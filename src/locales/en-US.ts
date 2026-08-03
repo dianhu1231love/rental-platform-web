@@ -34,6 +34,9 @@ export default {
     collapse: 'Collapse',
     columns: 'Columns',
     export: 'Export',
+    dataSheet: 'Data',
+    startDate: 'Start date',
+    endDate: 'End date',
   },
   menu: {
     dashboard: 'Dashboard',

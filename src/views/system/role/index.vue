@@ -251,6 +251,7 @@ onMounted(async () => {
         :data="filteredRoles"
         :filters="filters"
         :loading="loading"
+        :paginated="false"
         exportable
         export-name="角色列表"
         row-key="id"

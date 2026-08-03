@@ -139,6 +139,7 @@ onMounted(async () => {
         :data="filteredList"
         :filters="filters"
         :loading="loading"
+        :paginated="false"
         exportable
         export-name="产品型号"
         row-key="id"

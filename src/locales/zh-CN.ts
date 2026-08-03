@@ -34,6 +34,9 @@ export default {
     collapse: '收起',
     columns: '列设置',
     export: '导出',
+    dataSheet: '数据',
+    startDate: '开始日期',
+    endDate: '结束日期',
   },
   menu: {
     dashboard: '首页',

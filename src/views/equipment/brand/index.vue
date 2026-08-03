@@ -115,6 +115,7 @@ onMounted(loadList)
         :data="filteredList"
         :filters="filters"
         :loading="loading"
+        :paginated="false"
         exportable
         export-name="设备品牌"
         row-key="id"

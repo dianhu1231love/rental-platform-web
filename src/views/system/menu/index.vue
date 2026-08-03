@@ -304,6 +304,7 @@ onMounted(loadMenus)
         :data="filteredMenus"
         :filters="filters"
         :loading="loading"
+        :paginated="false"
         row-key="id"
         :tree-props="{ children: 'children' }"
         default-expand-all

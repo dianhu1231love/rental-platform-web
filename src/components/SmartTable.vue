@@ -59,6 +59,9 @@ import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } 
 import type { Directive, DirectiveBinding } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import * as XLSX from 'xlsx'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = withDefaults(
   defineProps<{
@@ -104,7 +107,7 @@ const props = withDefaults(
   {
     filters: () => [],
     loading: false,
-    paginated: false,
+    paginated: true,
     total: 0,
     selectable: false,
     showIndex: false,
@@ -326,7 +329,7 @@ function exportExcel(): void {
   })
   const worksheet = XLSX.utils.json_to_sheet(rows)
   const workbook = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(workbook, worksheet, '数据')
+  XLSX.utils.book_append_sheet(workbook, worksheet, t('common.dataSheet'))
   XLSX.writeFile(workbook, `${props.exportName}.xlsx`)
 }
 
@@ -390,8 +393,8 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
             v-model="query[field.prop]"
             type="daterange"
             value-format="YYYY-MM-DD"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
+            :start-placeholder="$t('common.startDate')"
+            :end-placeholder="$t('common.endDate')"
             @change="onFilterChange"
           />
           <el-input-number
@@ -429,7 +432,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
       <div class="toolbar-right">
         <el-popover width="190" trigger="click">
           <template #reference>
-            <el-button plain size="small">
+            <el-button plain>
               <el-icon><Setting /></el-icon>
               {{ $t('common.columns') }}
             </el-button>
@@ -445,7 +448,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
             </el-checkbox>
           </el-checkbox-group>
         </el-popover>
-        <el-button v-if="exportable" type="primary" plain size="small" @click="exportExcel">
+        <el-button v-if="exportable" type="primary" plain @click="exportExcel">
           <el-icon><Download /></el-icon>
           {{ $t('common.export') }}
         </el-button>

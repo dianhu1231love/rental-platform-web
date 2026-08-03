@@ -122,7 +122,12 @@ function handleSendReset(): void {
 
     <el-dialog v-model="resultVisible" :title="$t('login.foundTitle')" width="420px" append-to-body>
       <p>{{ $t('login.foundDesc') }}</p>
-      <SmartTable :columns="resultColumns" :data="matchedAccounts" size="small" />
+      <SmartTable
+        :columns="resultColumns"
+        :data="matchedAccounts"
+        :paginated="false"
+        size="small"
+      />
       <template #footer>
         <el-button @click="resultVisible = false">{{ $t('common.cancel') }}</el-button>
         <el-button type="primary" @click="handleSendReset">
