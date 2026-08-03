@@ -57,6 +57,7 @@ export type TableRow = Record<string, any>
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import type { Directive, DirectiveBinding } from 'vue'
+import { useDebounceFn } from '@vueuse/core'
 import * as XLSX from 'xlsx'
 
 const props = withDefaults(
@@ -95,6 +96,10 @@ const props = withDefaults(
     selectionFixed?: boolean
     /** 表格尺寸 */
     size?: 'large' | 'default' | 'small'
+    /** 输入筛选条件后是否自动搜索（防抖），默认 true */
+    autoSearch?: boolean
+    /** 自动搜索防抖延迟（毫秒），默认 400 */
+    debounce?: number
   }>(),
   {
     filters: () => [],
@@ -112,6 +117,8 @@ const props = withDefaults(
     maxHeight: 560,
     selectionFixed: false,
     size: 'default',
+    autoSearch: true,
+    debounce: 400,
   },
 )
 
@@ -226,6 +233,7 @@ const query = reactive<Record<string, unknown>>({})
 const filterWrap = ref<HTMLElement>()
 const filterExpanded = ref(false)
 const needExpand = ref(false)
+let lastEmittedSignature = ''
 
 watch(
   () => props.filters,
@@ -244,11 +252,14 @@ function checkFilterOverflow(): void {
   needExpand.value = el.scrollHeight > el.clientHeight + 2
 }
 
+/** 防抖后的溢出检测（窗口/内容尺寸变化时高频触发） */
+const debouncedCheckOverflow = useDebounceFn(checkFilterOverflow, 150)
+
 let resizeObserver: ResizeObserver | null = null
 onMounted(() => {
   nextTick(checkFilterOverflow)
   if (typeof ResizeObserver !== 'undefined') {
-    resizeObserver = new ResizeObserver(checkFilterOverflow)
+    resizeObserver = new ResizeObserver(debouncedCheckOverflow)
     if (filterWrap.value) resizeObserver.observe(filterWrap.value)
   }
 })
@@ -267,14 +278,32 @@ function collectQuery(): Record<string, unknown> {
   return result
 }
 
+/** 组装并发送搜索事件（相同条件的重复搜索自动去重） */
+function emitSearch(): void {
+  const queryData = collectQuery()
+  const signature = JSON.stringify(queryData)
+  if (signature === lastEmittedSignature) return
+  lastEmittedSignature = signature
+  emit('search', queryData)
+}
+
+/** 筛选条件变化时触发防抖自动搜索 */
+function onFilterChange(): void {
+  if (props.autoSearch) debouncedSearch()
+}
+
+const debouncedSearch = useDebounceFn(emitSearch, props.debounce)
+
 function handleSearch(): void {
-  emit('search', collectQuery())
+  emitSearch()
 }
 
 function handleReset(): void {
   Object.keys(query).forEach((key) => {
     query[key] = undefined
   })
+  // 更新签名，避免重置前挂起的防抖回调重复触发
+  lastEmittedSignature = JSON.stringify(collectQuery())
   emit('reset')
 }
 
@@ -331,6 +360,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
             v-model="query[field.prop]"
             :placeholder="field.placeholder || field.label"
             clearable
+            @input="onFilterChange"
             @keyup.enter="handleSearch"
           />
           <el-select
@@ -338,6 +368,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
             v-model="query[field.prop]"
             :placeholder="field.placeholder || field.label"
             clearable
+            @change="onFilterChange"
           >
             <el-option
               v-for="opt in field.options || []"
@@ -352,6 +383,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
             type="date"
             value-format="YYYY-MM-DD"
             :placeholder="field.placeholder || field.label"
+            @change="onFilterChange"
           />
           <el-date-picker
             v-else-if="field.type === 'daterange'"
@@ -360,11 +392,13 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
             value-format="YYYY-MM-DD"
             start-placeholder="开始日期"
             end-placeholder="结束日期"
+            @change="onFilterChange"
           />
           <el-input-number
             v-else-if="field.type === 'number'"
             v-model="query[field.prop]"
             :placeholder="field.placeholder || field.label"
+            @change="onFilterChange"
           />
         </div>
       </div>
