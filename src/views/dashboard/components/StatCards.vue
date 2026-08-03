@@ -1,6 +1,7 @@
 <!-- 六大核心指标卡片 -->
 <script setup lang="ts">
 import { formatMoney } from '@/utils/format'
+import TextEllipsis from '@/components/TextEllipsis.vue'
 import type { StatCard } from '@/types'
 
 defineProps<{ stats: StatCard[] }>()
@@ -14,8 +15,8 @@ defineProps<{ stats: StatCard[] }>()
           <el-icon :size="24"><component :is="item.icon" /></el-icon>
         </div>
         <div class="stat-body">
-          <div class="stat-label">{{ $t(`dashboard.${item.key}`) }}</div>
-          <div class="stat-value">
+          <TextEllipsis class="stat-label" :content="$t(`dashboard.${item.key}`)" />
+          <div class="stat-value" :title="`${formatMoney(item.value)} ${$t(item.unit)}`">
             {{ formatMoney(item.value) }}
             <span class="stat-unit">{{ $t(item.unit) }}</span>
           </div>

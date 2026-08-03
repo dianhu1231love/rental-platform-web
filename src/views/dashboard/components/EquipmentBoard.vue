@@ -4,6 +4,7 @@ import { computed } from 'vue'
 import type { EChartsOption } from 'echarts'
 import { formatPercent } from '@/utils/format'
 import BaseChart from '@/components/BaseChart.vue'
+import TextEllipsis from '@/components/TextEllipsis.vue'
 import type { EquipmentBoard } from '@/types'
 
 const props = defineProps<{ data: EquipmentBoard }>()
@@ -36,19 +37,19 @@ const pieOption = computed<EChartsOption>(() => ({
   <div class="equipment-board">
     <div class="equipment-left">
       <div class="equip-item">
-        <span class="equip-label">{{ $t('dashboard.equipmentTotal') }}</span>
+        <TextEllipsis class="equip-label" :content="$t('dashboard.equipmentTotal')" />
         <span class="equip-value">{{ data.total }}</span>
       </div>
       <div class="equip-item">
-        <span class="equip-label">{{ $t('dashboard.renting') }}</span>
+        <TextEllipsis class="equip-label" :content="$t('dashboard.renting')" />
         <span class="equip-value renting">{{ data.renting }}</span>
       </div>
       <div class="equip-item">
-        <span class="equip-label">{{ $t('dashboard.idle') }}</span>
+        <TextEllipsis class="equip-label" :content="$t('dashboard.idle')" />
         <span class="equip-value idle">{{ data.idle }}</span>
       </div>
       <div class="equip-item">
-        <span class="equip-label">{{ $t('dashboard.maintenance') }}</span>
+        <TextEllipsis class="equip-label" :content="$t('dashboard.maintenance')" />
         <span class="equip-value maintenance">{{ data.maintenance }}</span>
       </div>
       <div class="rate-block">
@@ -77,7 +78,7 @@ const pieOption = computed<EChartsOption>(() => ({
       </div>
     </div>
     <div class="equipment-right">
-      <p class="chart-title">{{ $t('dashboard.statusDistribute') }}</p>
+      <TextEllipsis class="chart-title" :content="$t('dashboard.statusDistribute')" />
       <BaseChart :option="pieOption" height="100%" />
     </div>
   </div>
@@ -164,6 +165,24 @@ const pieOption = computed<EChartsOption>(() => ({
   :deep(.base-chart) {
     flex: 1;
     min-height: 0;
+  }
+}
+
+/* 手机端：环形图置顶，设备统计置底，避免横向溢出 */
+@media (width <= 768px) {
+  .equipment-board {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .equipment-left {
+    flex: none;
+  }
+
+  .equipment-right {
+    order: -1;
+    flex: none;
+    height: 240px;
   }
 }
 </style>

@@ -5,6 +5,7 @@ import { ElMessage } from 'element-plus'
 import { handleTodo } from '@/api/dashboard'
 import { useI18n } from 'vue-i18n'
 import { TODO_PRIORITY_COLORS, TODO_TYPE_MAP } from '@/constants'
+import TextEllipsis from '@/components/TextEllipsis.vue'
 import type { TodoItem } from '@/types'
 
 defineProps<{ todos: TodoItem[] }>()
@@ -36,7 +37,7 @@ async function handle(todo: TodoItem, action: 'approve' | 'reject'): Promise<voi
           </el-tag>
           <span class="todo-time">{{ todo.time }}</span>
         </div>
-        <p class="todo-title" :title="todo.title">{{ todo.title }}</p>
+        <TextEllipsis class="todo-title" :content="todo.title" />
         <div class="todo-meta">
           <span class="todo-applicant">{{ todo.applicant }}</span>
           <span class="priority-dot" :style="{ background: TODO_PRIORITY_COLORS[todo.priority] }" />
