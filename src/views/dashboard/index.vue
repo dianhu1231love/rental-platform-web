@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 defineOptions({ name: 'Dashboard' })
 
 import { onMounted, ref } from 'vue'
@@ -10,6 +10,13 @@ import {
   getTodos,
 } from '@/api/dashboard'
 import { useUserStore } from '@/store/user'
+import type {
+  EquipmentBoard as EquipmentBoardData,
+  HoursStat,
+  PaymentTrend,
+  StatCard,
+  TodoItem,
+} from '@/types'
 import StatCards from './components/StatCards.vue'
 import EquipmentBoard from './components/EquipmentBoard.vue'
 import PaymentTrendChart from './components/PaymentTrendChart.vue'
@@ -19,15 +26,15 @@ import TodoList from './components/TodoList.vue'
 const userStore = useUserStore()
 const loading = ref(true)
 
-const stats = ref([])
-const equipment = ref(null)
-const trend = ref(null)
-const hours = ref(null)
-const todos = ref([])
+const stats = ref<StatCard[]>([])
+const equipment = ref<EquipmentBoardData | null>(null)
+const trend = ref<PaymentTrend | null>(null)
+const hours = ref<HoursStat | null>(null)
+const todos = ref<TodoItem[]>([])
 
 const errorMessage = ref('')
 
-async function loadAll() {
+async function loadAll(): Promise<void> {
   loading.value = true
   errorMessage.value = ''
   try {
@@ -94,13 +101,13 @@ async function loadAll() {
     hours.value = hoursRes.data
     todos.value = todosRes.data
   } catch (error) {
-    errorMessage.value = error?.message || '加载失败'
+    errorMessage.value = (error as Error | undefined)?.message || '加载失败'
   } finally {
     loading.value = false
   }
 }
 
-function handleTodoHandled(id) {
+function handleTodoHandled(id: number): void {
   todos.value = todos.value.filter((t) => t.id !== id)
 }
 

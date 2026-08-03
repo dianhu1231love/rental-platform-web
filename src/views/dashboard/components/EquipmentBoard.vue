@@ -1,13 +1,13 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
+import type { EChartsOption } from 'echarts'
 import { formatPercent } from '@/utils/format'
 import BaseChart from '@/components/BaseChart.vue'
+import type { EquipmentBoard } from '@/types'
 
-const props = defineProps({
-  data: { type: Object, required: true },
-})
+const props = defineProps<{ data: EquipmentBoard }>()
 
-const pieOption = computed(() => ({
+const pieOption = computed<EChartsOption>(() => ({
   tooltip: { trigger: 'item', formatter: '{b}: {c} 台 ({d}%)' },
   legend: { bottom: 0 },
   color: ['#67c23a', '#909399', '#f56c6c'],

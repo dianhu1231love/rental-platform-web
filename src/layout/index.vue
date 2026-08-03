@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { useAppStore } from '@/store/app'
 import settings from '@/settings'
 import Sidebar from './components/Sidebar/index.vue'

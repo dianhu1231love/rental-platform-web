@@ -1,9 +1,27 @@
-import axios from 'axios'
+import axios, { type AxiosError, type AxiosRequestConfig, type AxiosResponse } from 'axios'
 import { ElMessage } from 'element-plus'
 import { getToken, removeToken } from './auth'
 import { createMockAdapter } from '@/api/mock'
 import i18n from '@/locales'
 import router from '@/router'
+import type { ApiResponse } from '@/types'
+
+type GetDelete = <T = unknown>(
+  _url: string,
+  _config?: AxiosRequestConfig,
+) => Promise<ApiResponse<T>>
+type PostPut = <T = unknown>(
+  _url: string,
+  _data?: unknown,
+  _config?: AxiosRequestConfig,
+) => Promise<ApiResponse<T>>
+
+interface RequestInstance {
+  get: GetDelete
+  delete: GetDelete
+  post: PostPut
+  put: PostPut
+}
 
 const service = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
@@ -22,10 +40,10 @@ service.interceptors.request.use(
     }
     return config
   },
-  (error) => Promise.reject(error),
+  (error: AxiosError) => Promise.reject(error),
 )
 
-function handleUnauthorized() {
+function handleUnauthorized(): void {
   removeToken()
   import('../store').then(({ useUserStore }) => {
     useUserStore().resetState()
@@ -36,10 +54,10 @@ function handleUnauthorized() {
 }
 
 service.interceptors.response.use(
-  (response) => {
+  (response: AxiosResponse<ApiResponse>) => {
     const res = response.data
     if (res.code === 200) {
-      return res
+      return res as unknown as AxiosResponse
     }
     if (res.code === 401) {
       handleUnauthorized()
@@ -48,7 +66,7 @@ service.interceptors.response.use(
     ElMessage.error(res.message || i18n.global.t('common.requestError'))
     return Promise.reject(new Error(res.message))
   },
-  (error) => {
+  (error: AxiosError) => {
     if (error.response?.status === 401) {
       handleUnauthorized()
     } else {
@@ -58,4 +76,5 @@ service.interceptors.response.use(
   },
 )
 
-export default service
+// 拦截器已把响应解包为 { code, data, message }，这里按实际返回类型声明
+export default service as unknown as RequestInstance

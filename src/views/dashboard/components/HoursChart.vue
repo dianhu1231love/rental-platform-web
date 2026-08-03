@@ -1,12 +1,12 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
+import type { EChartsOption } from 'echarts'
 import BaseChart from '@/components/BaseChart.vue'
+import type { HoursStat } from '@/types'
 
-const props = defineProps({
-  data: { type: Object, required: true },
-})
+const props = defineProps<{ data: HoursStat }>()
 
-const option = computed(() => ({
+const option = computed<EChartsOption>(() => ({
   tooltip: { trigger: 'axis' },
   legend: { data: ['计划工时', '实际工时', '工时利用率'] },
   grid: { left: 60, right: 60, top: 40, bottom: 30 },

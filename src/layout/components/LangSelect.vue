@@ -1,11 +1,11 @@
-<script setup>
+<script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/store/app'
 
 const { locale } = useI18n()
 const appStore = useAppStore()
 
-function changeLang(lang) {
+function changeLang(lang: string): void {
   appStore.setLanguage(lang)
   locale.value = lang
 }

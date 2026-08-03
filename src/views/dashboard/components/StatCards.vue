@@ -1,9 +1,8 @@
-<script setup>
+<script setup lang="ts">
 import { formatMoney } from '@/utils/format'
+import type { StatCard } from '@/types'
 
-defineProps({
-  stats: { type: Array, default: () => [] },
-})
+defineProps<{ stats: StatCard[] }>()
 </script>
 
 <template>

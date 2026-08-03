@@ -1,30 +1,29 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { handleTodo } from '@/api/dashboard'
 import { useI18n } from 'vue-i18n'
+import type { TodoItem, TodoType } from '@/types'
 
-defineProps({
-  todos: { type: Array, default: () => [] },
-})
+defineProps<{ todos: TodoItem[] }>()
 
-const emit = defineEmits(['handled'])
+const emit = defineEmits<{ handled: [id: number] }>()
 const { t } = useI18n()
-const loadingId = ref(null)
+const loadingId = ref<number | null>(null)
 
-const typeMap = {
+const typeMap: Record<TodoType, { labelKey: string; type: 'primary' | 'warning' | 'success' }> = {
   contract: { labelKey: 'dashboard.todoContract', type: 'primary' },
   distribute: { labelKey: 'dashboard.todoDistribute', type: 'warning' },
   invoice: { labelKey: 'dashboard.todoInvoice', type: 'success' },
 }
 
-const priorityMap = {
+const priorityMap: Record<string, string> = {
   high: '#f56c6c',
   medium: '#e6a23c',
   low: '#67c23a',
 }
 
-async function handle(todo, action) {
+async function handle(todo: TodoItem, action: 'approve' | 'reject'): Promise<void> {
   loadingId.value = todo.id
   try {
     await handleTodo(todo.id, action)

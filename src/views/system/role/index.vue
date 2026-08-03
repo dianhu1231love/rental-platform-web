@@ -1,16 +1,17 @@
-<script setup>
+<script setup lang="ts">
 defineOptions({ name: 'RoleManage' })
 
 import { computed, onMounted, reactive, ref } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox, ElTree, type FormInstance, type FormRules } from 'element-plus'
 import { getRoleList, createRole, updateRole, deleteRole, getMenuList } from '@/api/system'
-import { buildTree } from '@/utils/tree'
+import { buildTree, type TreeNode } from '@/utils/tree'
 import { useI18n } from 'vue-i18n'
+import type { Menu, Role } from '@/types'
 
 const { t } = useI18n()
 
 const loading = ref(false)
-const roles = ref([])
+const roles = ref<Role[]>([])
 const keyword = ref('')
 
 const filteredRoles = computed(() => {
@@ -25,12 +26,23 @@ const filteredRoles = computed(() => {
 const drawerVisible = ref(false)
 const drawerMode = ref('create')
 const saving = ref(false)
-const menuTree = ref([])
-const treeRef = ref()
-const buttonChecked = reactive({})
+const menuTree = ref<TreeNode<Menu>[]>([])
+const treeRef = ref<InstanceType<typeof ElTree>>()
+const buttonChecked = reactive<Record<string, string[]>>({})
 
-const roleFormRef = ref()
-const roleForm = reactive({
+const roleFormRef = ref<FormInstance>()
+
+interface RoleFormModel {
+  id: number | null
+  name: string
+  code: string
+  status: number
+  remark: string
+  menuIds: number[]
+  perms: string[]
+}
+
+const roleForm = reactive<RoleFormModel>({
   id: null,
   name: '',
   code: '',
@@ -40,17 +52,17 @@ const roleForm = reactive({
   perms: [],
 })
 
-const roleRules = {
+const roleRules: FormRules = {
   name: [{ required: true, message: () => t('role.namePlaceholder'), trigger: 'blur' }],
   code: [{ required: true, message: () => t('role.codePlaceholder'), trigger: 'blur' }],
 }
 
-function buttonLabel(perm) {
+function buttonLabel(perm: string): string {
   const suffix = perm.split(':').pop()
   return t(`common.${suffix}`) || perm
 }
 
-async function loadRoles() {
+async function loadRoles(): Promise<void> {
   loading.value = true
   try {
     const res = await getRoleList()
@@ -60,12 +72,12 @@ async function loadRoles() {
   }
 }
 
-async function loadMenus() {
+async function loadMenus(): Promise<void> {
   const res = await getMenuList()
   menuTree.value = buildTree(res.data)
 }
 
-function openCreate() {
+function openCreate(): void {
   drawerMode.value = 'create'
   Object.assign(roleForm, {
     id: null,
@@ -80,7 +92,7 @@ function openCreate() {
   drawerVisible.value = true
 }
 
-function openEdit(role) {
+function openEdit(role: Role): void {
   drawerMode.value = 'edit'
   Object.assign(roleForm, {
     id: role.id,
@@ -93,8 +105,8 @@ function openEdit(role) {
   })
   // 回显按钮权限
   for (const key of Object.keys(buttonChecked)) delete buttonChecked[key]
-  const menus = []
-  const collect = (nodes) => {
+  const menus: TreeNode<Menu>[] = []
+  const collect = (nodes: TreeNode<Menu>[]): void => {
     nodes.forEach((n) => {
       menus.push(n)
       collect(n.children || [])
@@ -110,16 +122,16 @@ function openEdit(role) {
   drawerVisible.value = true
 }
 
-function collectTreeIds() {
+function collectTreeIds(): number[] {
   if (!treeRef.value) return []
-  const checked = treeRef.value.getCheckedKeys()
-  const half = treeRef.value.getHalfCheckedKeys()
+  const checked = treeRef.value.getCheckedKeys().map(Number)
+  const half = treeRef.value.getHalfCheckedKeys().map(Number)
   return [...new Set([...checked, ...half])]
 }
 
-function collectPerms() {
-  const perms = new Set()
-  const walk = (nodes) => {
+function collectPerms(): string[] {
+  const perms = new Set<string>()
+  const walk = (nodes: TreeNode<Menu>[]): void => {
     nodes.forEach((n) => {
       if (roleForm.menuIds.includes(n.id)) {
         if (n.perms) perms.add(n.perms)
@@ -133,7 +145,7 @@ function collectPerms() {
   return [...perms]
 }
 
-async function handleSave() {
+async function handleSave(): Promise<void> {
   if (!roleFormRef.value) return
   await roleFormRef.value.validate()
   saving.value = true
@@ -146,9 +158,9 @@ async function handleSave() {
       roleForm.perms = collectPerms()
     }
     if (drawerMode.value === 'create') {
-      await createRole({ ...roleForm })
+      await createRole({ ...roleForm, id: undefined })
     } else {
-      await updateRole(roleForm.id, { ...roleForm })
+      await updateRole(roleForm.id as number, { ...roleForm, id: roleForm.id as number })
     }
     ElMessage.success(t('common.success'))
     drawerVisible.value = false
@@ -158,7 +170,7 @@ async function handleSave() {
   }
 }
 
-async function handleToggleStatus(role) {
+async function handleToggleStatus(role: Role): Promise<void> {
   try {
     await updateRole(role.id, { status: role.status })
     ElMessage.success(t('common.success'))
@@ -167,7 +179,7 @@ async function handleToggleStatus(role) {
   }
 }
 
-async function handleDelete(role) {
+async function handleDelete(role: Role): Promise<void> {
   if (role.id === 1) {
     ElMessage.warning('内置管理员角色不可删除')
     return

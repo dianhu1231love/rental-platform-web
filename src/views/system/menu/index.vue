@@ -1,22 +1,23 @@
-<script setup>
+<script setup lang="ts">
 defineOptions({ name: 'MenuManage' })
 
 import { computed, onMounted, reactive, ref } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import { getMenuList, createMenu, updateMenu, deleteMenu } from '@/api/system'
-import { buildTree } from '@/utils/tree'
+import { buildTree, type TreeNode } from '@/utils/tree'
 import { useI18n } from 'vue-i18n'
+import type { Menu, MenuType } from '@/types'
 
 const { t } = useI18n()
 
 const loading = ref(false)
-const menus = ref([])
+const menus = ref<TreeNode<Menu>[]>([])
 const keyword = ref('')
 
 const filteredMenus = computed(() => {
   const kw = keyword.value.trim().toLowerCase()
   if (!kw) return menus.value
-  const filterRec = (nodes) =>
+  const filterRec = (nodes: TreeNode<Menu>[]): TreeNode<Menu>[] =>
     nodes
       .map((n) => {
         const children = filterRec(n.children || [])
@@ -25,7 +26,7 @@ const filteredMenus = computed(() => {
         }
         return children.length ? { ...n, children } : null
       })
-      .filter(Boolean)
+      .filter((x): x is TreeNode<Menu> => x !== null)
   return filterRec(menus.value)
 })
 
@@ -58,10 +59,25 @@ const defaultButtons = ['add', 'edit', 'delete', 'view']
 const dialogVisible = ref(false)
 const dialogMode = ref('create')
 const saving = ref(false)
-const refreshingId = ref(null)
-const formRef = ref()
+const refreshingId = ref<number | null>(null)
+const formRef = ref<FormInstance>()
 
-const form = reactive({
+interface MenuFormModel {
+  id: number | null
+  parentId: number
+  type: MenuType
+  name: string
+  path: string
+  component: string
+  perms: string
+  icon: string
+  sort: number
+  visible: boolean
+  autoRefresh: boolean
+  buttons: string[]
+}
+
+const form = reactive<MenuFormModel>({
   id: null,
   parentId: 0,
   type: 'menu',
@@ -76,7 +92,7 @@ const form = reactive({
   buttons: [],
 })
 
-const formRules = {
+const formRules: FormRules = {
   name: [{ required: true, message: () => t('menuManage.name'), trigger: 'blur' }],
   path: [
     {
@@ -109,7 +125,7 @@ const formRules = {
   ],
 }
 
-async function loadMenus() {
+async function loadMenus(): Promise<void> {
   loading.value = true
   try {
     const res = await getMenuList()
@@ -119,9 +135,11 @@ async function loadMenus() {
   }
 }
 
-function parentOptions() {
-  const options = [{ id: 0, title: t('menuManage.root') }]
-  const walk = (nodes, depth = 0) => {
+function parentOptions(): Array<{ id: number; title: string; depth: number }> {
+  const options: Array<{ id: number; title: string; depth: number }> = [
+    { id: 0, title: t('menuManage.root'), depth: 0 },
+  ]
+  const walk = (nodes: TreeNode<Menu>[], depth = 0): void => {
     nodes.forEach((n) => {
       if (n.type !== 'button') {
         options.push({ id: n.id, title: `${'　'.repeat(depth)}${n.title}`, depth })
@@ -133,7 +151,7 @@ function parentOptions() {
   return options
 }
 
-function openCreate(parentId = 0) {
+function openCreate(parentId = 0): void {
   dialogMode.value = 'create'
   Object.assign(form, {
     id: null,
@@ -152,7 +170,7 @@ function openCreate(parentId = 0) {
   dialogVisible.value = true
 }
 
-function openEdit(row) {
+function openEdit(row: TreeNode<Menu>): void {
   dialogMode.value = 'edit'
   Object.assign(form, {
     id: row.id,
@@ -171,14 +189,14 @@ function openEdit(row) {
   dialogVisible.value = true
 }
 
-function permBase() {
+function permBase(): string {
   if (!form.perms) return ''
   const parts = form.perms.split(':')
   if (parts[parts.length - 1] === 'list') return parts.slice(0, -1).join(':')
   return parts.join(':')
 }
 
-function handleTypeChange() {
+function handleTypeChange(): void {
   if (form.type === 'button') {
     form.path = ''
     form.component = ''
@@ -187,15 +205,27 @@ function handleTypeChange() {
   }
 }
 
-async function handleSave() {
+async function handleSave(): Promise<void> {
   if (!formRef.value) return
   await formRef.value.validate()
   saving.value = true
   try {
-    const payload = { ...form }
+    const payload: Partial<Menu> = {
+      id: form.id ?? undefined,
+      parentId: form.parentId,
+      type: form.type,
+      name: form.name,
+      path: form.path,
+      component: form.component,
+      perms: form.perms,
+      icon: form.icon,
+      sort: form.sort,
+      visible: form.visible,
+      autoRefresh: form.autoRefresh,
+    }
     if (payload.type === 'menu') {
       const base = permBase()
-      payload.buttons = (payload.buttons || [])
+      payload.buttons = (form.buttons || [])
         .map((suffix) => ({ label: suffix, perm: base ? `${base}:${suffix}` : '' }))
         .filter((b) => b.perm)
     } else {
@@ -204,7 +234,7 @@ async function handleSave() {
     if (dialogMode.value === 'create') {
       await createMenu(payload)
     } else {
-      await updateMenu(payload.id, payload)
+      await updateMenu(payload.id as number, { ...payload, id: payload.id as number })
     }
     ElMessage.success(t('menuManage.saveSuccess'))
     dialogVisible.value = false
@@ -214,7 +244,7 @@ async function handleSave() {
   }
 }
 
-async function handleDelete(row) {
+async function handleDelete(row: TreeNode<Menu>): Promise<void> {
   try {
     await ElMessageBox.confirm(t('common.deleteConfirm'), t('common.confirmTitle'), {
       confirmButtonText: t('common.confirm'),
@@ -229,7 +259,7 @@ async function handleDelete(row) {
   }
 }
 
-async function handleAutoRefreshChange(row, value) {
+async function handleAutoRefreshChange(row: TreeNode<Menu>, value: boolean): Promise<void> {
   refreshingId.value = row.id
   const prev = row.autoRefresh
   // 先同步本地状态，让开关立即切换
@@ -245,7 +275,7 @@ async function handleAutoRefreshChange(row, value) {
   }
 }
 
-function typeTag(row) {
+function typeTag(row: TreeNode<Menu>): { label: string; type: 'warning' | 'primary' | 'info' } {
   if (row.type === 'directory') return { label: t('menuManage.typeDirectory'), type: 'warning' }
   if (row.type === 'menu') return { label: t('menuManage.typeMenu'), type: 'primary' }
   return { label: t('menuManage.typeButton'), type: 'info' }

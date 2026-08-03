@@ -1,7 +1,7 @@
-<script setup>
+<script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { useUserStore } from '@/store/user'
 import { getRememberedUsername, setRememberedUsername } from '@/utils/auth'
 import { useI18n } from 'vue-i18n'
@@ -11,21 +11,27 @@ const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 
-const formRef = ref()
+const formRef = ref<FormInstance>()
 const loading = ref(false)
 
-const form = reactive({
+interface LoginFormModel {
+  username: string
+  password: string
+  remember: boolean
+}
+
+const form = reactive<LoginFormModel>({
   username: getRememberedUsername(),
   password: '',
   remember: !!getRememberedUsername(),
 })
 
-const rules = {
+const rules: FormRules = {
   username: [{ required: true, message: () => t('login.usernamePlaceholder'), trigger: 'blur' }],
   password: [{ required: true, message: () => t('login.passwordPlaceholder'), trigger: 'blur' }],
 }
 
-async function handleLogin() {
+async function handleLogin(): Promise<void> {
   if (!formRef.value) return
   await formRef.value.validate()
   loading.value = true
@@ -35,7 +41,7 @@ async function handleLogin() {
       setRememberedUsername(form.username)
     }
     ElMessage.success(t('login.loginSuccess'))
-    const redirect = route.query.redirect || '/'
+    const redirect = (route.query.redirect as string) || '/'
     router.push(redirect)
   } finally {
     loading.value = false

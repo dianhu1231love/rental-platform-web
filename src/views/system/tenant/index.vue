@@ -1,8 +1,8 @@
-<script setup>
+<script setup lang="ts">
 defineOptions({ name: 'TenantManage' })
 
 import { onMounted, reactive, ref } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import {
   getTenantList,
   createTenant,
@@ -12,15 +12,21 @@ import {
 } from '@/api/system'
 import { isValidPhone } from '@/utils/validate'
 import { useI18n } from 'vue-i18n'
+import type { Tenant } from '@/types'
 
 const { t } = useI18n()
 
 const loading = ref(false)
 const saving = ref(false)
-const list = ref([])
+const list = ref<Tenant[]>([])
 const total = ref(0)
 
-const query = reactive({
+const query = reactive<{
+  page: number
+  pageSize: number
+  keyword: string
+  status: number | ''
+}>({
   page: 1,
   pageSize: 10,
   keyword: '',
@@ -29,9 +35,21 @@ const query = reactive({
 
 const dialogVisible = ref(false)
 const dialogMode = ref('create')
-const formRef = ref()
+const formRef = ref<FormInstance>()
 
-const form = reactive({
+interface TenantFormModel {
+  id: number | null
+  name: string
+  code: string
+  contact: string
+  phone: string
+  plan: string
+  expireAt: string
+  remark: string
+  status: number
+}
+
+const form = reactive<TenantFormModel>({
   id: null,
   name: '',
   code: '',
@@ -43,7 +61,7 @@ const form = reactive({
   status: 1,
 })
 
-const formRules = {
+const formRules: FormRules = {
   name: [{ required: true, message: () => t('tenant.namePlaceholder'), trigger: 'blur' }],
   code: [{ required: true, message: () => t('tenant.codePlaceholder'), trigger: 'blur' }],
   contact: [{ required: true, message: () => t('tenant.contactPlaceholder'), trigger: 'blur' }],
@@ -61,7 +79,7 @@ const formRules = {
   expireAt: [{ required: true, message: () => t('tenant.expireAtPlaceholder'), trigger: 'change' }],
 }
 
-async function loadList() {
+async function loadList(): Promise<void> {
   loading.value = true
   try {
     const res = await getTenantList({ ...query })
@@ -72,19 +90,19 @@ async function loadList() {
   }
 }
 
-function handleSearch() {
+function handleSearch(): void {
   query.page = 1
   loadList()
 }
 
-function handleReset() {
+function handleReset(): void {
   query.keyword = ''
   query.status = ''
   query.page = 1
   loadList()
 }
 
-function openCreate() {
+function openCreate(): void {
   dialogMode.value = 'create'
   Object.assign(form, {
     id: null,
@@ -100,7 +118,7 @@ function openCreate() {
   dialogVisible.value = true
 }
 
-function openEdit(row) {
+function openEdit(row: Tenant): void {
   dialogMode.value = 'edit'
   Object.assign(form, {
     id: row.id,
@@ -116,15 +134,24 @@ function openEdit(row) {
   dialogVisible.value = true
 }
 
-async function handleSave() {
+async function handleSave(): Promise<void> {
   if (!formRef.value) return
   await formRef.value.validate()
   saving.value = true
   try {
     if (dialogMode.value === 'create') {
-      await createTenant({ ...form })
+      await createTenant({
+        name: form.name,
+        code: form.code,
+        contact: form.contact,
+        phone: form.phone,
+        plan: form.plan,
+        expireAt: form.expireAt,
+        remark: form.remark,
+        status: form.status,
+      })
     } else {
-      await updateTenant(form.id, { ...form })
+      await updateTenant(form.id as number, { ...form, id: form.id as number })
     }
     ElMessage.success(t('common.success'))
     dialogVisible.value = false
@@ -134,7 +161,7 @@ async function handleSave() {
   }
 }
 
-async function handleToggleStatus(row) {
+async function handleToggleStatus(row: Tenant): Promise<void> {
   try {
     await updateTenantStatus(row.id, row.status)
     ElMessage.success(t('common.success'))
@@ -143,7 +170,7 @@ async function handleToggleStatus(row) {
   }
 }
 
-async function handleDelete(row) {
+async function handleDelete(row: Tenant): Promise<void> {
   try {
     await ElMessageBox.confirm(t('common.deleteConfirm'), t('common.confirmTitle'), {
       confirmButtonText: t('common.confirm'),
@@ -158,7 +185,7 @@ async function handleDelete(row) {
   }
 }
 
-function planTag(plan) {
+function planTag(plan: string): 'danger' | 'warning' | 'info' {
   if (plan === '企业版') return 'danger'
   if (plan === '专业版') return 'warning'
   return 'info'

@@ -1,24 +1,32 @@
-<script setup>
+<script setup lang="ts">
 import * as echarts from 'echarts'
+import type { EChartsOption } from 'echarts'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
-const props = defineProps({
-  option: { type: Object, required: true },
-  height: { type: String, default: '320px' },
-  autoresize: { type: Boolean, default: true },
-})
+const props = withDefaults(
+  defineProps<{
+    option: EChartsOption
+    height?: string
+    autoresize?: boolean
+  }>(),
+  {
+    height: '320px',
+    autoresize: true,
+  },
+)
 
-const el = ref(null)
-let chart = null
-let resizeObserver = null
+const el = ref<HTMLDivElement>()
+let chart: echarts.ECharts | null = null
+let resizeObserver: ResizeObserver | null = null
 
-function render() {
+function render(): void {
   if (chart) {
     chart.setOption(props.option, true)
   }
 }
 
 onMounted(() => {
+  if (!el.value) return
   chart = echarts.init(el.value)
   render()
   if (props.autoresize && typeof ResizeObserver !== 'undefined') {

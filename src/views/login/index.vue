@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import PasswordLogin from './components/PasswordLogin.vue'
 import SsoLogin from './components/SsoLogin.vue'

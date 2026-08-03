@@ -1,6 +1,6 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, type RouteMeta } from 'vue-router'
 
 const route = useRoute()
 
@@ -9,9 +9,9 @@ const levelList = computed(() => {
   return [{ path: '/dashboard', meta: { title: '', i18nKey: 'menu.dashboard' } }, ...matched]
 })
 
-function itemLabel(meta) {
-  if (meta.i18nKey) return meta.i18nKey
-  return meta.title
+function itemLabel(meta: RouteMeta): string {
+  if (meta.i18nKey) return meta.i18nKey as string
+  return (meta.title as string) || ''
 }
 </script>
 

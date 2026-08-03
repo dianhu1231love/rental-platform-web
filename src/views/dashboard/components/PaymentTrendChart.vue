@@ -1,12 +1,12 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
+import type { EChartsOption } from 'echarts'
 import BaseChart from '@/components/BaseChart.vue'
+import type { PaymentTrend } from '@/types'
 
-const props = defineProps({
-  data: { type: Object, required: true },
-})
+const props = defineProps<{ data: PaymentTrend }>()
 
-const option = computed(() => ({
+const option = computed<EChartsOption>(() => ({
   tooltip: {
     trigger: 'axis',
     axisPointer: { type: 'shadow' },

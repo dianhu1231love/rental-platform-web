@@ -6,6 +6,7 @@ import {
   getUserInfo as getUserInfoApi,
 } from '@/api/auth'
 import { getToken, setToken, removeToken } from '@/utils/auth'
+import type { LoginForm, Menu, SsoForm, UserInfo } from '@/types'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -13,23 +14,23 @@ export const useUserStore = defineStore('user', {
     name: '',
     username: '',
     avatar: '',
-    roles: [],
-    perms: [],
-    roleId: null,
-    menus: [],
+    roles: [] as string[],
+    perms: [] as string[],
+    roleId: null as number | null,
+    menus: [] as Menu[],
   }),
   actions: {
-    async login(form) {
+    async login(form: LoginForm): Promise<void> {
       const res = await loginApi(form)
       this.token = res.data.token
       setToken(res.data.token)
     },
-    async ssoLogin(form) {
+    async ssoLogin(form: SsoForm): Promise<void> {
       const res = await ssoApi(form)
       this.token = res.data.token
       setToken(res.data.token)
     },
-    async getUserInfo() {
+    async getUserInfo(): Promise<UserInfo> {
       const res = await getUserInfoApi()
       const info = res.data
       this.name = info.name
@@ -41,7 +42,7 @@ export const useUserStore = defineStore('user', {
       this.menus = info.menus
       return info
     },
-    async logout() {
+    async logout(): Promise<void> {
       try {
         await logoutApi()
       } catch {
@@ -50,7 +51,7 @@ export const useUserStore = defineStore('user', {
       this.resetState()
       removeToken()
     },
-    resetState() {
+    resetState(): void {
       this.token = ''
       this.name = ''
       this.username = ''

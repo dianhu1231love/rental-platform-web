@@ -1,7 +1,7 @@
-<script setup>
+<script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useAppStore, HOME_PATH } from '@/store/app'
+import { useAppStore, HOME_PATH, type VisitedView } from '@/store/app'
 
 const route = useRoute()
 const router = useRouter()
@@ -9,27 +9,27 @@ const appStore = useAppStore()
 
 const visitedViews = computed(() => appStore.visitedViews)
 
-function isHomeView(view) {
-  return view && view.path === HOME_PATH
+function isHomeView(view: VisitedView | null): boolean {
+  return !!view && view.path === HOME_PATH
 }
 
-function isActive(path) {
+function isActive(path: string): boolean {
   return route.path === path
 }
 
-function tagLabel(view) {
+function tagLabel(view: VisitedView): string {
   if (view.i18nKey) return view.i18nKey
-  return view.title
+  return view.title || ''
 }
 
 // 右键菜单状态
 const menuVisible = ref(false)
 const menuX = ref(0)
 const menuY = ref(0)
-const menuView = ref(null)
+const menuView = ref<VisitedView | null>(null)
 
 // 拖拽状态
-const dragView = ref(null)
+const dragView = ref<VisitedView | null>(null)
 const dropActive = ref(false)
 
 const isFirst = computed(
@@ -43,12 +43,12 @@ const isLast = computed(
 const onlyOne = computed(() => visitedViews.value.length <= 1)
 const homeMenu = computed(() => isHomeView(menuView.value))
 
-function handleClick(view) {
+function handleClick(view: VisitedView): void {
   if (isActive(view.path)) return
   router.push(view.path)
 }
 
-function handleClose(view) {
+function handleClose(view: VisitedView): void {
   if (isHomeView(view)) return
   appStore.delVisitedView(view.path)
   if (isActive(view.path)) {
@@ -57,7 +57,7 @@ function handleClose(view) {
   }
 }
 
-function openContextMenu(view, event) {
+function openContextMenu(view: VisitedView, event: MouseEvent): void {
   event.preventDefault()
   menuView.value = view
   const menuWidth = 190
@@ -67,12 +67,16 @@ function openContextMenu(view, event) {
   menuVisible.value = true
 }
 
-function closeContextMenu() {
+function closeContextMenu(): void {
   menuVisible.value = false
   menuView.value = null
 }
 
-function refreshView(view) {
+function refreshView(view: VisitedView | null): void {
+  if (!view) {
+    closeContextMenu()
+    return
+  }
   if (isActive(view.path)) {
     router.replace(`/redirect${view.fullPath}`)
   } else {
@@ -81,7 +85,11 @@ function refreshView(view) {
   closeContextMenu()
 }
 
-function closeCurrent(view) {
+function closeCurrent(view: VisitedView | null): void {
+  if (!view) {
+    closeContextMenu()
+    return
+  }
   if (onlyOne.value || isHomeView(view)) {
     closeContextMenu()
     return
@@ -90,7 +98,11 @@ function closeCurrent(view) {
   closeContextMenu()
 }
 
-function closeLeft(view) {
+function closeLeft(view: VisitedView | null): void {
+  if (!view) {
+    closeContextMenu()
+    return
+  }
   appStore.delViewsLeft(view)
   if (!visitedViews.value.some((v) => v.path === route.path)) {
     router.push(view.path)
@@ -98,7 +110,11 @@ function closeLeft(view) {
   closeContextMenu()
 }
 
-function closeRight(view) {
+function closeRight(view: VisitedView | null): void {
+  if (!view) {
+    closeContextMenu()
+    return
+  }
   appStore.delViewsRight(view)
   if (!visitedViews.value.some((v) => v.path === route.path)) {
     router.push(view.path)
@@ -106,7 +122,11 @@ function closeRight(view) {
   closeContextMenu()
 }
 
-function closeOthers(view) {
+function closeOthers(view: VisitedView | null): void {
+  if (!view) {
+    closeContextMenu()
+    return
+  }
   appStore.delOtherViews(view)
   if (!visitedViews.value.some((v) => v.path === route.path)) {
     router.push(view.path)
@@ -114,14 +134,14 @@ function closeOthers(view) {
   closeContextMenu()
 }
 
-function closeAll() {
+function closeAll(): void {
   appStore.delAllViews()
   if (!isActive(HOME_PATH)) router.push(HOME_PATH)
   closeContextMenu()
 }
 
 // 拖拽排序
-function onDragStart(view, event) {
+function onDragStart(view: VisitedView, event: DragEvent): void {
   if (isHomeView(view)) {
     event.preventDefault()
     return
@@ -133,47 +153,49 @@ function onDragStart(view, event) {
   }
 }
 
-function onDragOver(view) {
-  if (!dragView.value || isHomeView(view)) return
-  const from = visitedViews.value.findIndex((v) => v.path === dragView.value.path)
+function onDragOver(view: VisitedView): void {
+  const current = dragView.value
+  if (!current || isHomeView(view)) return
+  const from = visitedViews.value.findIndex((v) => v.path === current.path)
   const to = visitedViews.value.findIndex((v) => v.path === view.path)
   if (from > 0 && to > 0 && from !== to) {
     appStore.moveVisitedView(from, to)
   }
 }
 
-function onDropZoneDragOver() {
+function onDropZoneDragOver(): void {
   dropActive.value = true
 }
 
-function onDropZoneDragLeave() {
+function onDropZoneDragLeave(): void {
   dropActive.value = false
 }
 
-function onDropClose() {
+function onDropClose(): void {
   if (dragView.value && !isHomeView(dragView.value)) {
     handleClose(dragView.value)
   }
   endDrag()
 }
 
-function endDrag() {
+function endDrag(): void {
   dragView.value = null
   dropActive.value = false
 }
 
 // 点击页面其他位置 / 右键其他位置 / 按 Esc 时关闭菜单
-function onDocumentClick() {
+function onDocumentClick(): void {
   closeContextMenu()
 }
 
-function onDocumentContextMenu(event) {
-  if (!event.target.closest('.tags-item') && !event.target.closest('.context-menu')) {
+function onDocumentContextMenu(event: MouseEvent): void {
+  const target = event.target as HTMLElement
+  if (!target.closest('.tags-item') && !target.closest('.context-menu')) {
     closeContextMenu()
   }
 }
 
-function onKeydown(event) {
+function onKeydown(event: KeyboardEvent): void {
   if (event.key === 'Escape') closeContextMenu()
 }
 

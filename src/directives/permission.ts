@@ -1,6 +1,7 @@
+import type { Directive } from 'vue'
 import { useUserStore } from '@/store'
 
-export default {
+const permissionDirective: Directive<HTMLElement, string[]> = {
   mounted(el, binding) {
     const { value } = binding
     const userStore = useUserStore()
@@ -8,8 +9,12 @@ export default {
     if (value && Array.isArray(value) && value.length > 0) {
       const allowed = value.some((p) => perms.includes('*:*:*') || perms.includes(p))
       if (!allowed) {
-        el.parentNode && el.parentNode.removeChild(el)
+        if (el.parentNode) {
+          el.parentNode.removeChild(el)
+        }
       }
     }
   },
 }
+
+export default permissionDirective

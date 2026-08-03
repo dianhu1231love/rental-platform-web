@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia'
+import type { RouteRecordRaw } from 'vue-router'
 import Layout from '@/layout/index.vue'
+import type { Menu } from '@/types'
 
 const viewModules = import.meta.glob('/src/views/**/*.vue')
 
-function menuToRoute(menu) {
+function menuToRoute(menu: Menu): RouteRecordRaw {
   const route = {
     path: menu.path,
     name: menu.name || String(menu.path),
@@ -18,24 +20,25 @@ function menuToRoute(menu) {
       // 开启“点击标签自动刷新”则不缓存页面，每次进入重新加载
       keepAlive: !(menu.autoRefresh === true),
     },
-  }
+  } as unknown as RouteRecordRaw
   if (menu.type === 'menu' && menu.component) {
-    const loader = viewModules[`/src/views/${menu.component}.vue`]
-    route.component = loader || Layout
+    const loader = viewModules[`/src/views/${menu.component}.vue`] as
+      (() => Promise<unknown>) | undefined
+    route.component = (loader || Layout) as RouteRecordRaw['component']
   }
   return route
 }
 
 export const usePermissionStore = defineStore('permission', {
   state: () => ({
-    menus: [],
-    routes: [],
+    menus: [] as Menu[],
+    routes: [] as RouteRecordRaw[],
   }),
   actions: {
-    generateRoutes(menus) {
+    generateRoutes(menus: Menu[]): RouteRecordRaw[] {
       this.menus = menus || []
-      const children = []
-      const walk = (nodes) => {
+      const children: RouteRecordRaw[] = []
+      const walk = (nodes: Menu[]): void => {
         nodes.forEach((node) => {
           if (node.type === 'directory') {
             walk(node.children || [])
@@ -45,7 +48,7 @@ export const usePermissionStore = defineStore('permission', {
         })
       }
       walk(this.menus)
-      const rootRoute = {
+      const rootRoute: RouteRecordRaw = {
         path: '/',
         component: Layout,
         redirect: children[0]?.path || '/dashboard',
@@ -54,7 +57,7 @@ export const usePermissionStore = defineStore('permission', {
       this.routes = [rootRoute]
       return this.routes
     },
-    reset() {
+    reset(): void {
       this.menus = []
       this.routes = []
     },

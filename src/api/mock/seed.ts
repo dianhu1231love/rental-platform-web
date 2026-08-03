@@ -1,6 +1,26 @@
-// 种子数据：首次运行时写入 localStorage，之后系统内编辑会持久化保存
+import type {
+  DashboardStats,
+  EquipmentBoard,
+  HoursStat,
+  Menu,
+  PaymentTrend,
+  Role,
+  Tenant,
+  TodoItem,
+} from '@/types'
 
-export const seedMenus = [
+export interface SeedUser {
+  id: number
+  username: string
+  password: string
+  name: string
+  roleId: number
+  avatar: string
+  phone?: string
+}
+
+// 种子数据：首次运行时写入 localStorage，之后系统内编辑会持久化保存
+export const seedMenus: Menu[] = [
   {
     id: 1,
     parentId: 0,
@@ -97,7 +117,7 @@ export const seedMenus = [
   },
 ]
 
-export const seedRoles = [
+export const seedRoles: Role[] = [
   {
     id: 1,
     name: '超级管理员',
@@ -130,13 +150,13 @@ export const seedRoles = [
   },
 ]
 
-export const seedUsers = [
+export const seedUsers: SeedUser[] = [
   { id: 1, username: 'admin', password: '123456', name: '系统管理员', roleId: 1, avatar: '' },
   { id: 2, username: 'finance', password: '123456', name: '财务专员-小李', roleId: 2, avatar: '' },
   { id: 3, username: 'operator', password: '123456', name: '运营专员-小王', roleId: 3, avatar: '' },
 ]
 
-export const seedTenants = [
+export const seedTenants: Tenant[] = [
   {
     id: 1,
     name: '上海华筑租赁有限公司',
@@ -211,7 +231,12 @@ export const seedTenants = [
   },
 ]
 
-export const seedDashboard = {
+export const seedDashboard: {
+  stats: DashboardStats
+  trend: PaymentTrend
+  equipment: EquipmentBoard
+  hours: HoursStat
+} = {
   stats: {
     totalRental: { value: 128653000, trend: 12.5 },
     receivables: { value: 35680000, trend: -3.2 },
@@ -248,7 +273,7 @@ export const seedDashboard = {
   },
 }
 
-export const seedTodos = [
+export const seedTodos: TodoItem[] = [
   {
     id: 1,
     type: 'contract',

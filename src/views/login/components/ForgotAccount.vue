@@ -1,23 +1,28 @@
-<script setup>
+<script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { forgotAccount } from '@/api/auth'
 import { isValidAccount } from '@/utils/validate'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
-const formRef = ref()
+const formRef = ref<FormInstance>()
 const loading = ref(false)
 const countdown = ref(0)
 const resultVisible = ref(false)
-const matchedAccounts = ref([])
+const matchedAccounts = ref<{ username: string; name: string }[]>([])
 
-const form = reactive({
+interface ForgotFormModel {
+  account: string
+  code: string
+}
+
+const form = reactive<ForgotFormModel>({
   account: '',
   code: '',
 })
 
-const rules = {
+const rules: FormRules = {
   account: [
     {
       validator: (_rule, value, callback) => {
@@ -35,15 +40,15 @@ const codeButtonText = computed(() =>
   countdown.value > 0 ? `${countdown.value}${t('login.resend')}` : t('login.getCode'),
 )
 
-function startCountdown() {
+function startCountdown(): void {
   countdown.value = 60
-  const timer = setInterval(() => {
+  const timer: ReturnType<typeof setInterval> = setInterval(() => {
     countdown.value -= 1
     if (countdown.value <= 0) clearInterval(timer)
   }, 1000)
 }
 
-function handleGetCode() {
+function handleGetCode(): void {
   if (!form.account || !isValidAccount(form.account)) {
     ElMessage.warning(t('login.accountPlaceholder'))
     return
@@ -52,7 +57,7 @@ function handleGetCode() {
   startCountdown()
 }
 
-async function handleFind() {
+async function handleFind(): Promise<void> {
   if (!formRef.value) return
   await formRef.value.validate()
   loading.value = true
@@ -65,7 +70,7 @@ async function handleFind() {
   }
 }
 
-function handleSendReset() {
+function handleSendReset(): void {
   ElMessage.success(t('login.sentSuccess'))
   resultVisible.value = false
 }

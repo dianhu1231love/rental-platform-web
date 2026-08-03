@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -11,12 +11,13 @@ const router = useRouter()
 const userStore = useUserStore()
 const loading = ref(false)
 
-async function doSsoLogin(username = 'admin') {
+async function doSsoLogin(username = 'admin'): Promise<void> {
   loading.value = true
   try {
     await userStore.ssoLogin({ username })
     ElMessage.success(t('login.loginSuccess'))
-    router.push(route.query.redirect || '/')
+    const redirect = (route.query.redirect as string | undefined) || '/'
+    router.push(redirect)
   } finally {
     loading.value = false
   }

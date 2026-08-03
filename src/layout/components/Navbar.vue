@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import { useAppStore } from '@/store/app'
@@ -10,7 +10,7 @@ const router = useRouter()
 const appStore = useAppStore()
 const userStore = useUserStore()
 
-async function handleCommand(command) {
+async function handleCommand(command: string): Promise<void> {
   if (command === 'logout') {
     try {
       await ElMessageBox.confirm('确定要退出登录吗？', '提示', {

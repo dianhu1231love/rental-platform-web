@@ -1,14 +1,13 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import type { Menu } from '@/types'
 
-const props = defineProps({
-  item: { type: Object, required: true },
-})
+const props = defineProps<{ item: Menu }>()
 
 const { t } = useI18n()
 
-const visibleChildren = computed(() =>
+const visibleChildren = computed<Menu[]>(() =>
   (props.item.children || []).filter((c) => c.type !== 'button' && c.visible !== false),
 )
 

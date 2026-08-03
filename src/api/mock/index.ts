@@ -1,4 +1,14 @@
-import { seedMenus, seedRoles, seedUsers, seedTenants, seedDashboard, seedTodos } from './seed.js'
+import type { AxiosResponse, InternalAxiosRequestConfig } from 'axios'
+import {
+  seedDashboard,
+  seedMenus,
+  seedRoles,
+  seedTenants,
+  seedTodos,
+  seedUsers,
+  type SeedUser,
+} from './seed'
+import type { Menu, Role, Tenant, TodoItem } from '@/types'
 
 const PREFIX = '/api'
 
@@ -10,20 +20,28 @@ const KEYS = {
   todos: 'rp_mock_todos',
 }
 
-function load(key, seed) {
+function load<T>(key: string, seed: T): T {
   try {
     const raw = localStorage.getItem(key)
-    return raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(seed))
+    return raw ? (JSON.parse(raw) as T) : JSON.parse(JSON.stringify(seed))
   } catch {
     return JSON.parse(JSON.stringify(seed))
   }
 }
 
-function save(key, value) {
+function save(key: string, value: unknown): void {
   localStorage.setItem(key, JSON.stringify(value))
 }
 
-const db = {
+interface MockDb {
+  menus: Menu[]
+  roles: Role[]
+  users: SeedUser[]
+  tenants: Tenant[]
+  todos: TodoItem[]
+}
+
+const db: MockDb = {
   get menus() {
     return load(KEYS.menus, seedMenus)
   },
@@ -56,40 +74,67 @@ const db = {
   },
 }
 
-function createToken(user) {
+interface MockResult {
+  code: number
+  data: unknown
+  message: string
+}
+
+interface MockConfig {
+  data?: unknown
+  params?: Record<string, unknown>
+  headers?: Record<string, unknown>
+}
+
+interface MockRoute {
+  method: 'get' | 'post' | 'put' | 'delete'
+  pattern: RegExp
+  auth?: boolean
+  handler: (
+    _config: MockConfig,
+    _match: RegExpMatchArray,
+    _ctx: MockConfig,
+  ) => MockResult | Promise<MockResult>
+}
+
+function createToken(user: SeedUser): string {
   return `mock_${user.username}_${Date.now()}`
 }
 
-function parseToken(token) {
+function parseToken(token: string): string | null {
   if (!token || !token.startsWith('mock_')) return null
   const parts = token.split('_')
   return parts.length >= 2 ? parts[1] : null
 }
 
-function currentUser(config) {
-  const token = config.headers?.Authorization?.replace('Bearer ', '')
+function currentUser(config: MockConfig): SeedUser | null {
+  const header = config.headers?.Authorization
+  const token = String(header ?? '').replace('Bearer ', '')
   const username = parseToken(token)
   if (!username) return null
   return db.users.find((u) => u.username === username) || null
 }
 
-function buildTree(list) {
-  const map = new Map(list.map((m) => [m.id, { ...m, children: [] }]))
-  const roots = []
+type MenuNode = Menu & { children: MenuNode[] }
+
+function buildTree(list: Menu[]): MenuNode[] {
+  const map = new Map<number, MenuNode>()
+  list.forEach((m) => map.set(m.id, { ...m, children: [] }))
+  const roots: MenuNode[] = []
   for (const m of map.values()) {
     if (m.parentId === 0 || !map.has(m.parentId)) roots.push(m)
-    else map.get(m.parentId).children.push(m)
+    else map.get(m.parentId)!.children.push(m)
   }
-  const sortRec = (arr) => {
-    arr.sort((a, b) => a.sort - b.sort)
+  const sortRec = (arr: MenuNode[]): void => {
+    arr.sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0))
     arr.forEach((c) => sortRec(c.children))
   }
   sortRec(roots)
   return roots
 }
 
-function pruneTree(nodes, ids) {
-  const result = []
+function pruneTree(nodes: MenuNode[], ids: number[]): MenuNode[] {
+  const result: MenuNode[] = []
   for (const node of nodes) {
     if (!ids.includes(node.id)) continue
     const children = pruneTree(node.children || [], ids)
@@ -100,38 +145,42 @@ function pruneTree(nodes, ids) {
   return result
 }
 
-function collectPerms(role) {
+function collectPerms(role: Role): string[] {
   if (role.perms.includes('*:*:*')) return ['*:*:*']
   // 非管理员角色：权限以角色上保存的权限集为准（菜单控制可见性，权限控制按钮操作）
   return role.perms || []
 }
 
-function userMenus(role) {
+function userMenus(role: Role): MenuNode[] {
   return pruneTree(buildTree(db.menus), role.menuIds)
 }
 
-function ok(data, message = 'success') {
+function ok(data: unknown, message = 'success'): MockResult {
   return { code: 200, data, message }
 }
 
-function fail(code, message) {
+function fail(code: number, message: string): MockResult {
   return { code, data: null, message }
 }
 
-function delay() {
+function delay(): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, 150 + Math.random() * 250))
 }
 
-function nextId(list) {
+function nextId(list: Array<{ id: number }>): number {
   return list.length ? Math.max(...list.map((i) => i.id)) + 1 : 1
 }
 
-const routes = [
+function formatNow(): string {
+  return new Date().toISOString().slice(0, 19).replace('T', ' ')
+}
+
+const routes: MockRoute[] = [
   {
     method: 'post',
     pattern: /^\/auth\/login$/,
     handler: async ({ data }) => {
-      const { username, password } = data || {}
+      const { username, password } = (data || {}) as { username?: string; password?: string }
       const user = db.users.find((u) => u.username === username && u.password === password)
       if (!user) return fail(500, '用户名或密码错误')
       return ok({ token: createToken(user) })
@@ -141,7 +190,7 @@ const routes = [
     method: 'post',
     pattern: /^\/auth\/sso$/,
     handler: async ({ data }) => {
-      const username = data?.username || 'admin'
+      const username = ((data || {}) as { username?: string }).username || 'admin'
       const user = db.users.find((u) => u.username === username)
       if (!user) return fail(500, 'SSO 票据无效或已过期')
       return ok({ token: createToken(user) })
@@ -156,7 +205,7 @@ const routes = [
     method: 'post',
     pattern: /^\/auth\/forgot$/,
     handler: async ({ data }) => {
-      const { account, code } = data || {}
+      const { account, code } = (data || {}) as { account?: string; code?: string }
       if (code !== '123456') return fail(500, '验证码错误（演示环境请使用 123456）')
       const matched = db.users.filter(
         (u) => u.username === account || (u.phone && u.phone === account),
@@ -226,7 +275,7 @@ const routes = [
     auth: true,
     handler: async (_config, match, { data }) => {
       const id = Number(match[1])
-      const action = data?.action
+      const action = (data as { action?: string } | undefined)?.action
       const todos = db.todos
       const index = todos.findIndex((t) => t.id === id)
       if (index === -1) return fail(500, '待办事项不存在')
@@ -245,13 +294,13 @@ const routes = [
     method: 'post',
     pattern: /^\/system\/roles$/,
     auth: true,
-    handler: async (_c, _m, { data }) => {
+    handler: async (_config, _match, { data }) => {
       const roles = db.roles
       const role = {
-        ...data,
+        ...(data as Partial<Role>),
         id: nextId(roles),
-        createdAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
-      }
+        createdAt: formatNow(),
+      } as Role
       roles.push(role)
       db.roles = roles
       return ok(role)
@@ -261,12 +310,12 @@ const routes = [
     method: 'put',
     pattern: /^\/system\/roles\/(\d+)$/,
     auth: true,
-    handler: async (_c, match, { data }) => {
+    handler: async (_config, match, { data }) => {
       const id = Number(match[1])
       const roles = db.roles
       const index = roles.findIndex((r) => r.id === id)
       if (index === -1) return fail(500, '角色不存在')
-      roles[index] = { ...roles[index], ...data, id }
+      roles[index] = { ...roles[index], ...(data as Partial<Role>), id }
       db.roles = roles
       return ok(roles[index])
     },
@@ -275,7 +324,7 @@ const routes = [
     method: 'delete',
     pattern: /^\/system\/roles\/(\d+)$/,
     auth: true,
-    handler: async (_c, match) => {
+    handler: async (_config, match) => {
       const id = Number(match[1])
       const roles = db.roles
       const next = roles.filter((r) => r.id !== id)
@@ -294,9 +343,9 @@ const routes = [
     method: 'post',
     pattern: /^\/system\/menus$/,
     auth: true,
-    handler: async (_c, _m, { data }) => {
+    handler: async (_config, _match, { data }) => {
       const menus = db.menus
-      const menu = { ...data, id: nextId(menus) }
+      const menu = { ...(data as Partial<Menu>), id: nextId(menus) } as Menu
       menus.push(menu)
       db.menus = menus
       return ok(menu)
@@ -306,12 +355,12 @@ const routes = [
     method: 'put',
     pattern: /^\/system\/menus\/(\d+)$/,
     auth: true,
-    handler: async (_c, match, { data }) => {
+    handler: async (_config, match, { data }) => {
       const id = Number(match[1])
       const menus = db.menus
       const index = menus.findIndex((m) => m.id === id)
       if (index === -1) return fail(500, '菜单不存在')
-      menus[index] = { ...menus[index], ...data, id }
+      menus[index] = { ...menus[index], ...(data as Partial<Menu>), id }
       db.menus = menus
       return ok(menus[index])
     },
@@ -320,7 +369,7 @@ const routes = [
     method: 'delete',
     pattern: /^\/system\/menus\/(\d+)$/,
     auth: true,
-    handler: async (_c, match) => {
+    handler: async (_config, match) => {
       const id = Number(match[1])
       const menus = db.menus
       if (menus.some((m) => m.parentId === id)) return fail(500, '请先删除该菜单下的子菜单')
@@ -334,8 +383,13 @@ const routes = [
     method: 'get',
     pattern: /^\/system\/tenants$/,
     auth: true,
-    handler: async (_c, _m, config) => {
-      const params = config.params || {}
+    handler: async (_config, _match, config) => {
+      const params = (config.params || {}) as {
+        page?: string | number
+        pageSize?: string | number
+        keyword?: string
+        status?: string | number | null
+      }
       const page = Number(params.page) || 1
       const pageSize = Number(params.pageSize) || 10
       let list = db.tenants
@@ -360,13 +414,13 @@ const routes = [
     method: 'post',
     pattern: /^\/system\/tenants$/,
     auth: true,
-    handler: async (_c, _m, { data }) => {
+    handler: async (_config, _match, { data }) => {
       const tenants = db.tenants
       const tenant = {
-        ...data,
+        ...(data as Partial<Tenant>),
         id: nextId(tenants),
-        createdAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
-      }
+        createdAt: formatNow(),
+      } as Tenant
       tenants.unshift(tenant)
       db.tenants = tenants
       return ok(tenant)
@@ -376,12 +430,12 @@ const routes = [
     method: 'put',
     pattern: /^\/system\/tenants\/(\d+)$/,
     auth: true,
-    handler: async (_c, match, { data }) => {
+    handler: async (_config, match, { data }) => {
       const id = Number(match[1])
       const tenants = db.tenants
       const index = tenants.findIndex((t) => t.id === id)
       if (index === -1) return fail(500, '租户不存在')
-      tenants[index] = { ...tenants[index], ...data, id }
+      tenants[index] = { ...tenants[index], ...(data as Partial<Tenant>), id }
       db.tenants = tenants
       return ok(tenants[index])
     },
@@ -390,12 +444,12 @@ const routes = [
     method: 'put',
     pattern: /^\/system\/tenants\/(\d+)\/status$/,
     auth: true,
-    handler: async (_c, match, { data }) => {
+    handler: async (_config, match, { data }) => {
       const id = Number(match[1])
       const tenants = db.tenants
       const index = tenants.findIndex((t) => t.id === id)
       if (index === -1) return fail(500, '租户不存在')
-      tenants[index].status = data?.status ? 1 : 0
+      tenants[index].status = (data as { status?: number } | undefined)?.status ? 1 : 0
       db.tenants = tenants
       return ok(tenants[index])
     },
@@ -404,7 +458,7 @@ const routes = [
     method: 'delete',
     pattern: /^\/system\/tenants\/(\d+)$/,
     auth: true,
-    handler: async (_c, match) => {
+    handler: async (_config, match) => {
       const id = Number(match[1])
       const tenants = db.tenants
       const next = tenants.filter((t) => t.id !== id)
@@ -416,7 +470,7 @@ const routes = [
 ]
 
 export function createMockAdapter() {
-  return async (config) => {
+  return async (config: InternalAxiosRequestConfig): Promise<AxiosResponse> => {
     const method = (config.method || 'get').toLowerCase()
     const rawUrl = config.url || ''
     const url = rawUrl.startsWith(PREFIX) ? rawUrl.slice(PREFIX.length) : rawUrl
@@ -425,7 +479,7 @@ export function createMockAdapter() {
       const match = url.match(route.pattern)
       if (route.method !== method || !match) continue
       if (route.auth) {
-        const user = currentUser(config)
+        const user = currentUser(config as unknown as MockConfig)
         if (!user) {
           await delay()
           return {
@@ -438,7 +492,11 @@ export function createMockAdapter() {
         }
       }
       await delay()
-      const result = await route.handler(config, match, config)
+      const result = await route.handler(
+        config as unknown as MockConfig,
+        match,
+        config as unknown as MockConfig,
+      )
       return {
         data: result,
         status: 200,
