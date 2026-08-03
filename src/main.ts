@@ -14,6 +14,7 @@ import router from './router'
 import { setupStore } from './store'
 import i18n from './locales'
 import permissionDirective from './directives/permission'
+import SmartTable from './components/SmartTable.vue'
 import '@/permission'
 import '@/assets/styles/index.scss'
 
@@ -27,6 +28,7 @@ app.use(router)
 app.use(i18n)
 app.use(ElementPlus, { size: 'default' })
 app.directive('permission', permissionDirective)
+app.component('SmartTable', SmartTable)
 
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)

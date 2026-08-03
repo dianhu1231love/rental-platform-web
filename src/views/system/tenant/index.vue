@@ -13,6 +13,7 @@ import {
 } from '@/api/system'
 import { isValidPhone } from '@/utils/validate'
 import { useI18n } from 'vue-i18n'
+import type { TableColumn, FilterField } from '@/components/SmartTable.vue'
 import type { Tenant, TenantFormModel } from '@/types'
 
 const { t } = useI18n()
@@ -22,17 +23,55 @@ const saving = ref(false)
 const list = ref<Tenant[]>([])
 const total = ref(0)
 
-const query = reactive<{
-  page: number
-  pageSize: number
-  keyword: string
-  status: number | ''
-}>({
+/** 分页参数（与 SmartTable 的 v-model 双向绑定） */
+const query = reactive({
   page: 1,
   pageSize: 10,
-  keyword: '',
-  status: '',
 })
+
+/** 搜索条件（由 SmartTable 筛选面板驱动） */
+const searchParams = reactive({
+  keyword: '',
+  status: '' as number | '',
+})
+
+/** 表格列配置 */
+const columns: TableColumn[] = [
+  { prop: 'name', label: t('tenant.name'), minWidth: 200, showOverflowTooltip: true },
+  { prop: 'code', label: t('tenant.code'), width: 110 },
+  { prop: 'contact', label: t('tenant.contact'), width: 110 },
+  { prop: 'phone', label: t('tenant.phone'), width: 130 },
+  {
+    prop: 'plan',
+    label: t('tenant.plan'),
+    width: 100,
+    align: 'center',
+    statusMap: {
+      企业版: { type: 'danger' },
+      专业版: { type: 'warning' },
+      标准版: { type: 'info' },
+    },
+  },
+  { prop: 'expireAt', label: t('tenant.expireAt'), width: 120, align: 'center' },
+  { prop: 'status', label: t('common.status'), width: 110, align: 'center' },
+  { prop: 'remark', label: t('common.remark'), minWidth: 140, showOverflowTooltip: true },
+  { prop: 'createdAt', label: t('common.createdAt'), width: 165 },
+  { prop: 'action', label: t('common.action'), width: 140, fixed: 'right', hideable: false },
+]
+
+/** 筛选面板配置 */
+const filters: FilterField[] = [
+  { prop: 'keyword', label: t('tenant.namePlaceholder'), type: 'input' },
+  {
+    prop: 'status',
+    label: t('common.status'),
+    type: 'select',
+    options: [
+      { label: t('common.enabled'), value: 1 },
+      { label: t('common.disabled'), value: 0 },
+    ],
+  },
+]
 
 const dialogVisible = ref(false)
 const dialogMode = ref('create')
@@ -72,7 +111,12 @@ const formRules: FormRules = {
 async function loadList(): Promise<void> {
   loading.value = true
   try {
-    const res = await getTenantList({ ...query })
+    const res = await getTenantList({
+      page: query.page,
+      pageSize: query.pageSize,
+      keyword: searchParams.keyword,
+      status: searchParams.status,
+    })
     list.value = res.data.list
     total.value = res.data.total
   } finally {
@@ -80,16 +124,18 @@ async function loadList(): Promise<void> {
   }
 }
 
-/** 搜索：回到第一页并刷新 */
-function handleSearch(): void {
+/** 搜索：同步筛选条件、回到第一页并刷新 */
+function handleSearch(condition: Record<string, unknown>): void {
+  searchParams.keyword = (condition.keyword as string) || ''
+  searchParams.status = condition.status !== undefined ? (condition.status as number) : ''
   query.page = 1
   loadList()
 }
 
 /** 重置搜索条件 */
 function handleReset(): void {
-  query.keyword = ''
-  query.status = ''
+  searchParams.keyword = ''
+  searchParams.status = ''
   query.page = 1
   loadList()
 }
@@ -182,76 +228,38 @@ async function handleDelete(row: Tenant): Promise<void> {
   }
 }
 
-/** 套餐名称 → 标签颜色 */
-function planTag(plan: string): 'danger' | 'warning' | 'info' {
-  if (plan === '企业版') return 'danger'
-  if (plan === '专业版') return 'warning'
-  return 'info'
-}
-
 onMounted(loadList)
 </script>
 
 <template>
   <div class="app-container">
     <el-card class="page-card">
-      <div class="table-toolbar">
-        <div class="toolbar-left">
-          <el-input
-            v-model="query.keyword"
-            :placeholder="$t('tenant.namePlaceholder')"
-            clearable
-            style="width: 240px"
-            :prefix-icon="'Search'"
-            @keyup.enter="handleSearch"
-            @clear="handleSearch"
-          />
-          <el-select
-            v-model="query.status"
-            :placeholder="$t('common.all')"
-            clearable
-            style="width: 130px"
-            @change="handleSearch"
-          >
-            <el-option :label="$t('common.enabled')" :value="1" />
-            <el-option :label="$t('common.disabled')" :value="0" />
-          </el-select>
-          <el-button type="primary" @click="handleSearch">
-            <el-icon><Search /></el-icon>
-            {{ $t('common.search') }}
+      <SmartTable
+        v-model:page="query.page"
+        v-model:page-size="query.pageSize"
+        :columns="columns"
+        :data="list"
+        :filters="filters"
+        :loading="loading"
+        :total="total"
+        paginated
+        exportable
+        export-name="租户列表"
+        row-key="id"
+        show-index
+        @search="handleSearch"
+        @reset="handleReset"
+        @page-change="loadList"
+      >
+        <template #toolbar>
+          <el-button v-permission="['system:tenant:add']" type="primary" @click="openCreate">
+            <el-icon><Plus /></el-icon>
+            {{ $t('tenant.add') }}
           </el-button>
-          <el-button @click="handleReset">{{ $t('common.reset') }}</el-button>
-        </div>
-        <el-button v-permission="['system:tenant:add']" type="primary" @click="openCreate">
-          <el-icon><Plus /></el-icon>
-          {{ $t('tenant.add') }}
-        </el-button>
-      </div>
+        </template>
 
-      <el-table v-loading="loading" :data="list" border stripe>
-        <el-table-column type="index" label="#" width="55" align="center" />
-        <el-table-column
-          :label="$t('tenant.name')"
-          prop="name"
-          min-width="200"
-          show-overflow-tooltip
-        />
-        <el-table-column :label="$t('tenant.code')" prop="code" width="110" />
-        <el-table-column :label="$t('tenant.contact')" prop="contact" width="110" />
-        <el-table-column :label="$t('tenant.phone')" prop="phone" width="130" />
-        <el-table-column :label="$t('tenant.plan')" width="100" align="center">
-          <template #default="{ row }">
-            <el-tag :type="planTag(row.plan)" size="small">{{ row.plan }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column
-          :label="$t('tenant.expireAt')"
-          prop="expireAt"
-          width="120"
-          align="center"
-        />
-        <el-table-column :label="$t('common.status')" width="100" align="center">
-          <template #default="{ row }">
+        <template #col-status="{ row }">
+          <div class="status-cell">
             <el-switch
               v-model="row.status"
               v-permission="['system:tenant:edit']"
@@ -259,50 +267,30 @@ onMounted(loadList)
               :inactive-value="0"
               @change="handleToggleStatus(row)"
             />
-          </template>
-        </el-table-column>
-        <el-table-column
-          :label="$t('common.remark')"
-          prop="remark"
-          min-width="140"
-          show-overflow-tooltip
-        />
-        <el-table-column :label="$t('common.createdAt')" prop="createdAt" width="165" />
-        <el-table-column :label="$t('common.action')" width="140" fixed="right">
-          <template #default="{ row }">
-            <el-button
-              v-permission="['system:tenant:edit']"
-              size="small"
-              type="primary"
-              link
-              @click="openEdit(row)"
-            >
-              {{ $t('common.edit') }}
-            </el-button>
-            <el-button
-              v-permission="['system:tenant:delete']"
-              size="small"
-              type="danger"
-              link
-              @click="handleDelete(row)"
-            >
-              {{ $t('common.delete') }}
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+          </div>
+        </template>
 
-      <div class="pagination-wrap">
-        <el-pagination
-          v-model:current-page="query.page"
-          v-model:page-size="query.pageSize"
-          :total="total"
-          :page-sizes="[10, 20, 50]"
-          layout="total, sizes, prev, pager, next, jumper"
-          background
-          @change="loadList"
-        />
-      </div>
+        <template #col-action="{ row }">
+          <el-button
+            v-permission="['system:tenant:edit']"
+            size="small"
+            type="primary"
+            link
+            @click="openEdit(row)"
+          >
+            {{ $t('common.edit') }}
+          </el-button>
+          <el-button
+            v-permission="['system:tenant:delete']"
+            size="small"
+            type="danger"
+            link
+            @click="handleDelete(row)"
+          >
+            {{ $t('common.delete') }}
+          </el-button>
+        </template>
+      </SmartTable>
     </el-card>
 
     <el-dialog
@@ -374,3 +362,11 @@ onMounted(loadList)
     </el-dialog>
   </div>
 </template>
+
+<style lang="scss" scoped>
+.status-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>

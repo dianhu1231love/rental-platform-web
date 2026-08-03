@@ -5,6 +5,7 @@ import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { forgotAccount } from '@/api/auth'
 import { isValidAccount } from '@/utils/validate'
 import { useI18n } from 'vue-i18n'
+import type { TableColumn } from '@/components/SmartTable.vue'
 import type { ForgotFormModel } from '@/types'
 
 const { t } = useI18n()
@@ -13,6 +14,12 @@ const loading = ref(false)
 const countdown = ref(0)
 const resultVisible = ref(false)
 const matchedAccounts = ref<{ username: string; name: string }[]>([])
+
+/** 匹配账户表格列配置 */
+const resultColumns: TableColumn[] = [
+  { prop: 'name', label: t('layout.profile'), width: 160 },
+  { prop: 'username', label: t('login.username'), minWidth: 160 },
+]
 
 const form = reactive<ForgotFormModel>({
   account: '',
@@ -115,10 +122,7 @@ function handleSendReset(): void {
 
     <el-dialog v-model="resultVisible" :title="$t('login.foundTitle')" width="420px" append-to-body>
       <p>{{ $t('login.foundDesc') }}</p>
-      <el-table :data="matchedAccounts" size="small" border>
-        <el-table-column prop="name" :label="$t('layout.profile')" width="160" />
-        <el-table-column prop="username" :label="$t('login.username')" />
-      </el-table>
+      <SmartTable :columns="resultColumns" :data="matchedAccounts" size="small" />
       <template #footer>
         <el-button @click="resultVisible = false">{{ $t('common.cancel') }}</el-button>
         <el-button type="primary" @click="handleSendReset">

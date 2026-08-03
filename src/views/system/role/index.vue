@@ -7,6 +7,7 @@ import { ElMessage, ElMessageBox, ElTree, type FormInstance, type FormRules } fr
 import { getRoleList, createRole, updateRole, deleteRole, getMenuList } from '@/api/system'
 import { buildTree, type TreeNode } from '@/utils/tree'
 import { useI18n } from 'vue-i18n'
+import type { TableColumn, FilterField } from '@/components/SmartTable.vue'
 import type { Menu, Role, RoleFormModel } from '@/types'
 
 const { t } = useI18n()
@@ -22,6 +23,32 @@ const filteredRoles = computed(() => {
     (r) => r.name.toLowerCase().includes(kw) || r.code.toLowerCase().includes(kw),
   )
 })
+
+/** 表格列配置 */
+const columns: TableColumn[] = [
+  { prop: 'name', label: t('role.name'), minWidth: 140 },
+  { prop: 'code', label: t('role.code'), minWidth: 110 },
+  { prop: 'permissionScope', label: t('role.permissionScope'), minWidth: 150 },
+  { prop: 'status', label: t('common.status'), width: 130 },
+  { prop: 'remark', label: t('common.remark'), minWidth: 180, showOverflowTooltip: true },
+  { prop: 'createdAt', label: t('common.createdAt'), width: 170 },
+  { prop: 'action', label: t('common.action'), width: 180, fixed: 'right', hideable: false },
+]
+
+/** 筛选面板配置 */
+const filters: FilterField[] = [
+  { prop: 'keyword', label: t('role.namePlaceholder'), type: 'input' },
+]
+
+/** 搜索：按名称/编码本地过滤 */
+function handleSearch(condition: Record<string, unknown>): void {
+  keyword.value = (condition.keyword as string) || ''
+}
+
+/** 重置搜索 */
+function handleReset(): void {
+  keyword.value = ''
+}
 
 // 权限分配抽屉
 const drawerVisible = ref(false)
@@ -219,78 +246,68 @@ onMounted(async () => {
 <template>
   <div class="app-container">
     <el-card class="page-card">
-      <div class="table-toolbar">
-        <el-input
-          v-model="keyword"
-          :placeholder="$t('role.namePlaceholder')"
-          clearable
-          style="width: 260px"
-          :prefix-icon="'Search'"
-        />
-        <el-button v-permission="['system:role:add']" type="primary" @click="openCreate">
-          <el-icon><Plus /></el-icon>
-          {{ $t('common.add') }}
-        </el-button>
-      </div>
+      <SmartTable
+        :columns="columns"
+        :data="filteredRoles"
+        :filters="filters"
+        :loading="loading"
+        exportable
+        export-name="角色列表"
+        row-key="id"
+        @search="handleSearch"
+        @reset="handleReset"
+      >
+        <template #toolbar>
+          <el-button v-permission="['system:role:add']" type="primary" @click="openCreate">
+            <el-icon><Plus /></el-icon>
+            {{ $t('common.add') }}
+          </el-button>
+        </template>
 
-      <el-table v-loading="loading" :data="filteredRoles" border stripe>
-        <el-table-column :label="$t('role.name')" prop="name" min-width="140" />
-        <el-table-column :label="$t('role.code')" prop="code" min-width="110" />
-        <el-table-column :label="$t('role.permissionScope')" min-width="150">
-          <template #default="{ row }">
-            <el-tag v-if="row.perms.includes('*:*:*')" type="success">
-              {{ $t('role.allPermissions') }}
-            </el-tag>
-            <el-tag v-else type="info">
-              {{ $t('role.customPermissions') }} ({{ row.menuIds.length }})
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column :label="$t('common.status')" width="90">
-          <template #default="{ row }">
-            <el-switch
-              v-model="row.status"
-              v-permission="['system:role:edit']"
-              :active-value="1"
-              :inactive-value="0"
-              @change="handleToggleStatus(row)"
-            />
-            <el-tag v-if="row.status === 1" type="success" size="small">
-              {{ $t('common.enabled') }}
-            </el-tag>
-            <el-tag v-else type="danger" size="small">{{ $t('common.disabled') }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column
-          :label="$t('common.remark')"
-          prop="remark"
-          min-width="180"
-          show-overflow-tooltip
-        />
-        <el-table-column :label="$t('common.createdAt')" prop="createdAt" width="170" />
-        <el-table-column :label="$t('common.action')" width="180" fixed="right">
-          <template #default="{ row }">
-            <el-button
-              v-permission="['system:role:edit']"
-              size="small"
-              type="primary"
-              link
-              @click="openEdit(row)"
-            >
-              {{ $t('role.assignPermission') }}
-            </el-button>
-            <el-button
-              v-permission="['system:role:delete']"
-              size="small"
-              type="danger"
-              link
-              @click="handleDelete(row)"
-            >
-              {{ $t('common.delete') }}
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+        <template #col-permissionScope="{ row }">
+          <el-tag v-if="row.perms.includes('*:*:*')" type="success">
+            {{ $t('role.allPermissions') }}
+          </el-tag>
+          <el-tag v-else type="info">
+            {{ $t('role.customPermissions') }} ({{ row.menuIds.length }})
+          </el-tag>
+        </template>
+
+        <template #col-status="{ row }">
+          <el-switch
+            v-model="row.status"
+            v-permission="['system:role:edit']"
+            :active-value="1"
+            :inactive-value="0"
+            @change="handleToggleStatus(row)"
+          />
+          <el-tag v-if="row.status === 1" type="success" size="small">
+            {{ $t('common.enabled') }}
+          </el-tag>
+          <el-tag v-else type="danger" size="small">{{ $t('common.disabled') }}</el-tag>
+        </template>
+
+        <template #col-action="{ row }">
+          <el-button
+            v-permission="['system:role:edit']"
+            size="small"
+            type="primary"
+            link
+            @click="openEdit(row)"
+          >
+            {{ $t('role.assignPermission') }}
+          </el-button>
+          <el-button
+            v-permission="['system:role:delete']"
+            size="small"
+            type="danger"
+            link
+            @click="handleDelete(row)"
+          >
+            {{ $t('common.delete') }}
+          </el-button>
+        </template>
+      </SmartTable>
     </el-card>
 
     <el-drawer

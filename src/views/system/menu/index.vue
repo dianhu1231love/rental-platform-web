@@ -8,6 +8,7 @@ import { getMenuList, createMenu, updateMenu, deleteMenu } from '@/api/system'
 import { buildTree, type TreeNode } from '@/utils/tree'
 import { useI18n } from 'vue-i18n'
 import { MENU_ICON_OPTIONS } from '@/constants'
+import type { TableColumn, FilterField } from '@/components/SmartTable.vue'
 import type { Menu, MenuFormModel } from '@/types'
 
 const { t } = useI18n()
@@ -31,6 +32,51 @@ const filteredMenus = computed(() => {
       .filter((x): x is TreeNode<Menu> => x !== null)
   return filterRec(menus.value)
 })
+
+/** 表格列配置 */
+const columns: TableColumn[] = [
+  { prop: 'name', label: t('menuManage.name'), minWidth: 220 },
+  {
+    prop: 'type',
+    label: t('menuManage.type'),
+    width: 100,
+    align: 'center',
+    statusMap: {
+      directory: { label: t('menuManage.typeDirectory'), type: 'warning' },
+      menu: { label: t('menuManage.typeMenu'), type: 'primary' },
+      button: { label: t('menuManage.typeButton'), type: 'info' },
+    },
+  },
+  { prop: 'path', label: t('menuManage.path'), minWidth: 150, showOverflowTooltip: true },
+  { prop: 'component', label: t('menuManage.component'), minWidth: 180, showOverflowTooltip: true },
+  { prop: 'perms', label: t('menuManage.perms'), minWidth: 160, showOverflowTooltip: true },
+  { prop: 'sort', label: t('menuManage.sort'), width: 70, align: 'center' },
+  { prop: 'autoRefresh', label: t('menuManage.autoRefresh'), width: 130, align: 'center' },
+  {
+    prop: 'visible',
+    label: t('common.status'),
+    width: 90,
+    align: 'center',
+    statusMap: {
+      true: { label: t('common.enabled'), type: 'success' },
+      false: { label: t('common.disabled'), type: 'danger' },
+    },
+  },
+  { prop: 'action', label: t('common.action'), width: 230, fixed: 'right', hideable: false },
+]
+
+/** 筛选面板配置 */
+const filters: FilterField[] = [{ prop: 'keyword', label: t('menuManage.name'), type: 'input' }]
+
+/** 搜索：按名称/权限标识本地过滤 */
+function handleSearch(condition: Record<string, unknown>): void {
+  keyword.value = (condition.keyword as string) || ''
+}
+
+/** 重置搜索 */
+function handleReset(): void {
+  keyword.value = ''
+}
 
 const defaultButtons = ['add', 'edit', 'delete', 'view']
 
@@ -247,126 +293,79 @@ async function handleAutoRefreshChange(row: TreeNode<Menu>, value: boolean): Pro
   }
 }
 
-/** 菜单类型标签样式 */
-function typeTag(row: TreeNode<Menu>): { label: string; type: 'warning' | 'primary' | 'info' } {
-  if (row.type === 'directory') return { label: t('menuManage.typeDirectory'), type: 'warning' }
-  if (row.type === 'menu') return { label: t('menuManage.typeMenu'), type: 'primary' }
-  return { label: t('menuManage.typeButton'), type: 'info' }
-}
-
 onMounted(loadMenus)
 </script>
 
 <template>
   <div class="app-container">
     <el-card class="page-card">
-      <div class="table-toolbar">
-        <el-input
-          v-model="keyword"
-          :placeholder="$t('menuManage.name')"
-          clearable
-          style="width: 260px"
-          :prefix-icon="'Search'"
-        />
-        <el-button v-permission="['system:menu:add']" type="primary" @click="openCreate()">
-          <el-icon><Plus /></el-icon>
-          {{ $t('common.add') }}
-        </el-button>
-      </div>
-
-      <el-table
-        v-loading="loading"
+      <SmartTable
+        :columns="columns"
         :data="filteredMenus"
+        :filters="filters"
+        :loading="loading"
         row-key="id"
-        border
-        default-expand-all
         :tree-props="{ children: 'children' }"
+        default-expand-all
+        @search="handleSearch"
+        @reset="handleReset"
       >
-        <el-table-column :label="$t('menuManage.name')" min-width="220">
-          <template #default="{ row }">
-            <span class="menu-name">
-              <el-icon v-if="row.icon" class="menu-icon"><component :is="row.icon" /></el-icon>
-              {{ row.title }}
-            </span>
-          </template>
-        </el-table-column>
-        <el-table-column :label="$t('menuManage.type')" width="100">
-          <template #default="{ row }">
-            <el-tag :type="typeTag(row).type" size="small">{{ typeTag(row).label }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column
-          :label="$t('menuManage.path')"
-          prop="path"
-          min-width="150"
-          show-overflow-tooltip
-        />
-        <el-table-column
-          :label="$t('menuManage.component')"
-          prop="component"
-          min-width="180"
-          show-overflow-tooltip
-        />
-        <el-table-column
-          :label="$t('menuManage.perms')"
-          prop="perms"
-          min-width="160"
-          show-overflow-tooltip
-        />
-        <el-table-column :label="$t('menuManage.sort')" prop="sort" width="70" align="center" />
-        <el-table-column :label="$t('menuManage.autoRefresh')" width="130" align="center">
-          <template #default="{ row }">
-            <el-switch
-              v-if="row.type === 'menu'"
-              :model-value="!!row.autoRefresh"
-              :loading="refreshingId === row.id"
-              @change="handleAutoRefreshChange(row, $event)"
-            />
-            <span v-else>-</span>
-          </template>
-        </el-table-column>
-        <el-table-column :label="$t('common.status')" width="90" align="center">
-          <template #default="{ row }">
-            <el-tag v-if="row.visible" type="success" size="small">
-              {{ $t('common.enabled') }}
-            </el-tag>
-            <el-tag v-else type="danger" size="small">{{ $t('common.disabled') }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column :label="$t('common.action')" width="230" fixed="right">
-          <template #default="{ row }">
-            <template v-if="row.type !== 'button'">
-              <el-button
-                v-permission="['system:menu:add']"
-                size="small"
-                type="primary"
-                link
-                @click="openCreate(row.id)"
-              >
-                {{ $t('menuManage.addChild') }}
-              </el-button>
-            </template>
+        <template #toolbar>
+          <el-button v-permission="['system:menu:add']" type="primary" @click="openCreate()">
+            <el-icon><Plus /></el-icon>
+            {{ $t('common.add') }}
+          </el-button>
+        </template>
+
+        <template #col-name="{ row }">
+          <span class="menu-name">
+            <el-icon v-if="row.icon" class="menu-icon"><component :is="row.icon" /></el-icon>
+            {{ row.title }}
+          </span>
+        </template>
+
+        <template #col-autoRefresh="{ row }">
+          <el-switch
+            v-if="row.type === 'menu'"
+            :model-value="!!row.autoRefresh"
+            :loading="refreshingId === row.id"
+            @change="handleAutoRefreshChange(row, $event)"
+          />
+          <span v-else>-</span>
+        </template>
+
+        <template #col-action="{ row }">
+          <template v-if="row.type !== 'button'">
             <el-button
-              v-permission="['system:menu:edit']"
+              v-permission="['system:menu:add']"
               size="small"
               type="primary"
               link
-              @click="openEdit(row)"
+              @click="openCreate(row.id)"
             >
-              {{ $t('common.edit') }}
-            </el-button>
-            <el-button
-              v-permission="['system:menu:delete']"
-              size="small"
-              type="danger"
-              link
-              @click="handleDelete(row)"
-            >
-              {{ $t('common.delete') }}
+              {{ $t('menuManage.addChild') }}
             </el-button>
           </template>
-        </el-table-column>
-      </el-table>
+          <el-button
+            v-permission="['system:menu:edit']"
+            size="small"
+            type="primary"
+            link
+            @click="openEdit(row)"
+          >
+            {{ $t('common.edit') }}
+          </el-button>
+          <el-button
+            v-permission="['system:menu:delete']"
+            size="small"
+            type="danger"
+            link
+            @click="handleDelete(row)"
+          >
+            {{ $t('common.delete') }}
+          </el-button>
+        </template>
+      </SmartTable>
     </el-card>
 
     <el-dialog

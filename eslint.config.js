@@ -27,6 +27,8 @@ export default defineConfigWithVueTs(
       'vue/multi-word-component-names': 'off',
       'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      // 泛型表格组件允许使用 any 兜底行数据类型
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
   {
