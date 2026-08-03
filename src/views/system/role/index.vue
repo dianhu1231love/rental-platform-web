@@ -2,7 +2,7 @@
 <script setup lang="ts">
 defineOptions({ name: 'RoleManage' })
 
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox, ElTree, type FormInstance, type FormRules } from 'element-plus'
 import { getRoleList, createRole, updateRole, deleteRole, getMenuList } from '@/api/system'
 import { buildTree, type TreeNode } from '@/utils/tree'
@@ -85,6 +85,10 @@ function openCreate(): void {
   })
   for (const key of Object.keys(buttonChecked)) delete buttonChecked[key]
   drawerVisible.value = true
+  // 新增角色：清空权限树勾选
+  nextTick(() => {
+    treeRef.value?.setCheckedKeys([])
+  })
 }
 
 /** 打开编辑抽屉并回显权限 */
@@ -110,12 +114,20 @@ function openEdit(role: Role): void {
   }
   collect(menuTree.value)
   const menuPerms = new Set(roleForm.perms)
+  // 管理员持有通配权限 *:*:*，等价于全部按钮权限已勾选
+  const isAdmin = menuPerms.has('*:*:*')
   menus.forEach((m) => {
     const buttons = m.buttons || []
-    const checked = buttons.filter((b) => menuPerms.has(b.perm)).map((b) => b.perm)
+    const checked = isAdmin
+      ? buttons.map((b) => b.perm)
+      : buttons.filter((b) => menuPerms.has(b.perm)).map((b) => b.perm)
     if (checked.length) buttonChecked[m.id] = checked
   })
   drawerVisible.value = true
+  // 抽屉内容挂载后回显菜单勾选，避免打开时整棵树处于未勾选状态
+  nextTick(() => {
+    treeRef.value?.setCheckedKeys(roleForm.menuIds)
+  })
 }
 
 /** 收集权限树勾选的菜单 id（含半选父级） */
