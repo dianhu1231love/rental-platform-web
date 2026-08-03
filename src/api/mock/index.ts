@@ -6,14 +6,29 @@
 import type { AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import {
   seedDashboard,
+  seedDicts,
+  seedEquipment,
+  seedGroups,
   seedMenus,
+  seedModels,
   seedRoles,
+  seedBrands,
   seedTenants,
   seedTodos,
   seedUsers,
   type SeedUser,
 } from './seed'
-import type { Menu, Role, Tenant, TodoItem } from '@/types'
+import type {
+  DictItem,
+  EquipmentBrand,
+  EquipmentGroup,
+  EquipmentItem,
+  EquipmentModel,
+  Menu,
+  Role,
+  Tenant,
+  TodoItem,
+} from '@/types'
 
 const PREFIX = '/api'
 
@@ -24,6 +39,11 @@ const KEYS = {
   users: 'rp_mock_users',
   tenants: 'rp_mock_tenants',
   todos: 'rp_mock_todos',
+  equipment: 'rp_mock_equipment',
+  brands: 'rp_mock_brands',
+  groups: 'rp_mock_groups',
+  models: 'rp_mock_models',
+  dicts: 'rp_mock_dicts',
 }
 
 /** 读取 localStorage，不存在或损坏时回退到种子数据 */
@@ -41,6 +61,37 @@ function save(key: string, value: unknown): void {
   localStorage.setItem(key, JSON.stringify(value))
 }
 
+/**
+ * 菜单数据迁移：历史 localStorage 中可能缺少新增的种子菜单，
+ * 按 id 补齐，保证升级后新模块自动出现
+ */
+function migrateMenus(): Menu[] {
+  const stored = load(KEYS.menus, seedMenus)
+  const missing = seedMenus.filter((sm) => !stored.some((m) => m.id === sm.id))
+  if (missing.length === 0) return stored
+  const merged = [...stored, ...missing]
+  save(KEYS.menus, merged)
+  return merged
+}
+
+/**
+ * 角色数据迁移：为已存在的角色补齐新增菜单的可见权限（管理员全量）
+ */
+function migrateRoles(): Role[] {
+  const stored = load(KEYS.roles, seedRoles)
+  let changed = false
+  const updated = stored.map((role) => {
+    const seed = seedRoles.find((s) => s.id === role.id)
+    if (!seed) return role
+    const missingIds = seed.menuIds.filter((id) => !role.menuIds.includes(id))
+    if (missingIds.length === 0) return role
+    changed = true
+    return { ...role, menuIds: [...role.menuIds, ...missingIds] }
+  })
+  if (changed) save(KEYS.roles, updated)
+  return updated
+}
+
 /** 模拟数据库：读写时即时持久化 */
 interface MockDb {
   menus: Menu[]
@@ -48,17 +99,22 @@ interface MockDb {
   users: SeedUser[]
   tenants: Tenant[]
   todos: TodoItem[]
+  equipment: EquipmentItem[]
+  brands: EquipmentBrand[]
+  groups: EquipmentGroup[]
+  models: EquipmentModel[]
+  dicts: DictItem[]
 }
 
 const db: MockDb = {
   get menus() {
-    return load(KEYS.menus, seedMenus)
+    return migrateMenus()
   },
   set menus(v) {
     save(KEYS.menus, v)
   },
   get roles() {
-    return load(KEYS.roles, seedRoles)
+    return migrateRoles()
   },
   set roles(v) {
     save(KEYS.roles, v)
@@ -80,6 +136,36 @@ const db: MockDb = {
   },
   set todos(v) {
     save(KEYS.todos, v)
+  },
+  get equipment() {
+    return load(KEYS.equipment, seedEquipment)
+  },
+  set equipment(v) {
+    save(KEYS.equipment, v)
+  },
+  get brands() {
+    return load(KEYS.brands, seedBrands)
+  },
+  set brands(v) {
+    save(KEYS.brands, v)
+  },
+  get groups() {
+    return load(KEYS.groups, seedGroups)
+  },
+  set groups(v) {
+    save(KEYS.groups, v)
+  },
+  get models() {
+    return load(KEYS.models, seedModels)
+  },
+  set models(v) {
+    save(KEYS.models, v)
+  },
+  get dicts() {
+    return load(KEYS.dicts, seedDicts)
+  },
+  set dicts(v) {
+    save(KEYS.dicts, v)
   },
 }
 
@@ -484,6 +570,282 @@ const routes: MockRoute[] = [
       const next = tenants.filter((t) => t.id !== id)
       if (next.length === tenants.length) return fail(500, '租户不存在')
       db.tenants = next
+      return ok(null)
+    },
+  },
+  {
+    method: 'get',
+    pattern: /^\/system\/dicts$/,
+    auth: true,
+    handler: async (_config, _match, config) => {
+      const type = String((config.params || {}).type || '')
+      const list = db.dicts
+      return ok(type ? list.filter((d) => d.type === type) : list)
+    },
+  },
+  {
+    method: 'post',
+    pattern: /^\/system\/dicts$/,
+    auth: true,
+    handler: async (_config, _match, { data }) => {
+      const dicts = db.dicts
+      const { type, label } = (data || {}) as { type?: string; label?: string }
+      if (!type || !label) return fail(500, '字典类型与标签不能为空')
+      const exists = dicts.find((d) => d.type === type && d.label === label)
+      if (exists) return ok(exists)
+      const item: DictItem = { id: nextId(dicts), type, label }
+      dicts.push(item)
+      db.dicts = dicts
+      return ok(item)
+    },
+  },
+  {
+    method: 'get',
+    pattern: /^\/equipment\/list$/,
+    auth: true,
+    handler: async (_config, _match, config) => {
+      const params = (config.params || {}) as {
+        page?: string | number
+        pageSize?: string | number
+        keyword?: string
+        brandId?: string | number
+        status?: string
+      }
+      const page = Number(params.page) || 1
+      const pageSize = Number(params.pageSize) || 10
+      let list = db.equipment
+      if (params.keyword) {
+        const kw = String(params.keyword).toLowerCase()
+        list = list.filter(
+          (e) =>
+            e.code.toLowerCase().includes(kw) ||
+            e.owner.toLowerCase().includes(kw) ||
+            e.remark.toLowerCase().includes(kw),
+        )
+      }
+      if (params.brandId !== undefined && params.brandId !== '') {
+        list = list.filter((e) => e.brandId === Number(params.brandId))
+      }
+      if (params.status) {
+        list = list.filter((e) => e.status === params.status)
+      }
+      const total = list.length
+      const start = (page - 1) * pageSize
+      return ok({ list: list.slice(start, start + pageSize), total })
+    },
+  },
+  {
+    method: 'post',
+    pattern: /^\/equipment\/list$/,
+    auth: true,
+    handler: async (_config, _match, { data }) => {
+      const equipment = db.equipment
+      const item = {
+        ...(data as Partial<EquipmentItem>),
+        id: nextId(equipment),
+        createdAt: formatNow(),
+      } as EquipmentItem
+      equipment.unshift(item)
+      db.equipment = equipment
+      return ok(item)
+    },
+  },
+  {
+    method: 'get',
+    pattern: /^\/equipment\/list\/(\d+)\/location$/,
+    auth: true,
+    handler: async (_config, match) => {
+      const id = Number(match[1])
+      // 模拟外部设备定位接口；接入真实定位服务时替换该地址
+      return ok({
+        lng: Number((121.4737 + (id % 7) * 0.03).toFixed(4)),
+        lat: Number((31.2304 + (id % 5) * 0.02).toFixed(4)),
+        address: `上海市浦东新区示例路${id}号`,
+      })
+    },
+  },
+  {
+    method: 'get',
+    pattern: /^\/equipment\/list\/(\d+)$/,
+    auth: true,
+    handler: async (_config, match) => {
+      const id = Number(match[1])
+      const item = db.equipment.find((e) => e.id === id)
+      if (!item) return fail(500, '设备不存在')
+      return ok(item)
+    },
+  },
+  {
+    method: 'put',
+    pattern: /^\/equipment\/list\/(\d+)$/,
+    auth: true,
+    handler: async (_config, match, { data }) => {
+      const id = Number(match[1])
+      const equipment = db.equipment
+      const index = equipment.findIndex((e) => e.id === id)
+      if (index === -1) return fail(500, '设备不存在')
+      equipment[index] = { ...equipment[index], ...(data as Partial<EquipmentItem>), id }
+      db.equipment = equipment
+      return ok(equipment[index])
+    },
+  },
+  {
+    method: 'delete',
+    pattern: /^\/equipment\/list\/(\d+)$/,
+    auth: true,
+    handler: async (_config, match) => {
+      const id = Number(match[1])
+      const equipment = db.equipment
+      const next = equipment.filter((e) => e.id !== id)
+      if (next.length === equipment.length) return fail(500, '设备不存在')
+      db.equipment = next
+      return ok(null)
+    },
+  },
+  {
+    method: 'get',
+    pattern: /^\/equipment\/brands$/,
+    auth: true,
+    handler: async () => ok(db.brands),
+  },
+  {
+    method: 'post',
+    pattern: /^\/equipment\/brands$/,
+    auth: true,
+    handler: async (_config, _match, { data }) => {
+      const list = db.brands
+      const item = {
+        ...(data as Partial<EquipmentBrand>),
+        id: nextId(list),
+        createdAt: formatNow(),
+      } as EquipmentBrand
+      list.push(item)
+      db.brands = list
+      return ok(item)
+    },
+  },
+  {
+    method: 'put',
+    pattern: /^\/equipment\/brands\/(\d+)$/,
+    auth: true,
+    handler: async (_config, match, { data }) => {
+      const id = Number(match[1])
+      const list = db.brands
+      const index = list.findIndex((b) => b.id === id)
+      if (index === -1) return fail(500, '品牌不存在')
+      list[index] = { ...list[index], ...(data as Partial<EquipmentBrand>), id }
+      db.brands = list
+      return ok(list[index])
+    },
+  },
+  {
+    method: 'delete',
+    pattern: /^\/equipment\/brands\/(\d+)$/,
+    auth: true,
+    handler: async (_config, match) => {
+      const id = Number(match[1])
+      const list = db.brands
+      const next = list.filter((b) => b.id !== id)
+      if (next.length === list.length) return fail(500, '品牌不存在')
+      db.brands = next
+      return ok(null)
+    },
+  },
+  {
+    method: 'get',
+    pattern: /^\/equipment\/groups$/,
+    auth: true,
+    handler: async () => ok(db.groups),
+  },
+  {
+    method: 'post',
+    pattern: /^\/equipment\/groups$/,
+    auth: true,
+    handler: async (_config, _match, { data }) => {
+      const list = db.groups
+      const item = {
+        ...(data as Partial<EquipmentGroup>),
+        id: nextId(list),
+        createdAt: formatNow(),
+      } as EquipmentGroup
+      list.push(item)
+      db.groups = list
+      return ok(item)
+    },
+  },
+  {
+    method: 'put',
+    pattern: /^\/equipment\/groups\/(\d+)$/,
+    auth: true,
+    handler: async (_config, match, { data }) => {
+      const id = Number(match[1])
+      const list = db.groups
+      const index = list.findIndex((g) => g.id === id)
+      if (index === -1) return fail(500, '产品组不存在')
+      list[index] = { ...list[index], ...(data as Partial<EquipmentGroup>), id }
+      db.groups = list
+      return ok(list[index])
+    },
+  },
+  {
+    method: 'delete',
+    pattern: /^\/equipment\/groups\/(\d+)$/,
+    auth: true,
+    handler: async (_config, match) => {
+      const id = Number(match[1])
+      const list = db.groups
+      const next = list.filter((g) => g.id !== id)
+      if (next.length === list.length) return fail(500, '产品组不存在')
+      db.groups = next
+      return ok(null)
+    },
+  },
+  {
+    method: 'get',
+    pattern: /^\/equipment\/models$/,
+    auth: true,
+    handler: async () => ok(db.models),
+  },
+  {
+    method: 'post',
+    pattern: /^\/equipment\/models$/,
+    auth: true,
+    handler: async (_config, _match, { data }) => {
+      const list = db.models
+      const item = {
+        ...(data as Partial<EquipmentModel>),
+        id: nextId(list),
+        createdAt: formatNow(),
+      } as EquipmentModel
+      list.push(item)
+      db.models = list
+      return ok(item)
+    },
+  },
+  {
+    method: 'put',
+    pattern: /^\/equipment\/models\/(\d+)$/,
+    auth: true,
+    handler: async (_config, match, { data }) => {
+      const id = Number(match[1])
+      const list = db.models
+      const index = list.findIndex((m) => m.id === id)
+      if (index === -1) return fail(500, '产品型号不存在')
+      list[index] = { ...list[index], ...(data as Partial<EquipmentModel>), id }
+      db.models = list
+      return ok(list[index])
+    },
+  },
+  {
+    method: 'delete',
+    pattern: /^\/equipment\/models\/(\d+)$/,
+    auth: true,
+    handler: async (_config, match) => {
+      const id = Number(match[1])
+      const list = db.models
+      const next = list.filter((m) => m.id !== id)
+      if (next.length === list.length) return fail(500, '产品型号不存在')
+      db.models = next
       return ok(null)
     },
   },

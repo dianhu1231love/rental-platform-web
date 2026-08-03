@@ -240,3 +240,80 @@ export interface TodoItem {
   time: string
   priority: TodoPriority
 }
+
+/** 附件信息（证照/保险/随车备件清单等） */
+export interface Attachment {
+  name: string
+  size: number
+  type: string
+}
+
+/** 设备当前状态 */
+export type EquipmentStatus = 'renting' | 'idle' | 'preparing' | 'maintenance'
+
+/** 设备（整机） */
+export interface EquipmentItem {
+  id: number
+  /** 整机编码 */
+  code: string
+  /** 品牌 id */
+  brandId: number
+  /** 产品型号 id */
+  modelId: number
+  /** 资产归属（来自数据字典，可自定义） */
+  owner: string
+  /** 采购金额 */
+  purchaseAmount: number
+  /** 当前状态 */
+  status: EquipmentStatus
+  /** 累计开票金额 */
+  invoiceAmount: number
+  /** 维保费用总价 */
+  maintenanceCost: number
+  /** 费用填报总价 */
+  expenseTotal: number
+  /** 证照附件 */
+  certificates: Attachment[]
+  /** 保险附件 */
+  insurance: Attachment[]
+  /** 随车备件清单附件 */
+  spareParts: Attachment[]
+  /** 备注 */
+  remark: string
+  createdAt: string
+}
+
+/** 设备品牌 */
+export interface EquipmentBrand {
+  id: number
+  name: string
+  remark: string
+  createdAt: string
+}
+
+/** 产品组 */
+export interface EquipmentGroup {
+  id: number
+  name: string
+  remark: string
+  createdAt: string
+}
+
+/** 产品型号 */
+export interface EquipmentModel {
+  id: number
+  name: string
+  /** 所属产品组 id */
+  groupId: number
+  remark: string
+  createdAt: string
+}
+
+/** 数据字典项（如资产归属） */
+export interface DictItem {
+  id: number
+  /** 字典类型 */
+  type: string
+  /** 字典标签 */
+  label: string
+}

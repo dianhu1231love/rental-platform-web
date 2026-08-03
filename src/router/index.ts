@@ -3,6 +3,7 @@
  * constantRoutes 为静态路由（登录、404、重定向），业务路由由权限模块动态注册
  */
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import Layout from '@/layout/index.vue'
 
 /** 静态路由表 */
 export const constantRoutes: RouteRecordRaw[] = [
@@ -23,6 +24,20 @@ export const constantRoutes: RouteRecordRaw[] = [
     name: 'Redirect',
     component: () => import('@/views/redirect/index.vue'),
     meta: { hidden: true },
+  },
+  {
+    path: '/equipment/detail/:id',
+    name: 'EquipmentDetail',
+    component: Layout,
+    meta: { hidden: true, title: '设备详情' },
+    children: [
+      {
+        path: '',
+        name: 'EquipmentDetailPage',
+        component: () => import('@/views/equipment/detail/index.vue'),
+        meta: { hidden: true, title: '设备详情' },
+      },
+    ],
   },
 ]
 
