@@ -7,7 +7,7 @@ import {
   getPaymentTrend,
   getEquipmentBoard,
   getHoursStat,
-  getTodos
+  getTodos,
 } from '@/api/dashboard'
 import { useUserStore } from '@/store/user'
 import StatCards from './components/StatCards.vue'
@@ -36,16 +36,58 @@ async function loadAll() {
       getEquipmentBoard(),
       getPaymentTrend(),
       getHoursStat(),
-      getTodos()
+      getTodos(),
     ])
     const s = statsRes.data
     stats.value = [
-      { key: 'totalRental', icon: 'Coin', color: '#409eff', value: s.totalRental.value, unit: 'dashboard.unitYuan', trend: s.totalRental.trend },
-      { key: 'receivables', icon: 'Wallet', color: '#e6a23c', value: s.receivables.value, unit: 'dashboard.unitYuan', trend: s.receivables.trend },
-      { key: 'pendingDistribute', icon: 'Money', color: '#67c23a', value: s.pendingDistribute.value, unit: 'dashboard.unitYuan', trend: s.pendingDistribute.trend },
-      { key: 'monthInvoicePending', icon: 'Document', color: '#f56c6c', value: s.monthInvoicePending.value, unit: 'dashboard.unitCount', trend: s.monthInvoicePending.trend },
-      { key: 'monthDistribute', icon: 'CreditCard', color: '#9c27b0', value: s.monthDistribute.value, unit: 'dashboard.unitYuan', trend: s.monthDistribute.trend },
-      { key: 'monthInvoice', icon: 'Tickets', color: '#00bcd4', value: s.monthInvoice.value, unit: 'dashboard.unitYuan', trend: s.monthInvoice.trend }
+      {
+        key: 'totalRental',
+        icon: 'Coin',
+        color: '#409eff',
+        value: s.totalRental.value,
+        unit: 'dashboard.unitYuan',
+        trend: s.totalRental.trend,
+      },
+      {
+        key: 'receivables',
+        icon: 'Wallet',
+        color: '#e6a23c',
+        value: s.receivables.value,
+        unit: 'dashboard.unitYuan',
+        trend: s.receivables.trend,
+      },
+      {
+        key: 'pendingDistribute',
+        icon: 'Money',
+        color: '#67c23a',
+        value: s.pendingDistribute.value,
+        unit: 'dashboard.unitYuan',
+        trend: s.pendingDistribute.trend,
+      },
+      {
+        key: 'monthInvoicePending',
+        icon: 'Document',
+        color: '#f56c6c',
+        value: s.monthInvoicePending.value,
+        unit: 'dashboard.unitCount',
+        trend: s.monthInvoicePending.trend,
+      },
+      {
+        key: 'monthDistribute',
+        icon: 'CreditCard',
+        color: '#9c27b0',
+        value: s.monthDistribute.value,
+        unit: 'dashboard.unitYuan',
+        trend: s.monthDistribute.trend,
+      },
+      {
+        key: 'monthInvoice',
+        icon: 'Tickets',
+        color: '#00bcd4',
+        value: s.monthInvoice.value,
+        unit: 'dashboard.unitYuan',
+        trend: s.monthInvoice.trend,
+      },
     ]
     equipment.value = equipmentRes.data
     trend.value = trendRes.data

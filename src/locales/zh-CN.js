@@ -26,14 +26,14 @@ export default {
     backHome: '返回首页',
     pageNotFound: '抱歉，您访问的页面不存在',
     confirmTitle: '提示',
-    all: '全部'
+    all: '全部',
   },
   menu: {
     dashboard: '首页',
     system: '系统设置',
     role: '权限设置',
     menuManage: '菜单设置',
-    tenant: '租户管理'
+    tenant: '租户管理',
   },
   layout: {
     platformName: '租赁平台管理系统',
@@ -41,7 +41,7 @@ export default {
     documentation: '使用文档',
     collapse: '收起菜单',
     expand: '展开菜单',
-    refresh: '刷新页面'
+    refresh: '刷新页面',
   },
   tagsView: {
     refresh: '刷新',
@@ -51,7 +51,7 @@ export default {
     closeOthers: '关闭其他',
     closeAll: '关闭全部',
     homePinned: '首页固定，不可关闭',
-    dropCloseTip: '拖到此处关闭标签'
+    dropCloseTip: '拖到此处关闭标签',
   },
   login: {
     title: '欢迎登录',
@@ -90,7 +90,7 @@ export default {
     demoPassword: '密码均为',
     captchaSent: '验证码已发送（演示环境固定为 123456）',
     loginSuccess: '登录成功',
-    ssoTicketInvalid: 'SSO 票据验证失败'
+    ssoTicketInvalid: 'SSO 票据验证失败',
   },
   dashboard: {
     title: '数据看板',
@@ -126,7 +126,7 @@ export default {
     todoInvoice: '开票申请',
     todoHandled: '已处理：{title}',
     unitYuan: '元',
-    unitCount: '笔'
+    unitCount: '笔',
   },
   role: {
     title: '权限设置',
@@ -142,7 +142,7 @@ export default {
     buttonPermissions: '按钮权限',
     namePlaceholder: '请输入角色名称',
     codePlaceholder: '请输入角色编码',
-    menuTree: '权限树'
+    menuTree: '权限树',
   },
   menuManage: {
     title: '菜单设置',
@@ -170,8 +170,9 @@ export default {
     menuPermission: '菜单权限',
     addEditDeleteView: '新增、编辑、删除、查看等按钮权限',
     autoRefresh: '点击标签自动刷新',
-    autoRefreshTip: '开启：每次点击该标签页都会重新加载页面；关闭：保留页面数据，点击标签不重新加载',
-    saveSuccess: '菜单保存成功，重新登录后生效'
+    autoRefreshTip:
+      '开启：每次点击该标签页都会重新加载页面；关闭：保留页面数据，点击标签不重新加载',
+    saveSuccess: '菜单保存成功，重新登录后生效',
   },
   tenant: {
     title: '租户管理',
@@ -191,6 +192,6 @@ export default {
     expireAtPlaceholder: '请选择到期时间',
     planStandard: '标准版',
     planProfessional: '专业版',
-    planEnterprise: '企业版'
-  }
+    planEnterprise: '企业版',
+  },
 }

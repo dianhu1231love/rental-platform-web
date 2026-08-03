@@ -4,7 +4,7 @@ import enUS from './en-US'
 
 const messages = {
   'zh-CN': zhCN,
-  'en-US': enUS
+  'en-US': enUS,
 }
 
 const savedLang = localStorage.getItem('rental_platform_lang') || 'zh-CN'
@@ -14,7 +14,7 @@ const i18n = createI18n({
   globalInjection: true,
   locale: savedLang,
   fallbackLocale: 'zh-CN',
-  messages
+  messages,
 })
 
 export default i18n

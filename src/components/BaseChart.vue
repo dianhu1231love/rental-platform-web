@@ -5,7 +5,7 @@ import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 const props = defineProps({
   option: { type: Object, required: true },
   height: { type: String, default: '320px' },
-  autoresize: { type: Boolean, default: true }
+  autoresize: { type: Boolean, default: true },
 })
 
 const el = ref(null)

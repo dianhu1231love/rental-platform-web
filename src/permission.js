@@ -29,7 +29,7 @@ router.beforeEach(async (to, from, next) => {
         router.addRoute({
           path: '/:pathMatch(.*)*',
           redirect: '/404',
-          meta: { hidden: true }
+          meta: { hidden: true },
         })
         next({ ...to, replace: true })
       } catch (error) {

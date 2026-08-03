@@ -5,7 +5,7 @@ import { handleTodo } from '@/api/dashboard'
 import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
-  todos: { type: Array, default: () => [] }
+  todos: { type: Array, default: () => [] },
 })
 
 const emit = defineEmits(['handled'])
@@ -15,13 +15,13 @@ const loadingId = ref(null)
 const typeMap = {
   contract: { labelKey: 'dashboard.todoContract', type: 'primary' },
   distribute: { labelKey: 'dashboard.todoDistribute', type: 'warning' },
-  invoice: { labelKey: 'dashboard.todoInvoice', type: 'success' }
+  invoice: { labelKey: 'dashboard.todoInvoice', type: 'success' },
 }
 
 const priorityMap = {
   high: '#f56c6c',
   medium: '#e6a23c',
-  low: '#67c23a'
+  low: '#67c23a',
 }
 
 async function handle(todo, action) {

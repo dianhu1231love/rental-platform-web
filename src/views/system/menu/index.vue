@@ -50,7 +50,7 @@ const iconOptions = [
   'Monitor',
   'List',
   'Operation',
-  'Tools'
+  'Tools',
 ]
 
 const defaultButtons = ['add', 'edit', 'delete', 'view']
@@ -73,7 +73,7 @@ const form = reactive({
   sort: 1,
   visible: true,
   autoRefresh: false,
-  buttons: []
+  buttons: [],
 })
 
 const formRules = {
@@ -84,27 +84,29 @@ const formRules = {
         if (form.type !== 'button' && !value) callback(new Error(t('menuManage.pathPlaceholder')))
         else callback()
       },
-      trigger: 'blur'
-    }
+      trigger: 'blur',
+    },
   ],
   component: [
     {
       validator: (_rule, value, callback) => {
-        if (form.type === 'menu' && !value) callback(new Error(t('menuManage.componentPlaceholder')))
+        if (form.type === 'menu' && !value)
+          callback(new Error(t('menuManage.componentPlaceholder')))
         else callback()
       },
-      trigger: 'blur'
-    }
+      trigger: 'blur',
+    },
   ],
   perms: [
     {
       validator: (_rule, value, callback) => {
-        if (form.type !== 'directory' && !value) callback(new Error(t('menuManage.permsPlaceholder')))
+        if (form.type !== 'directory' && !value)
+          callback(new Error(t('menuManage.permsPlaceholder')))
         else callback()
       },
-      trigger: 'blur'
-    }
-  ]
+      trigger: 'blur',
+    },
+  ],
 }
 
 async function loadMenus() {
@@ -145,7 +147,7 @@ function openCreate(parentId = 0) {
     sort: 1,
     visible: true,
     autoRefresh: false,
-    buttons: []
+    buttons: [],
   })
   dialogVisible.value = true
 }
@@ -164,7 +166,7 @@ function openEdit(row) {
     sort: row.sort ?? 1,
     visible: !!row.visible,
     autoRefresh: !!row.autoRefresh,
-    buttons: (row.buttons || []).map((b) => (b.perm ? b.perm.split(':').pop() : ''))
+    buttons: (row.buttons || []).map((b) => (b.perm ? b.perm.split(':').pop() : '')),
   })
   dialogVisible.value = true
 }
@@ -217,7 +219,7 @@ async function handleDelete(row) {
     await ElMessageBox.confirm(t('common.deleteConfirm'), t('common.confirmTitle'), {
       confirmButtonText: t('common.confirm'),
       cancelButtonText: t('common.cancel'),
-      type: 'warning'
+      type: 'warning',
     })
     await deleteMenu(row.id)
     ElMessage.success(t('common.success'))
@@ -264,7 +266,8 @@ onMounted(loadMenus)
           :prefix-icon="'Search'"
         />
         <el-button type="primary" v-permission="['system:menu:add']" @click="openCreate()">
-          <el-icon><Plus /></el-icon>{{ $t('common.add') }}
+          <el-icon><Plus /></el-icon>
+          {{ $t('common.add') }}
         </el-button>
       </div>
 
@@ -289,9 +292,24 @@ onMounted(loadMenus)
             <el-tag :type="typeTag(row).type" size="small">{{ typeTag(row).label }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('menuManage.path')" prop="path" min-width="150" show-overflow-tooltip />
-        <el-table-column :label="$t('menuManage.component')" prop="component" min-width="180" show-overflow-tooltip />
-        <el-table-column :label="$t('menuManage.perms')" prop="perms" min-width="160" show-overflow-tooltip />
+        <el-table-column
+          :label="$t('menuManage.path')"
+          prop="path"
+          min-width="150"
+          show-overflow-tooltip
+        />
+        <el-table-column
+          :label="$t('menuManage.component')"
+          prop="component"
+          min-width="180"
+          show-overflow-tooltip
+        />
+        <el-table-column
+          :label="$t('menuManage.perms')"
+          prop="perms"
+          min-width="160"
+          show-overflow-tooltip
+        />
         <el-table-column :label="$t('menuManage.sort')" prop="sort" width="70" align="center" />
         <el-table-column :label="$t('menuManage.autoRefresh')" width="130" align="center">
           <template #default="{ row }">
@@ -306,7 +324,9 @@ onMounted(loadMenus)
         </el-table-column>
         <el-table-column :label="$t('common.status')" width="90" align="center">
           <template #default="{ row }">
-            <el-tag v-if="row.visible" type="success" size="small">{{ $t('common.enabled') }}</el-tag>
+            <el-tag v-if="row.visible" type="success" size="small">
+              {{ $t('common.enabled') }}
+            </el-tag>
             <el-tag v-else type="danger" size="small">{{ $t('common.disabled') }}</el-tag>
           </template>
         </el-table-column>
@@ -385,7 +405,11 @@ onMounted(loadMenus)
           <el-input v-model="form.path" :placeholder="$t('menuManage.pathPlaceholder')" />
         </el-form-item>
 
-        <el-form-item v-if="form.type === 'menu'" :label="$t('menuManage.component')" prop="component">
+        <el-form-item
+          v-if="form.type === 'menu'"
+          :label="$t('menuManage.component')"
+          prop="component"
+        >
           <el-input v-model="form.component" :placeholder="$t('menuManage.componentPlaceholder')" />
         </el-form-item>
 

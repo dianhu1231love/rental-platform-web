@@ -13,11 +13,11 @@ const userStore = useUserStore()
 async function handleCommand(command) {
   if (command === 'logout') {
     try {
-      await ElMessageBox.confirm(
-        '确定要退出登录吗？',
-        '提示',
-        { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }
-      )
+      await ElMessageBox.confirm('确定要退出登录吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
       await userStore.logout()
       ElMessage.success('已退出登录')
       router.push('/login')
@@ -52,10 +52,12 @@ async function handleCommand(command) {
         <template #dropdown>
           <el-dropdown-menu>
             <el-dropdown-item command="profile">
-              <el-icon><User /></el-icon>{{ $t('layout.profile') }}
+              <el-icon><User /></el-icon>
+              {{ $t('layout.profile') }}
             </el-dropdown-item>
             <el-dropdown-item command="logout" divided>
-              <el-icon><SwitchButton /></el-icon>{{ $t('common.logout') }}
+              <el-icon><SwitchButton /></el-icon>
+              {{ $t('common.logout') }}
             </el-dropdown-item>
           </el-dropdown-menu>
         </template>

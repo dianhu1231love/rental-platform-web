@@ -4,7 +4,7 @@ import { formatPercent } from '@/utils/format'
 import BaseChart from '@/components/BaseChart.vue'
 
 const props = defineProps({
-  data: { type: Object, required: true }
+  data: { type: Object, required: true },
 })
 
 const pieOption = computed(() => ({
@@ -24,10 +24,10 @@ const pieOption = computed(() => ({
       data: [
         { name: '在租', value: props.data.renting },
         { name: '空闲', value: props.data.idle },
-        { name: '维修中', value: props.data.maintenance }
-      ]
-    }
-  ]
+        { name: '维修中', value: props.data.maintenance },
+      ],
+    },
+  ],
 }))
 </script>
 

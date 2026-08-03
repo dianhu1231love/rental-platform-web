@@ -7,7 +7,7 @@ export function formatWan(value) {
   const num = Number(value) || 0
   return (num / 10000).toLocaleString('zh-CN', {
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2
+    maximumFractionDigits: 2,
   })
 }
 

@@ -1,11 +1,4 @@
-import {
-  seedMenus,
-  seedRoles,
-  seedUsers,
-  seedTenants,
-  seedDashboard,
-  seedTodos
-} from './seed.js'
+import { seedMenus, seedRoles, seedUsers, seedTenants, seedDashboard, seedTodos } from './seed.js'
 
 const PREFIX = '/api'
 
@@ -14,7 +7,7 @@ const KEYS = {
   roles: 'rp_mock_roles',
   users: 'rp_mock_users',
   tenants: 'rp_mock_tenants',
-  todos: 'rp_mock_todos'
+  todos: 'rp_mock_todos',
 }
 
 function load(key, seed) {
@@ -60,7 +53,7 @@ const db = {
   },
   set todos(v) {
     save(KEYS.todos, v)
-  }
+  },
 }
 
 function createToken(user) {
@@ -142,7 +135,7 @@ const routes = [
       const user = db.users.find((u) => u.username === username && u.password === password)
       if (!user) return fail(500, '用户名或密码错误')
       return ok({ token: createToken(user) })
-    }
+    },
   },
   {
     method: 'post',
@@ -152,12 +145,12 @@ const routes = [
       const user = db.users.find((u) => u.username === username)
       if (!user) return fail(500, 'SSO 票据无效或已过期')
       return ok({ token: createToken(user) })
-    }
+    },
   },
   {
     method: 'post',
     pattern: /^\/auth\/logout$/,
-    handler: async () => ok(null)
+    handler: async () => ok(null),
   },
   {
     method: 'post',
@@ -166,16 +159,16 @@ const routes = [
       const { account, code } = data || {}
       if (code !== '123456') return fail(500, '验证码错误（演示环境请使用 123456）')
       const matched = db.users.filter(
-        (u) => u.username === account || (u.phone && u.phone === account)
+        (u) => u.username === account || (u.phone && u.phone === account),
       )
       if (matched.length === 0) return fail(500, '未找到关联账户，请核对后重试')
       return ok(
         matched.map((u) => ({
           username: u.username.slice(0, 1) + '***' + u.username.slice(-1),
-          name: u.name
-        }))
+          name: u.name,
+        })),
       )
-    }
+    },
   },
   {
     method: 'get',
@@ -193,39 +186,39 @@ const routes = [
         roles: [role.code],
         perms: collectPerms(role),
         roleId: role.id,
-        menus: userMenus(role)
+        menus: userMenus(role),
       })
-    }
+    },
   },
   {
     method: 'get',
     pattern: /^\/dashboard\/stats$/,
     auth: true,
-    handler: async () => ok(seedDashboard.stats)
+    handler: async () => ok(seedDashboard.stats),
   },
   {
     method: 'get',
     pattern: /^\/dashboard\/trend$/,
     auth: true,
-    handler: async () => ok(seedDashboard.trend)
+    handler: async () => ok(seedDashboard.trend),
   },
   {
     method: 'get',
     pattern: /^\/dashboard\/equipment$/,
     auth: true,
-    handler: async () => ok(seedDashboard.equipment)
+    handler: async () => ok(seedDashboard.equipment),
   },
   {
     method: 'get',
     pattern: /^\/dashboard\/hours$/,
     auth: true,
-    handler: async () => ok(seedDashboard.hours)
+    handler: async () => ok(seedDashboard.hours),
   },
   {
     method: 'get',
     pattern: /^\/dashboard\/todos$/,
     auth: true,
-    handler: async () => ok(db.todos)
+    handler: async () => ok(db.todos),
   },
   {
     method: 'put',
@@ -240,13 +233,13 @@ const routes = [
       todos.splice(index, 1)
       db.todos = todos
       return ok({ id, action })
-    }
+    },
   },
   {
     method: 'get',
     pattern: /^\/system\/roles$/,
     auth: true,
-    handler: async () => ok(db.roles)
+    handler: async () => ok(db.roles),
   },
   {
     method: 'post',
@@ -254,11 +247,15 @@ const routes = [
     auth: true,
     handler: async (_c, _m, { data }) => {
       const roles = db.roles
-      const role = { ...data, id: nextId(roles), createdAt: new Date().toISOString().slice(0, 19).replace('T', ' ') }
+      const role = {
+        ...data,
+        id: nextId(roles),
+        createdAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
+      }
       roles.push(role)
       db.roles = roles
       return ok(role)
-    }
+    },
   },
   {
     method: 'put',
@@ -272,7 +269,7 @@ const routes = [
       roles[index] = { ...roles[index], ...data, id }
       db.roles = roles
       return ok(roles[index])
-    }
+    },
   },
   {
     method: 'delete',
@@ -285,13 +282,13 @@ const routes = [
       if (next.length === roles.length) return fail(500, '角色不存在')
       db.roles = next
       return ok(null)
-    }
+    },
   },
   {
     method: 'get',
     pattern: /^\/system\/menus$/,
     auth: true,
-    handler: async () => ok(db.menus)
+    handler: async () => ok(db.menus),
   },
   {
     method: 'post',
@@ -303,7 +300,7 @@ const routes = [
       menus.push(menu)
       db.menus = menus
       return ok(menu)
-    }
+    },
   },
   {
     method: 'put',
@@ -317,7 +314,7 @@ const routes = [
       menus[index] = { ...menus[index], ...data, id }
       db.menus = menus
       return ok(menus[index])
-    }
+    },
   },
   {
     method: 'delete',
@@ -331,7 +328,7 @@ const routes = [
       if (next.length === menus.length) return fail(500, '菜单不存在')
       db.menus = next
       return ok(null)
-    }
+    },
   },
   {
     method: 'get',
@@ -348,7 +345,7 @@ const routes = [
           (t) =>
             t.name.toLowerCase().includes(kw) ||
             t.code.toLowerCase().includes(kw) ||
-            t.contact.toLowerCase().includes(kw)
+            t.contact.toLowerCase().includes(kw),
         )
       }
       if (params.status !== undefined && params.status !== '' && params.status !== null) {
@@ -357,7 +354,7 @@ const routes = [
       const total = list.length
       const start = (page - 1) * pageSize
       return ok({ list: list.slice(start, start + pageSize), total })
-    }
+    },
   },
   {
     method: 'post',
@@ -368,12 +365,12 @@ const routes = [
       const tenant = {
         ...data,
         id: nextId(tenants),
-        createdAt: new Date().toISOString().slice(0, 19).replace('T', ' ')
+        createdAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
       }
       tenants.unshift(tenant)
       db.tenants = tenants
       return ok(tenant)
-    }
+    },
   },
   {
     method: 'put',
@@ -387,7 +384,7 @@ const routes = [
       tenants[index] = { ...tenants[index], ...data, id }
       db.tenants = tenants
       return ok(tenants[index])
-    }
+    },
   },
   {
     method: 'put',
@@ -401,7 +398,7 @@ const routes = [
       tenants[index].status = data?.status ? 1 : 0
       db.tenants = tenants
       return ok(tenants[index])
-    }
+    },
   },
   {
     method: 'delete',
@@ -414,8 +411,8 @@ const routes = [
       if (next.length === tenants.length) return fail(500, '租户不存在')
       db.tenants = next
       return ok(null)
-    }
-  }
+    },
+  },
 ]
 
 export function createMockAdapter() {
@@ -436,7 +433,7 @@ export function createMockAdapter() {
             status: 200,
             statusText: 'OK',
             headers: {},
-            config
+            config,
           }
         }
       }
@@ -447,7 +444,7 @@ export function createMockAdapter() {
         status: 200,
         statusText: 'OK',
         headers: {},
-        config
+        config,
       }
     }
 
@@ -456,7 +453,7 @@ export function createMockAdapter() {
       status: 200,
       statusText: 'OK',
       headers: {},
-      config
+      config,
     }
   }
 }

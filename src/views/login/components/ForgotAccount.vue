@@ -14,7 +14,7 @@ const matchedAccounts = ref([])
 
 const form = reactive({
   account: '',
-  code: ''
+  code: '',
 })
 
 const rules = {
@@ -25,14 +25,14 @@ const rules = {
         else if (!isValidAccount(value)) callback(new Error(t('login.accountPlaceholder')))
         else callback()
       },
-      trigger: 'blur'
-    }
+      trigger: 'blur',
+    },
   ],
-  code: [{ required: true, message: () => t('login.codePlaceholder'), trigger: 'blur' }]
+  code: [{ required: true, message: () => t('login.codePlaceholder'), trigger: 'blur' }],
 }
 
 const codeButtonText = computed(() =>
-  countdown.value > 0 ? `${countdown.value}${t('login.resend')}` : t('login.getCode')
+  countdown.value > 0 ? `${countdown.value}${t('login.resend')}` : t('login.getCode'),
 )
 
 function startCountdown() {
@@ -102,23 +102,13 @@ function handleSendReset() {
         </div>
       </el-form-item>
       <el-form-item>
-        <el-button
-          type="primary"
-          class="find-button"
-          :loading="loading"
-          @click="handleFind"
-        >
+        <el-button type="primary" class="find-button" :loading="loading" @click="handleFind">
           {{ $t('login.findAccount') }}
         </el-button>
       </el-form-item>
     </el-form>
 
-    <el-dialog
-      v-model="resultVisible"
-      :title="$t('login.foundTitle')"
-      width="420px"
-      append-to-body
-    >
+    <el-dialog v-model="resultVisible" :title="$t('login.foundTitle')" width="420px" append-to-body>
       <p>{{ $t('login.foundDesc') }}</p>
       <el-table :data="matchedAccounts" size="small" border>
         <el-table-column prop="name" :label="$t('layout.profile')" width="160" />

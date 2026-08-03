@@ -8,7 +8,7 @@ import {
   createTenant,
   updateTenant,
   deleteTenant,
-  updateTenantStatus
+  updateTenantStatus,
 } from '@/api/system'
 import { isValidPhone } from '@/utils/validate'
 import { useI18n } from 'vue-i18n'
@@ -24,7 +24,7 @@ const query = reactive({
   page: 1,
   pageSize: 10,
   keyword: '',
-  status: ''
+  status: '',
 })
 
 const dialogVisible = ref(false)
@@ -40,7 +40,7 @@ const form = reactive({
   plan: '标准版',
   expireAt: '',
   remark: '',
-  status: 1
+  status: 1,
 })
 
 const formRules = {
@@ -54,11 +54,11 @@ const formRules = {
         if (value && !isValidPhone(value)) callback(new Error(t('tenant.phonePlaceholder')))
         else callback()
       },
-      trigger: 'blur'
-    }
+      trigger: 'blur',
+    },
   ],
   plan: [{ required: true, message: () => t('tenant.planPlaceholder'), trigger: 'change' }],
-  expireAt: [{ required: true, message: () => t('tenant.expireAtPlaceholder'), trigger: 'change' }]
+  expireAt: [{ required: true, message: () => t('tenant.expireAtPlaceholder'), trigger: 'change' }],
 }
 
 async function loadList() {
@@ -95,7 +95,7 @@ function openCreate() {
     plan: '标准版',
     expireAt: '',
     remark: '',
-    status: 1
+    status: 1,
   })
   dialogVisible.value = true
 }
@@ -111,7 +111,7 @@ function openEdit(row) {
     plan: row.plan,
     expireAt: row.expireAt,
     remark: row.remark,
-    status: row.status
+    status: row.status,
   })
   dialogVisible.value = true
 }
@@ -148,7 +148,7 @@ async function handleDelete(row) {
     await ElMessageBox.confirm(t('common.deleteConfirm'), t('common.confirmTitle'), {
       confirmButtonText: t('common.confirm'),
       cancelButtonText: t('common.cancel'),
-      type: 'warning'
+      type: 'warning',
     })
     await deleteTenant(row.id)
     ElMessage.success(t('common.success'))
@@ -192,18 +192,25 @@ onMounted(loadList)
             <el-option :label="$t('common.disabled')" :value="0" />
           </el-select>
           <el-button type="primary" @click="handleSearch">
-            <el-icon><Search /></el-icon>{{ $t('common.search') }}
+            <el-icon><Search /></el-icon>
+            {{ $t('common.search') }}
           </el-button>
           <el-button @click="handleReset">{{ $t('common.reset') }}</el-button>
         </div>
         <el-button type="primary" v-permission="['system:tenant:add']" @click="openCreate">
-          <el-icon><Plus /></el-icon>{{ $t('tenant.add') }}
+          <el-icon><Plus /></el-icon>
+          {{ $t('tenant.add') }}
         </el-button>
       </div>
 
       <el-table :data="list" v-loading="loading" border stripe>
         <el-table-column type="index" label="#" width="55" align="center" />
-        <el-table-column :label="$t('tenant.name')" prop="name" min-width="200" show-overflow-tooltip />
+        <el-table-column
+          :label="$t('tenant.name')"
+          prop="name"
+          min-width="200"
+          show-overflow-tooltip
+        />
         <el-table-column :label="$t('tenant.code')" prop="code" width="110" />
         <el-table-column :label="$t('tenant.contact')" prop="contact" width="110" />
         <el-table-column :label="$t('tenant.phone')" prop="phone" width="130" />
@@ -212,7 +219,12 @@ onMounted(loadList)
             <el-tag :type="planTag(row.plan)" size="small">{{ row.plan }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('tenant.expireAt')" prop="expireAt" width="120" align="center" />
+        <el-table-column
+          :label="$t('tenant.expireAt')"
+          prop="expireAt"
+          width="120"
+          align="center"
+        />
         <el-table-column :label="$t('common.status')" width="100" align="center">
           <template #default="{ row }">
             <el-switch
@@ -224,7 +236,12 @@ onMounted(loadList)
             />
           </template>
         </el-table-column>
-        <el-table-column :label="$t('common.remark')" prop="remark" min-width="140" show-overflow-tooltip />
+        <el-table-column
+          :label="$t('common.remark')"
+          prop="remark"
+          min-width="140"
+          show-overflow-tooltip
+        />
         <el-table-column :label="$t('common.createdAt')" prop="createdAt" width="165" />
         <el-table-column :label="$t('common.action')" width="140" fixed="right">
           <template #default="{ row }">
@@ -314,7 +331,12 @@ onMounted(loadList)
           <el-switch v-model="form.status" :active-value="1" :inactive-value="0" />
         </el-form-item>
         <el-form-item :label="$t('common.remark')">
-          <el-input v-model="form.remark" type="textarea" :rows="3" :placeholder="$t('common.remark')" />
+          <el-input
+            v-model="form.remark"
+            type="textarea"
+            :rows="3"
+            :placeholder="$t('common.remark')"
+          />
         </el-form-item>
       </el-form>
 

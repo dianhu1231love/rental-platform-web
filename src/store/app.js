@@ -12,7 +12,7 @@ export const useAppStore = defineStore('app', {
     sidebarCollapsed: false,
     language: localStorage.getItem(LANG_KEY) || 'zh-CN',
     visitedViews: [],
-    cachedViews: []
+    cachedViews: [],
   }),
   actions: {
     toggleSidebar() {
@@ -31,7 +31,7 @@ export const useAppStore = defineStore('app', {
         name: view.name,
         title: view.meta?.title,
         i18nKey: view.meta?.i18nKey,
-        keepAlive: !!view.meta?.keepAlive
+        keepAlive: !!view.meta?.keepAlive,
       }
       // 首页固定在最前
       if (isHome(view.path)) {
@@ -59,9 +59,7 @@ export const useAppStore = defineStore('app', {
       this.syncCachedViews()
     },
     delOtherViews(view) {
-      this.visitedViews = this.visitedViews.filter(
-        (v) => isHome(v.path) || v.path === view.path
-      )
+      this.visitedViews = this.visitedViews.filter((v) => isHome(v.path) || v.path === view.path)
       this.syncCachedViews()
     },
     delAllViews() {
@@ -77,9 +75,7 @@ export const useAppStore = defineStore('app', {
       views.splice(toIndex, 0, moved)
     },
     syncCachedViews() {
-      this.cachedViews = this.visitedViews
-        .filter((v) => v.keepAlive && v.name)
-        .map((v) => v.name)
+      this.cachedViews = this.visitedViews.filter((v) => v.keepAlive && v.name).map((v) => v.name)
     },
     delCachedView(name) {
       if (!name) return
@@ -88,6 +84,6 @@ export const useAppStore = defineStore('app', {
     addCachedView(name) {
       if (!name || this.cachedViews.includes(name)) return
       this.cachedViews.push(name)
-    }
-  }
+    },
+  },
 })

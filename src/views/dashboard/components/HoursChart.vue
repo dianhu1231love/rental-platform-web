@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import BaseChart from '@/components/BaseChart.vue'
 
 const props = defineProps({
-  data: { type: Object, required: true }
+  data: { type: Object, required: true },
 })
 
 const option = computed(() => ({
@@ -13,13 +13,13 @@ const option = computed(() => ({
   xAxis: {
     type: 'category',
     data: props.data.categories,
-    axisTick: { alignWithLabel: true }
+    axisTick: { alignWithLabel: true },
   },
   yAxis: [
     {
       type: 'value',
       name: '小时',
-      splitLine: { lineStyle: { type: 'dashed' } }
+      splitLine: { lineStyle: { type: 'dashed' } },
     },
     {
       type: 'value',
@@ -27,8 +27,8 @@ const option = computed(() => ({
       min: 0,
       max: 100,
       splitLine: { show: false },
-      axisLabel: { formatter: '{value}%' }
-    }
+      axisLabel: { formatter: '{value}%' },
+    },
   ],
   series: [
     {
@@ -36,14 +36,14 @@ const option = computed(() => ({
       type: 'bar',
       barWidth: 14,
       itemStyle: { color: '#c7d8f2', borderRadius: [4, 4, 0, 0] },
-      data: props.data.plan
+      data: props.data.plan,
     },
     {
       name: '实际工时',
       type: 'bar',
       barWidth: 14,
       itemStyle: { color: '#2f7bfe', borderRadius: [4, 4, 0, 0] },
-      data: props.data.actual
+      data: props.data.actual,
     },
     {
       name: '工时利用率',
@@ -52,9 +52,9 @@ const option = computed(() => ({
       smooth: true,
       symbolSize: 7,
       itemStyle: { color: '#e6a23c' },
-      data: props.data.utilization
-    }
-  ]
+      data: props.data.utilization,
+    },
+  ],
 }))
 </script>
 

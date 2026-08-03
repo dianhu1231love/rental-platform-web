@@ -3,7 +3,7 @@ import {
   login as loginApi,
   ssoLogin as ssoApi,
   logout as logoutApi,
-  getUserInfo as getUserInfoApi
+  getUserInfo as getUserInfoApi,
 } from '@/api/auth'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 
@@ -16,7 +16,7 @@ export const useUserStore = defineStore('user', {
     roles: [],
     perms: [],
     roleId: null,
-    menus: []
+    menus: [],
   }),
   actions: {
     async login(form) {
@@ -59,6 +59,6 @@ export const useUserStore = defineStore('user', {
       this.perms = []
       this.roleId = null
       this.menus = []
-    }
-  }
+    },
+  },
 })

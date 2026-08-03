@@ -15,9 +15,15 @@ const activeMenu = computed(() => route.path)
 
 <template>
   <div class="sidebar-wrapper">
-    <div v-if="settings.sidebarLogo" class="sidebar-logo" :class="{ collapsed: appStore.sidebarCollapsed }">
+    <div
+      v-if="settings.sidebarLogo"
+      class="sidebar-logo"
+      :class="{ collapsed: appStore.sidebarCollapsed }"
+    >
       <el-icon :size="26" color="#2f7bfe"><Platform /></el-icon>
-      <span v-show="!appStore.sidebarCollapsed" class="logo-title">{{ $t('layout.platformName') }}</span>
+      <span v-show="!appStore.sidebarCollapsed" class="logo-title">
+        {{ $t('layout.platformName') }}
+      </span>
     </div>
     <el-scrollbar class="sidebar-scroll">
       <el-menu
@@ -31,7 +37,9 @@ const activeMenu = computed(() => route.path)
         active-text-color="#2f7bfe"
       >
         <sidebar-item
-          v-for="item in permissionStore.menus.filter((m) => m.visible !== false && m.type !== 'button')"
+          v-for="item in permissionStore.menus.filter(
+            (m) => m.visible !== false && m.type !== 'button',
+          )"
           :key="item.id"
           :item="item"
         />

@@ -17,7 +17,7 @@ const filteredRoles = computed(() => {
   const kw = keyword.value.trim().toLowerCase()
   if (!kw) return roles.value
   return roles.value.filter(
-    (r) => r.name.toLowerCase().includes(kw) || r.code.toLowerCase().includes(kw)
+    (r) => r.name.toLowerCase().includes(kw) || r.code.toLowerCase().includes(kw),
   )
 })
 
@@ -37,12 +37,12 @@ const roleForm = reactive({
   status: 1,
   remark: '',
   menuIds: [],
-  perms: []
+  perms: [],
 })
 
 const roleRules = {
   name: [{ required: true, message: () => t('role.namePlaceholder'), trigger: 'blur' }],
-  code: [{ required: true, message: () => t('role.codePlaceholder'), trigger: 'blur' }]
+  code: [{ required: true, message: () => t('role.codePlaceholder'), trigger: 'blur' }],
 }
 
 function buttonLabel(perm) {
@@ -74,7 +74,7 @@ function openCreate() {
     status: 1,
     remark: '',
     menuIds: [],
-    perms: []
+    perms: [],
   })
   for (const key of Object.keys(buttonChecked)) delete buttonChecked[key]
   drawerVisible.value = true
@@ -89,7 +89,7 @@ function openEdit(role) {
     status: role.status,
     remark: role.remark,
     menuIds: [...(role.menuIds || [])],
-    perms: [...(role.perms || [])]
+    perms: [...(role.perms || [])],
   })
   // 回显按钮权限
   for (const key of Object.keys(buttonChecked)) delete buttonChecked[key]
@@ -176,7 +176,7 @@ async function handleDelete(role) {
     await ElMessageBox.confirm(t('common.deleteConfirm'), t('common.confirmTitle'), {
       confirmButtonText: t('common.confirm'),
       cancelButtonText: t('common.cancel'),
-      type: 'warning'
+      type: 'warning',
     })
     await deleteRole(role.id)
     ElMessage.success(t('common.success'))
@@ -203,7 +203,8 @@ onMounted(async () => {
           :prefix-icon="'Search'"
         />
         <el-button type="primary" v-permission="['system:role:add']" @click="openCreate">
-          <el-icon><Plus /></el-icon>{{ $t('common.add') }}
+          <el-icon><Plus /></el-icon>
+          {{ $t('common.add') }}
         </el-button>
       </div>
 
@@ -229,11 +230,18 @@ onMounted(async () => {
               v-permission="['system:role:edit']"
               @change="handleToggleStatus(row)"
             />
-            <el-tag v-if="row.status === 1" type="success" size="small">{{ $t('common.enabled') }}</el-tag>
+            <el-tag v-if="row.status === 1" type="success" size="small">
+              {{ $t('common.enabled') }}
+            </el-tag>
             <el-tag v-else type="danger" size="small">{{ $t('common.disabled') }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('common.remark')" prop="remark" min-width="180" show-overflow-tooltip />
+        <el-table-column
+          :label="$t('common.remark')"
+          prop="remark"
+          min-width="180"
+          show-overflow-tooltip
+        />
         <el-table-column :label="$t('common.createdAt')" prop="createdAt" width="170" />
         <el-table-column :label="$t('common.action')" width="180" fixed="right">
           <template #default="{ row }">
@@ -266,8 +274,20 @@ onMounted(async () => {
       size="520px"
       destroy-on-close
     >
-      <el-alert :title="$t('role.assignTip')" type="info" :closable="false" show-icon class="assign-tip" />
-      <el-form ref="roleFormRef" :model="roleForm" :rules="roleRules" label-width="90px" class="role-form">
+      <el-alert
+        :title="$t('role.assignTip')"
+        type="info"
+        :closable="false"
+        show-icon
+        class="assign-tip"
+      />
+      <el-form
+        ref="roleFormRef"
+        :model="roleForm"
+        :rules="roleRules"
+        label-width="90px"
+        class="role-form"
+      >
         <el-form-item :label="$t('role.name')" prop="name">
           <el-input v-model="roleForm.name" :placeholder="$t('role.namePlaceholder')" />
         </el-form-item>
@@ -295,17 +315,9 @@ onMounted(async () => {
           <template #default="{ data }">
             <span class="tree-node">
               <span class="tree-label">{{ data.title }}</span>
-              <span
-                v-if="data.buttons && data.buttons.length"
-                class="tree-buttons"
-                @click.stop
-              >
+              <span v-if="data.buttons && data.buttons.length" class="tree-buttons" @click.stop>
                 <el-checkbox-group v-model="buttonChecked[data.id]" size="small">
-                  <el-checkbox
-                    v-for="btn in data.buttons"
-                    :key="btn.perm"
-                    :value="btn.perm"
-                  >
+                  <el-checkbox v-for="btn in data.buttons" :key="btn.perm" :value="btn.perm">
                     {{ buttonLabel(btn.perm) }}
                   </el-checkbox>
                 </el-checkbox-group>

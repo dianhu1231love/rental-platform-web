@@ -19,8 +19,12 @@ function changeLang(lang) {
     </span>
     <template #dropdown>
       <el-dropdown-menu>
-        <el-dropdown-item command="zh-CN" :disabled="appStore.language === 'zh-CN'">简体中文</el-dropdown-item>
-        <el-dropdown-item command="en-US" :disabled="appStore.language === 'en-US'">English</el-dropdown-item>
+        <el-dropdown-item command="zh-CN" :disabled="appStore.language === 'zh-CN'">
+          简体中文
+        </el-dropdown-item>
+        <el-dropdown-item command="en-US" :disabled="appStore.language === 'en-US'">
+          English
+        </el-dropdown-item>
       </el-dropdown-menu>
     </template>
   </el-dropdown>

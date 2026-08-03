@@ -17,16 +17,12 @@ const loading = ref(false)
 const form = reactive({
   username: getRememberedUsername(),
   password: '',
-  remember: !!getRememberedUsername()
+  remember: !!getRememberedUsername(),
 })
 
 const rules = {
-  username: [
-    { required: true, message: () => t('login.usernamePlaceholder'), trigger: 'blur' }
-  ],
-  password: [
-    { required: true, message: () => t('login.passwordPlaceholder'), trigger: 'blur' }
-  ]
+  username: [{ required: true, message: () => t('login.usernamePlaceholder'), trigger: 'blur' }],
+  password: [{ required: true, message: () => t('login.passwordPlaceholder'), trigger: 'blur' }],
 }
 
 async function handleLogin() {
@@ -70,12 +66,7 @@ async function handleLogin() {
       <el-checkbox v-model="form.remember">{{ $t('login.remember') }}</el-checkbox>
     </el-form-item>
     <el-form-item>
-      <el-button
-        type="primary"
-        class="login-button"
-        :loading="loading"
-        @click="handleLogin"
-      >
+      <el-button type="primary" class="login-button" :loading="loading" @click="handleLogin">
         {{ loading ? $t('login.loggingIn') : $t('login.login') }}
       </el-button>
     </el-form-item>

@@ -2,7 +2,7 @@
 import { formatMoney } from '@/utils/format'
 
 defineProps({
-  stats: { type: Array, default: () => [] }
+  stats: { type: Array, default: () => [] },
 })
 </script>
 
@@ -10,10 +10,7 @@ defineProps({
   <el-row :gutter="16">
     <el-col v-for="item in stats" :key="item.key" :xs="12" :sm="12" :md="8" :lg="4">
       <div class="stat-card">
-        <div
-          class="stat-icon"
-          :style="{ background: `${item.color}1a`, color: item.color }"
-        >
+        <div class="stat-icon" :style="{ background: `${item.color}1a`, color: item.color }">
           <el-icon :size="24"><component :is="item.icon" /></el-icon>
         </div>
         <div class="stat-body">
@@ -27,7 +24,7 @@ defineProps({
             :class="item.trend >= 0 ? 'up' : 'down'"
             :style="{
               background: `${item.color}14`,
-              color: item.trend >= 0 ? item.color : '#ef4444'
+              color: item.trend >= 0 ? item.color : '#ef4444',
             }"
           >
             <el-icon :size="12">
@@ -53,7 +50,9 @@ defineProps({
   border: 1px solid #e6eefb;
   margin-bottom: 16px;
   box-shadow: 0 2px 10px rgba(31, 60, 120, 0.06);
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 
   &:hover {
     transform: translateY(-2px);

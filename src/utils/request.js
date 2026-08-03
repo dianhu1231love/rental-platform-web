@@ -7,7 +7,7 @@ import router from '@/router'
 
 const service = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
-  timeout: 15000
+  timeout: 15000,
 })
 
 if (import.meta.env.VITE_USE_MOCK === 'true') {
@@ -22,7 +22,7 @@ service.interceptors.request.use(
     }
     return config
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 )
 
 function handleUnauthorized() {
@@ -55,7 +55,7 @@ service.interceptors.response.use(
       ElMessage.error(error.message || i18n.global.t('common.networkError'))
     }
     return Promise.reject(error)
-  }
+  },
 )
 
 export default service

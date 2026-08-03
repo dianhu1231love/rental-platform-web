@@ -15,7 +15,7 @@ export const seedMenus = [
     visible: true,
     autoRefresh: false,
     perms: 'dashboard:view',
-    buttons: []
+    buttons: [],
   },
   {
     id: 2,
@@ -30,7 +30,7 @@ export const seedMenus = [
     sort: 2,
     visible: true,
     perms: '',
-    buttons: []
+    buttons: [],
   },
   {
     id: 3,
@@ -50,8 +50,8 @@ export const seedMenus = [
       { label: '新增', perm: 'system:role:add' },
       { label: '编辑', perm: 'system:role:edit' },
       { label: '删除', perm: 'system:role:delete' },
-      { label: '查看', perm: 'system:role:view' }
-    ]
+      { label: '查看', perm: 'system:role:view' },
+    ],
   },
   {
     id: 4,
@@ -71,8 +71,8 @@ export const seedMenus = [
       { label: '新增', perm: 'system:menu:add' },
       { label: '编辑', perm: 'system:menu:edit' },
       { label: '删除', perm: 'system:menu:delete' },
-      { label: '查看', perm: 'system:menu:view' }
-    ]
+      { label: '查看', perm: 'system:menu:view' },
+    ],
   },
   {
     id: 5,
@@ -92,9 +92,9 @@ export const seedMenus = [
       { label: '新增', perm: 'system:tenant:add' },
       { label: '编辑', perm: 'system:tenant:edit' },
       { label: '删除', perm: 'system:tenant:delete' },
-      { label: '查看', perm: 'system:tenant:view' }
-    ]
-  }
+      { label: '查看', perm: 'system:tenant:view' },
+    ],
+  },
 ]
 
 export const seedRoles = [
@@ -106,7 +106,7 @@ export const seedRoles = [
     perms: ['*:*:*'],
     status: 1,
     remark: '拥有系统全部权限',
-    createdAt: '2026-01-01 10:00:00'
+    createdAt: '2026-01-01 10:00:00',
   },
   {
     id: 2,
@@ -116,7 +116,7 @@ export const seedRoles = [
     perms: ['dashboard:view', 'system:role:list', 'system:role:view'],
     status: 1,
     remark: '负责分款、开票等财务业务',
-    createdAt: '2026-01-02 10:00:00'
+    createdAt: '2026-01-02 10:00:00',
   },
   {
     id: 3,
@@ -126,14 +126,14 @@ export const seedRoles = [
     perms: ['dashboard:view', 'system:tenant:list', 'system:tenant:view'],
     status: 1,
     remark: '负责日常运营与租户维护',
-    createdAt: '2026-01-03 10:00:00'
-  }
+    createdAt: '2026-01-03 10:00:00',
+  },
 ]
 
 export const seedUsers = [
   { id: 1, username: 'admin', password: '123456', name: '系统管理员', roleId: 1, avatar: '' },
   { id: 2, username: 'finance', password: '123456', name: '财务专员-小李', roleId: 2, avatar: '' },
-  { id: 3, username: 'operator', password: '123456', name: '运营专员-小王', roleId: 3, avatar: '' }
+  { id: 3, username: 'operator', password: '123456', name: '运营专员-小王', roleId: 3, avatar: '' },
 ]
 
 export const seedTenants = [
@@ -147,7 +147,7 @@ export const seedTenants = [
     expireAt: '2027-06-30',
     status: 1,
     remark: '主营高空作业车租赁',
-    createdAt: '2026-01-10 09:30:00'
+    createdAt: '2026-01-10 09:30:00',
   },
   {
     id: 2,
@@ -159,7 +159,7 @@ export const seedTenants = [
     expireAt: '2026-12-31',
     status: 1,
     remark: '',
-    createdAt: '2026-02-05 14:20:00'
+    createdAt: '2026-02-05 14:20:00',
   },
   {
     id: 3,
@@ -171,7 +171,7 @@ export const seedTenants = [
     expireAt: '2026-09-15',
     status: 1,
     remark: '叉车与铲车为主',
-    createdAt: '2026-02-18 11:00:00'
+    createdAt: '2026-02-18 11:00:00',
   },
   {
     id: 4,
@@ -183,7 +183,7 @@ export const seedTenants = [
     expireAt: '2026-08-20',
     status: 0,
     remark: '试用到期待续费',
-    createdAt: '2026-03-02 16:45:00'
+    createdAt: '2026-03-02 16:45:00',
   },
   {
     id: 5,
@@ -195,7 +195,7 @@ export const seedTenants = [
     expireAt: '2027-03-31',
     status: 1,
     remark: '',
-    createdAt: '2026-03-20 10:10:00'
+    createdAt: '2026-03-20 10:10:00',
   },
   {
     id: 6,
@@ -207,8 +207,8 @@ export const seedTenants = [
     expireAt: '2026-11-30',
     status: 1,
     remark: '',
-    createdAt: '2026-04-12 13:35:00'
-  }
+    createdAt: '2026-04-12 13:35:00',
+  },
 ]
 
 export const seedDashboard = {
@@ -218,12 +218,12 @@ export const seedDashboard = {
     pendingDistribute: { value: 8260000, trend: 5.1 },
     monthInvoicePending: { value: 46, trend: 2.4 },
     monthDistribute: { value: 15230000, trend: 8.4 },
-    monthInvoice: { value: 21960000, trend: 11.2 }
+    monthInvoice: { value: 21960000, trend: 11.2 },
   },
   trend: {
     months: ['2026-02', '2026-03', '2026-04', '2026-05', '2026-06', '2026-07'],
     planned: [1800, 2100, 1950, 2400, 2200, 2600],
-    actual: [1650, 2280, 1880, 2510, 2050, 2430]
+    actual: [1650, 2280, 1880, 2510, 2050, 2430],
   },
   equipment: {
     total: 128,
@@ -237,15 +237,15 @@ export const seedDashboard = {
       { name: '叉车', count: 28 },
       { name: '挖掘机', count: 24 },
       { name: '吊车', count: 18 },
-      { name: '发电机', count: 26 }
-    ]
+      { name: '发电机', count: 26 },
+    ],
   },
   hours: {
     categories: ['高空作业车', '叉车', '挖掘机', '吊车', '发电机'],
     plan: [3260, 2840, 2130, 1560, 1880],
     actual: [3180, 2910, 2210, 1490, 1760],
-    utilization: [92.4, 88.1, 90.6, 85.2, 83.7]
-  }
+    utilization: [92.4, 88.1, 90.6, 85.2, 83.7],
+  },
 }
 
 export const seedTodos = [
@@ -255,7 +255,7 @@ export const seedTodos = [
     title: 'B公司高空作业车租赁合同审批（10台/6个月）',
     applicant: '张伟',
     time: '2026-08-03 09:12',
-    priority: 'high'
+    priority: 'high',
   },
   {
     id: 2,
@@ -263,7 +263,7 @@ export const seedTodos = [
     title: '分款审批：2026-07 分款单 #F20260718',
     applicant: '刘敏',
     time: '2026-08-03 08:40',
-    priority: 'medium'
+    priority: 'medium',
   },
   {
     id: 3,
@@ -271,7 +271,7 @@ export const seedTodos = [
     title: '开票申请：上海XX建筑工程有限公司 增值税专用发票',
     applicant: '陈晨',
     time: '2026-08-02 17:25',
-    priority: 'medium'
+    priority: 'medium',
   },
   {
     id: 4,
@@ -279,7 +279,7 @@ export const seedTodos = [
     title: 'C公司叉车租赁补充协议审批',
     applicant: '张伟',
     time: '2026-08-02 15:03',
-    priority: 'low'
+    priority: 'low',
   },
   {
     id: 5,
@@ -287,6 +287,6 @@ export const seedTodos = [
     title: '分款审批：2026-07 分款单 #F20260721',
     applicant: '刘敏',
     time: '2026-08-02 11:47',
-    priority: 'high'
-  }
+    priority: 'high',
+  },
 ]

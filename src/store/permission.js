@@ -16,8 +16,8 @@ function menuToRoute(menu) {
       hidden: !menu.visible,
       type: menu.type,
       // 开启“点击标签自动刷新”则不缓存页面，每次进入重新加载
-      keepAlive: !(menu.autoRefresh === true)
-    }
+      keepAlive: !(menu.autoRefresh === true),
+    },
   }
   if (menu.type === 'menu' && menu.component) {
     const loader = viewModules[`/src/views/${menu.component}.vue`]
@@ -29,7 +29,7 @@ function menuToRoute(menu) {
 export const usePermissionStore = defineStore('permission', {
   state: () => ({
     menus: [],
-    routes: []
+    routes: [],
   }),
   actions: {
     generateRoutes(menus) {
@@ -49,7 +49,7 @@ export const usePermissionStore = defineStore('permission', {
         path: '/',
         component: Layout,
         redirect: children[0]?.path || '/dashboard',
-        children
+        children,
       }
       this.routes = [rootRoute]
       return this.routes
@@ -57,6 +57,6 @@ export const usePermissionStore = defineStore('permission', {
     reset() {
       this.menus = []
       this.routes = []
-    }
-  }
+    },
+  },
 })

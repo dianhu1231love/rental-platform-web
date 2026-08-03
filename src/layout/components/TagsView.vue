@@ -33,12 +33,12 @@ const dragView = ref(null)
 const dropActive = ref(false)
 
 const isFirst = computed(
-  () => menuView.value && visitedViews.value[0]?.path === menuView.value.path
+  () => menuView.value && visitedViews.value[0]?.path === menuView.value.path,
 )
 const isLast = computed(
   () =>
     menuView.value &&
-    visitedViews.value[visitedViews.value.length - 1]?.path === menuView.value.path
+    visitedViews.value[visitedViews.value.length - 1]?.path === menuView.value.path,
 )
 const onlyOne = computed(() => visitedViews.value.length <= 1)
 const homeMenu = computed(() => isHomeView(menuView.value))
@@ -196,7 +196,7 @@ watch(
     if (route.meta?.hidden) return
     appStore.addVisitedView(route)
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 onBeforeUnmount(() => {
@@ -288,11 +288,7 @@ onBeforeUnmount(() => {
           <el-icon><DArrowRight /></el-icon>
           <span>{{ $t('tagsView.closeRight') }}</span>
         </li>
-        <li
-          class="context-item"
-          :class="{ disabled: onlyOne }"
-          @click="closeOthers(menuView)"
-        >
+        <li class="context-item" :class="{ disabled: onlyOne }" @click="closeOthers(menuView)">
           <el-icon><CircleClose /></el-icon>
           <span>{{ $t('tagsView.closeOthers') }}</span>
         </li>
@@ -441,7 +437,9 @@ onBeforeUnmount(() => {
 
 .context-fade-enter-active,
 .context-fade-leave-active {
-  transition: opacity 0.15s, transform 0.15s;
+  transition:
+    opacity 0.15s,
+    transform 0.15s;
 }
 
 .context-fade-enter-from,

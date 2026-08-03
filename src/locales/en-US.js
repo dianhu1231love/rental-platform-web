@@ -26,14 +26,14 @@ export default {
     backHome: 'Back to Home',
     pageNotFound: 'Sorry, the page you visited does not exist',
     confirmTitle: 'Notice',
-    all: 'All'
+    all: 'All',
   },
   menu: {
     dashboard: 'Dashboard',
     system: 'System Settings',
     role: 'Role Permissions',
     menuManage: 'Menu Settings',
-    tenant: 'Tenant Management'
+    tenant: 'Tenant Management',
   },
   layout: {
     platformName: 'Rental Platform',
@@ -41,7 +41,7 @@ export default {
     documentation: 'Documentation',
     collapse: 'Collapse Menu',
     expand: 'Expand Menu',
-    refresh: 'Refresh'
+    refresh: 'Refresh',
   },
   tagsView: {
     refresh: 'Refresh',
@@ -51,7 +51,7 @@ export default {
     closeOthers: 'Close Others',
     closeAll: 'Close All',
     homePinned: 'Home is pinned and cannot be closed',
-    dropCloseTip: 'Drop here to close tab'
+    dropCloseTip: 'Drop here to close tab',
   },
   login: {
     title: 'Welcome Back',
@@ -70,7 +70,8 @@ export default {
     ssoLogin: 'Sign in with Enterprise SSO',
     ssoRedirecting: 'Redirecting to the identity provider...',
     ssoBack: 'Authentication failed or cancelled, please try again',
-    forgotDesc: 'Enter the phone or email you registered with, we will find your account after verification',
+    forgotDesc:
+      'Enter the phone or email you registered with, we will find your account after verification',
     accountLabel: 'Phone / Email',
     accountPlaceholder: 'Enter registered phone or email',
     code: 'Verification Code',
@@ -90,7 +91,7 @@ export default {
     demoPassword: 'Password for all:',
     captchaSent: 'Code sent (demo code is 123456)',
     loginSuccess: 'Signed in successfully',
-    ssoTicketInvalid: 'SSO ticket verification failed'
+    ssoTicketInvalid: 'SSO ticket verification failed',
   },
   dashboard: {
     title: 'Dashboard',
@@ -126,7 +127,7 @@ export default {
     todoInvoice: 'Invoice',
     todoHandled: 'Handled: {title}',
     unitYuan: 'CNY',
-    unitCount: 'items'
+    unitCount: 'items',
   },
   role: {
     title: 'Role Permissions',
@@ -137,12 +138,13 @@ export default {
     customPermissions: 'Custom Permissions',
     userCount: 'Users',
     assignPermission: 'Assign Permissions',
-    assignTip: 'Check menus and button permissions; changes take effect after the role user signs in again',
+    assignTip:
+      'Check menus and button permissions; changes take effect after the role user signs in again',
     menuPermissions: 'Menu Permissions',
     buttonPermissions: 'Button Permissions',
     namePlaceholder: 'Enter role name',
     codePlaceholder: 'Enter role code',
-    menuTree: 'Permission Tree'
+    menuTree: 'Permission Tree',
   },
   menuManage: {
     title: 'Menu Settings',
@@ -172,7 +174,7 @@ export default {
     autoRefresh: 'Auto refresh on tab click',
     autoRefreshTip:
       'On: reload the page every time its tab is clicked. Off: keep page state and do not reload.',
-    saveSuccess: 'Menu saved, takes effect after next sign-in'
+    saveSuccess: 'Menu saved, takes effect after next sign-in',
   },
   tenant: {
     title: 'Tenant Management',
@@ -192,6 +194,6 @@ export default {
     expireAtPlaceholder: 'Select expiry date',
     planStandard: 'Standard',
     planProfessional: 'Professional',
-    planEnterprise: 'Enterprise'
-  }
+    planEnterprise: 'Enterprise',
+  },
 }
