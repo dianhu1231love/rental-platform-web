@@ -1,3 +1,6 @@
+/**
+ * vue-i18n 初始化：支持简体中文与英文，语言偏好持久化到 localStorage
+ */
 import { createI18n } from 'vue-i18n'
 import zhCN from './zh-CN'
 import enUS from './en-US'

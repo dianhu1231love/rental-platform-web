@@ -1,3 +1,4 @@
+<!-- 密码登录表单 -->
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -5,6 +6,7 @@ import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { useUserStore } from '@/store/user'
 import { getRememberedUsername, setRememberedUsername } from '@/utils/auth'
 import { useI18n } from 'vue-i18n'
+import type { LoginFormModel } from '@/types'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -13,12 +15,6 @@ const userStore = useUserStore()
 
 const formRef = ref<FormInstance>()
 const loading = ref(false)
-
-interface LoginFormModel {
-  username: string
-  password: string
-  remember: boolean
-}
 
 const form = reactive<LoginFormModel>({
   username: getRememberedUsername(),
@@ -31,6 +27,7 @@ const rules: FormRules = {
   password: [{ required: true, message: () => t('login.passwordPlaceholder'), trigger: 'blur' }],
 }
 
+/** 校验表单并登录，成功后跳转回来源页 */
 async function handleLogin(): Promise<void> {
   if (!formRef.value) return
   await formRef.value.validate()

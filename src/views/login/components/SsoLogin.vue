@@ -1,3 +1,4 @@
+<!-- SSO 单点登录面板 -->
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -11,6 +12,7 @@ const router = useRouter()
 const userStore = useUserStore()
 const loading = ref(false)
 
+/** 执行 SSO 登录（支持 URL 携带 ticket 自动登录） */
 async function doSsoLogin(username = 'admin'): Promise<void> {
   loading.value = true
   try {

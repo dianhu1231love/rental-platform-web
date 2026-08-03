@@ -1,3 +1,6 @@
+/**
+ * 英文语言包
+ */
 export default {
   common: {
     confirm: 'Confirm',

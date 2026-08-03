@@ -1,3 +1,4 @@
+<!-- 侧边栏：Logo + 动态菜单（支持折叠） -->
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'

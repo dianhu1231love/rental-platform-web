@@ -1,3 +1,8 @@
+/**
+ * 全局路由守卫
+ * - 未登录跳转登录页
+ * - 首次登录后拉取用户信息并动态注册路由
+ */
 import router from './router'
 import { getToken } from '@/utils/auth'
 import { useUserStore, usePermissionStore } from '@/store'
@@ -18,6 +23,7 @@ router.beforeEach(
     const hasToken = getToken()
 
     if (hasToken) {
+      // 已登录访问登录页时直接回首页
       if (to.path === '/login') {
         next({ path: '/' })
         NProgress.done()
@@ -27,6 +33,7 @@ router.beforeEach(
       const userStore = useUserStore()
       const permissionStore = usePermissionStore()
 
+      // 首次进入：拉取用户信息并生成动态路由
       if (userStore.roles.length === 0) {
         try {
           const userInfo = await userStore.getUserInfo()
@@ -50,6 +57,7 @@ router.beforeEach(
         next()
       }
     } else {
+      // 未登录：白名单直接放行，其余跳转登录页
       if (whiteList.includes(to.path)) {
         next()
       } else {

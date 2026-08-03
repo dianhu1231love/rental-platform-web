@@ -1,5 +1,10 @@
+/**
+ * 路由入口
+ * constantRoutes 为静态路由（登录、404、重定向），业务路由由权限模块动态注册
+ */
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
+/** 静态路由表 */
 export const constantRoutes: RouteRecordRaw[] = [
   {
     path: '/login',
@@ -24,6 +29,7 @@ export const constantRoutes: RouteRecordRaw[] = [
 const router = createRouter({
   history: createWebHistory(),
   routes: constantRoutes,
+  /** 切换路由后回到页面顶部 */
   scrollBehavior: () => ({ top: 0 }),
 })
 

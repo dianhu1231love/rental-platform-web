@@ -1,3 +1,4 @@
+<!-- 菜单设置：菜单树 CRUD、图标选择、点击标签自动刷新开关 -->
 <script setup lang="ts">
 defineOptions({ name: 'MenuManage' })
 
@@ -6,7 +7,8 @@ import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'elem
 import { getMenuList, createMenu, updateMenu, deleteMenu } from '@/api/system'
 import { buildTree, type TreeNode } from '@/utils/tree'
 import { useI18n } from 'vue-i18n'
-import type { Menu, MenuType } from '@/types'
+import { MENU_ICON_OPTIONS } from '@/constants'
+import type { Menu, MenuFormModel } from '@/types'
 
 const { t } = useI18n()
 
@@ -30,30 +32,6 @@ const filteredMenus = computed(() => {
   return filterRec(menus.value)
 })
 
-const iconOptions = [
-  'HomeFilled',
-  'Odometer',
-  'Setting',
-  'User',
-  'Menu',
-  'OfficeBuilding',
-  'DataAnalysis',
-  'Money',
-  'Coin',
-  'Wallet',
-  'Document',
-  'Tickets',
-  'CreditCard',
-  'TrendCharts',
-  'Files',
-  'Grid',
-  'Histogram',
-  'Monitor',
-  'List',
-  'Operation',
-  'Tools',
-]
-
 const defaultButtons = ['add', 'edit', 'delete', 'view']
 
 const dialogVisible = ref(false)
@@ -61,21 +39,6 @@ const dialogMode = ref('create')
 const saving = ref(false)
 const refreshingId = ref<number | null>(null)
 const formRef = ref<FormInstance>()
-
-interface MenuFormModel {
-  id: number | null
-  parentId: number
-  type: MenuType
-  name: string
-  path: string
-  component: string
-  perms: string
-  icon: string
-  sort: number
-  visible: boolean
-  autoRefresh: boolean
-  buttons: string[]
-}
 
 const form = reactive<MenuFormModel>({
   id: null,
@@ -125,6 +88,7 @@ const formRules: FormRules = {
   ],
 }
 
+/** 加载菜单并构建树形结构 */
 async function loadMenus(): Promise<void> {
   loading.value = true
   try {
@@ -135,6 +99,7 @@ async function loadMenus(): Promise<void> {
   }
 }
 
+/** 生成上级菜单下拉选项（含缩进层级） */
 function parentOptions(): Array<{ id: number; title: string; depth: number }> {
   const options: Array<{ id: number; title: string; depth: number }> = [
     { id: 0, title: t('menuManage.root'), depth: 0 },
@@ -151,6 +116,7 @@ function parentOptions(): Array<{ id: number; title: string; depth: number }> {
   return options
 }
 
+/** 打开新增弹窗 */
 function openCreate(parentId = 0): void {
   dialogMode.value = 'create'
   Object.assign(form, {
@@ -170,6 +136,7 @@ function openCreate(parentId = 0): void {
   dialogVisible.value = true
 }
 
+/** 打开编辑弹窗并回显表单 */
 function openEdit(row: TreeNode<Menu>): void {
   dialogMode.value = 'edit'
   Object.assign(form, {
@@ -189,6 +156,7 @@ function openEdit(row: TreeNode<Menu>): void {
   dialogVisible.value = true
 }
 
+/** 提取按钮权限的基础前缀（去掉末位的 list/操作后缀） */
 function permBase(): string {
   if (!form.perms) return ''
   const parts = form.perms.split(':')
@@ -196,6 +164,7 @@ function permBase(): string {
   return parts.join(':')
 }
 
+/** 菜单类型切换：按钮类型清空路由/图标/按钮权限字段 */
 function handleTypeChange(): void {
   if (form.type === 'button') {
     form.path = ''
@@ -205,6 +174,7 @@ function handleTypeChange(): void {
   }
 }
 
+/** 保存菜单：构建 payload 并新增/更新 */
 async function handleSave(): Promise<void> {
   if (!formRef.value) return
   await formRef.value.validate()
@@ -244,6 +214,7 @@ async function handleSave(): Promise<void> {
   }
 }
 
+/** 删除菜单（含确认与子菜单校验） */
 async function handleDelete(row: TreeNode<Menu>): Promise<void> {
   try {
     await ElMessageBox.confirm(t('common.deleteConfirm'), t('common.confirmTitle'), {
@@ -259,6 +230,7 @@ async function handleDelete(row: TreeNode<Menu>): Promise<void> {
   }
 }
 
+/** 内联切换“点击标签自动刷新”，即时保存 */
 async function handleAutoRefreshChange(row: TreeNode<Menu>, value: boolean): Promise<void> {
   refreshingId.value = row.id
   const prev = row.autoRefresh
@@ -275,6 +247,7 @@ async function handleAutoRefreshChange(row: TreeNode<Menu>, value: boolean): Pro
   }
 }
 
+/** 菜单类型标签样式 */
 function typeTag(row: TreeNode<Menu>): { label: string; type: 'warning' | 'primary' | 'info' } {
   if (row.type === 'directory') return { label: t('menuManage.typeDirectory'), type: 'warning' }
   if (row.type === 'menu') return { label: t('menuManage.typeMenu'), type: 'primary' }
@@ -449,7 +422,7 @@ onMounted(loadMenus)
 
         <el-form-item v-if="form.type !== 'button'" :label="$t('menuManage.icon')">
           <el-select v-model="form.icon" style="width: 100%" clearable filterable>
-            <el-option v-for="icon in iconOptions" :key="icon" :label="icon" :value="icon">
+            <el-option v-for="icon in MENU_ICON_OPTIONS" :key="icon" :label="icon" :value="icon">
               <span class="icon-option">
                 <el-icon><component :is="icon" /></el-icon>
                 <span>{{ icon }}</span>

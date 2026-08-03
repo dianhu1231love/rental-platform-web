@@ -1,3 +1,4 @@
+<!-- 登录页：左侧品牌区 + 右侧登录面板（密码/SSO/找回） -->
 <script setup lang="ts">
 import { ref } from 'vue'
 import PasswordLogin from './components/PasswordLogin.vue'

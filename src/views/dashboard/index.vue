@@ -1,3 +1,4 @@
+<!-- 首页数据看板：指标卡片、设备看板、回款趋势、工时统计、待办 -->
 <script setup lang="ts">
 defineOptions({ name: 'Dashboard' })
 
@@ -9,6 +10,7 @@ import {
   getHoursStat,
   getTodos,
 } from '@/api/dashboard'
+import { STAT_CARD_META } from '@/constants'
 import { useUserStore } from '@/store/user'
 import type {
   EquipmentBoard as EquipmentBoardData,
@@ -34,6 +36,7 @@ const todos = ref<TodoItem[]>([])
 
 const errorMessage = ref('')
 
+/** 并行加载看板全部数据 */
 async function loadAll(): Promise<void> {
   loading.value = true
   errorMessage.value = ''
@@ -46,56 +49,11 @@ async function loadAll(): Promise<void> {
       getTodos(),
     ])
     const s = statsRes.data
-    stats.value = [
-      {
-        key: 'totalRental',
-        icon: 'Coin',
-        color: '#409eff',
-        value: s.totalRental.value,
-        unit: 'dashboard.unitYuan',
-        trend: s.totalRental.trend,
-      },
-      {
-        key: 'receivables',
-        icon: 'Wallet',
-        color: '#e6a23c',
-        value: s.receivables.value,
-        unit: 'dashboard.unitYuan',
-        trend: s.receivables.trend,
-      },
-      {
-        key: 'pendingDistribute',
-        icon: 'Money',
-        color: '#67c23a',
-        value: s.pendingDistribute.value,
-        unit: 'dashboard.unitYuan',
-        trend: s.pendingDistribute.trend,
-      },
-      {
-        key: 'monthInvoicePending',
-        icon: 'Document',
-        color: '#f56c6c',
-        value: s.monthInvoicePending.value,
-        unit: 'dashboard.unitCount',
-        trend: s.monthInvoicePending.trend,
-      },
-      {
-        key: 'monthDistribute',
-        icon: 'CreditCard',
-        color: '#9c27b0',
-        value: s.monthDistribute.value,
-        unit: 'dashboard.unitYuan',
-        trend: s.monthDistribute.trend,
-      },
-      {
-        key: 'monthInvoice',
-        icon: 'Tickets',
-        color: '#00bcd4',
-        value: s.monthInvoice.value,
-        unit: 'dashboard.unitYuan',
-        trend: s.monthInvoice.trend,
-      },
-    ]
+    stats.value = STAT_CARD_META.map((meta) => ({
+      ...meta,
+      value: s[meta.key].value,
+      trend: s[meta.key].trend,
+    }))
     equipment.value = equipmentRes.data
     trend.value = trendRes.data
     hours.value = hoursRes.data
@@ -107,6 +65,7 @@ async function loadAll(): Promise<void> {
   }
 }
 
+/** 待办处理完成后从列表移除 */
 function handleTodoHandled(id: number): void {
   todos.value = todos.value.filter((t) => t.id !== id)
 }

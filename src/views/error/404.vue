@@ -1,3 +1,4 @@
+<!-- 404 错误页 -->
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 

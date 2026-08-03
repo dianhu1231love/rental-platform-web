@@ -1,3 +1,4 @@
+<!-- 刷新中转页：先移除页面缓存再跳回目标路由，实现真正刷新 -->
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/store/app'

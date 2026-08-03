@@ -1,3 +1,4 @@
+<!-- 权限设置：角色 CRUD + 菜单/按钮权限分配 -->
 <script setup lang="ts">
 defineOptions({ name: 'RoleManage' })
 
@@ -6,7 +7,7 @@ import { ElMessage, ElMessageBox, ElTree, type FormInstance, type FormRules } fr
 import { getRoleList, createRole, updateRole, deleteRole, getMenuList } from '@/api/system'
 import { buildTree, type TreeNode } from '@/utils/tree'
 import { useI18n } from 'vue-i18n'
-import type { Menu, Role } from '@/types'
+import type { Menu, Role, RoleFormModel } from '@/types'
 
 const { t } = useI18n()
 
@@ -32,16 +33,6 @@ const buttonChecked = reactive<Record<string, string[]>>({})
 
 const roleFormRef = ref<FormInstance>()
 
-interface RoleFormModel {
-  id: number | null
-  name: string
-  code: string
-  status: number
-  remark: string
-  menuIds: number[]
-  perms: string[]
-}
-
 const roleForm = reactive<RoleFormModel>({
   id: null,
   name: '',
@@ -57,11 +48,13 @@ const roleRules: FormRules = {
   code: [{ required: true, message: () => t('role.codePlaceholder'), trigger: 'blur' }],
 }
 
+/** 按钮权限标识 → 中文文案（取冒号后一段） */
 function buttonLabel(perm: string): string {
   const suffix = perm.split(':').pop()
   return t(`common.${suffix}`) || perm
 }
 
+/** 加载角色列表 */
 async function loadRoles(): Promise<void> {
   loading.value = true
   try {
@@ -72,11 +65,13 @@ async function loadRoles(): Promise<void> {
   }
 }
 
+/** 加载菜单树（用于权限分配） */
 async function loadMenus(): Promise<void> {
   const res = await getMenuList()
   menuTree.value = buildTree(res.data)
 }
 
+/** 打开新增角色抽屉 */
 function openCreate(): void {
   drawerMode.value = 'create'
   Object.assign(roleForm, {
@@ -92,6 +87,7 @@ function openCreate(): void {
   drawerVisible.value = true
 }
 
+/** 打开编辑抽屉并回显权限 */
 function openEdit(role: Role): void {
   drawerMode.value = 'edit'
   Object.assign(roleForm, {
@@ -122,6 +118,7 @@ function openEdit(role: Role): void {
   drawerVisible.value = true
 }
 
+/** 收集权限树勾选的菜单 id（含半选父级） */
 function collectTreeIds(): number[] {
   if (!treeRef.value) return []
   const checked = treeRef.value.getCheckedKeys().map(Number)
@@ -129,6 +126,7 @@ function collectTreeIds(): number[] {
   return [...new Set([...checked, ...half])]
 }
 
+/** 汇总勾选菜单与按钮生成的权限标识 */
 function collectPerms(): string[] {
   const perms = new Set<string>()
   const walk = (nodes: TreeNode<Menu>[]): void => {
@@ -145,6 +143,7 @@ function collectPerms(): string[] {
   return [...perms]
 }
 
+/** 保存角色：管理员保留通配权限，其余按勾选生成 */
 async function handleSave(): Promise<void> {
   if (!roleFormRef.value) return
   await roleFormRef.value.validate()
@@ -170,6 +169,7 @@ async function handleSave(): Promise<void> {
   }
 }
 
+/** 启停角色（失败时回滚开关状态） */
 async function handleToggleStatus(role: Role): Promise<void> {
   try {
     await updateRole(role.id, { status: role.status })
@@ -179,6 +179,7 @@ async function handleToggleStatus(role: Role): Promise<void> {
   }
 }
 
+/** 删除角色（内置管理员不可删除） */
 async function handleDelete(role: Role): Promise<void> {
   if (role.id === 1) {
     ElMessage.warning('内置管理员角色不可删除')

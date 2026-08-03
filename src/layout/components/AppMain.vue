@@ -1,3 +1,4 @@
+<!-- 内容区：路由视图 + keep-alive 页面缓存 + 切换过渡 -->
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import { useAppStore } from '@/store/app'

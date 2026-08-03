@@ -1,9 +1,11 @@
+<!-- 找回账户：手机号/邮箱 + 验证码校验 -->
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { forgotAccount } from '@/api/auth'
 import { isValidAccount } from '@/utils/validate'
 import { useI18n } from 'vue-i18n'
+import type { ForgotFormModel } from '@/types'
 
 const { t } = useI18n()
 const formRef = ref<FormInstance>()
@@ -11,11 +13,6 @@ const loading = ref(false)
 const countdown = ref(0)
 const resultVisible = ref(false)
 const matchedAccounts = ref<{ username: string; name: string }[]>([])
-
-interface ForgotFormModel {
-  account: string
-  code: string
-}
 
 const form = reactive<ForgotFormModel>({
   account: '',
@@ -40,6 +37,7 @@ const codeButtonText = computed(() =>
   countdown.value > 0 ? `${countdown.value}${t('login.resend')}` : t('login.getCode'),
 )
 
+/** 启动 60 秒验证码倒计时 */
 function startCountdown(): void {
   countdown.value = 60
   const timer: ReturnType<typeof setInterval> = setInterval(() => {
@@ -48,6 +46,7 @@ function startCountdown(): void {
   }, 1000)
 }
 
+/** 获取验证码（演示环境固定为 123456） */
 function handleGetCode(): void {
   if (!form.account || !isValidAccount(form.account)) {
     ElMessage.warning(t('login.accountPlaceholder'))
@@ -57,6 +56,7 @@ function handleGetCode(): void {
   startCountdown()
 }
 
+/** 校验并查找匹配账户 */
 async function handleFind(): Promise<void> {
   if (!formRef.value) return
   await formRef.value.validate()

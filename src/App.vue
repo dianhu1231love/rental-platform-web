@@ -1,3 +1,4 @@
+<!-- 应用根组件：配置 Element Plus 全局语言 -->
 <script setup lang="ts">
 import { computed } from 'vue'
 import zhCn from 'element-plus/es/locale/lang/zh-cn'

@@ -1,3 +1,4 @@
+<!-- 租户管理：分页搜索、CRUD、启停用 -->
 <script setup lang="ts">
 defineOptions({ name: 'TenantManage' })
 
@@ -12,7 +13,7 @@ import {
 } from '@/api/system'
 import { isValidPhone } from '@/utils/validate'
 import { useI18n } from 'vue-i18n'
-import type { Tenant } from '@/types'
+import type { Tenant, TenantFormModel } from '@/types'
 
 const { t } = useI18n()
 
@@ -36,18 +37,6 @@ const query = reactive<{
 const dialogVisible = ref(false)
 const dialogMode = ref('create')
 const formRef = ref<FormInstance>()
-
-interface TenantFormModel {
-  id: number | null
-  name: string
-  code: string
-  contact: string
-  phone: string
-  plan: string
-  expireAt: string
-  remark: string
-  status: number
-}
 
 const form = reactive<TenantFormModel>({
   id: null,
@@ -79,6 +68,7 @@ const formRules: FormRules = {
   expireAt: [{ required: true, message: () => t('tenant.expireAtPlaceholder'), trigger: 'change' }],
 }
 
+/** 按查询条件加载租户列表 */
 async function loadList(): Promise<void> {
   loading.value = true
   try {
@@ -90,11 +80,13 @@ async function loadList(): Promise<void> {
   }
 }
 
+/** 搜索：回到第一页并刷新 */
 function handleSearch(): void {
   query.page = 1
   loadList()
 }
 
+/** 重置搜索条件 */
 function handleReset(): void {
   query.keyword = ''
   query.status = ''
@@ -102,6 +94,7 @@ function handleReset(): void {
   loadList()
 }
 
+/** 打开新增弹窗 */
 function openCreate(): void {
   dialogMode.value = 'create'
   Object.assign(form, {
@@ -118,6 +111,7 @@ function openCreate(): void {
   dialogVisible.value = true
 }
 
+/** 打开编辑弹窗并回显 */
 function openEdit(row: Tenant): void {
   dialogMode.value = 'edit'
   Object.assign(form, {
@@ -134,6 +128,7 @@ function openEdit(row: Tenant): void {
   dialogVisible.value = true
 }
 
+/** 保存租户（新增/更新） */
 async function handleSave(): Promise<void> {
   if (!formRef.value) return
   await formRef.value.validate()
@@ -161,6 +156,7 @@ async function handleSave(): Promise<void> {
   }
 }
 
+/** 启停租户（失败时回滚开关状态） */
 async function handleToggleStatus(row: Tenant): Promise<void> {
   try {
     await updateTenantStatus(row.id, row.status)
@@ -170,6 +166,7 @@ async function handleToggleStatus(row: Tenant): Promise<void> {
   }
 }
 
+/** 删除租户（含确认） */
 async function handleDelete(row: Tenant): Promise<void> {
   try {
     await ElMessageBox.confirm(t('common.deleteConfirm'), t('common.confirmTitle'), {
@@ -185,6 +182,7 @@ async function handleDelete(row: Tenant): Promise<void> {
   }
 }
 
+/** 套餐名称 → 标签颜色 */
 function planTag(plan: string): 'danger' | 'warning' | 'info' {
   if (plan === '企业版') return 'danger'
   if (plan === '专业版') return 'warning'

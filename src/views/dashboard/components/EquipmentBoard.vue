@@ -1,3 +1,4 @@
+<!-- 设备看板：设备统计 + 状态分布环形图 -->
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { EChartsOption } from 'echarts'

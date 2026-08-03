@@ -1,3 +1,4 @@
+<!-- 设备工时统计：计划/实际工时 + 利用率 -->
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { EChartsOption } from 'echarts'

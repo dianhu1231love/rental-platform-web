@@ -1,3 +1,4 @@
+<!-- 六大核心指标卡片 -->
 <script setup lang="ts">
 import { formatMoney } from '@/utils/format'
 import type { StatCard } from '@/types'

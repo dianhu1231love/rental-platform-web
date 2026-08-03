@@ -1,3 +1,8 @@
+/**
+ * Mock 数据适配器
+ * 在无后端时模拟 HTTP 接口：数据持久化在浏览器 localStorage，
+ * 首次访问使用 seed 种子数据，登录态通过 mock_ 前缀 Token 模拟
+ */
 import type { AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import {
   seedDashboard,
@@ -12,6 +17,7 @@ import type { Menu, Role, Tenant, TodoItem } from '@/types'
 
 const PREFIX = '/api'
 
+/** localStorage 存储键名 */
 const KEYS = {
   menus: 'rp_mock_menus',
   roles: 'rp_mock_roles',
@@ -20,6 +26,7 @@ const KEYS = {
   todos: 'rp_mock_todos',
 }
 
+/** 读取 localStorage，不存在或损坏时回退到种子数据 */
 function load<T>(key: string, seed: T): T {
   try {
     const raw = localStorage.getItem(key)
@@ -29,10 +36,12 @@ function load<T>(key: string, seed: T): T {
   }
 }
 
+/** 写入 localStorage */
 function save(key: string, value: unknown): void {
   localStorage.setItem(key, JSON.stringify(value))
 }
 
+/** 模拟数据库：读写时即时持久化 */
 interface MockDb {
   menus: Menu[]
   roles: Role[]
@@ -97,16 +106,19 @@ interface MockRoute {
   ) => MockResult | Promise<MockResult>
 }
 
+/** 生成模拟 Token：mock_用户名_时间戳 */
 function createToken(user: SeedUser): string {
   return `mock_${user.username}_${Date.now()}`
 }
 
+/** 从 Token 中解析用户名 */
 function parseToken(token: string): string | null {
   if (!token || !token.startsWith('mock_')) return null
   const parts = token.split('_')
   return parts.length >= 2 ? parts[1] : null
 }
 
+/** 从请求头中解析当前登录用户 */
 function currentUser(config: MockConfig): SeedUser | null {
   const header = config.headers?.Authorization
   const token = String(header ?? '').replace('Bearer ', '')
@@ -117,6 +129,7 @@ function currentUser(config: MockConfig): SeedUser | null {
 
 type MenuNode = Menu & { children: MenuNode[] }
 
+/** 将扁平菜单列表构建为树 */
 function buildTree(list: Menu[]): MenuNode[] {
   const map = new Map<number, MenuNode>()
   list.forEach((m) => map.set(m.id, { ...m, children: [] }))
@@ -133,6 +146,7 @@ function buildTree(list: Menu[]): MenuNode[] {
   return roots
 }
 
+/** 按角色可见菜单 id 裁剪菜单树（目录下无可见子项时剔除） */
 function pruneTree(nodes: MenuNode[], ids: number[]): MenuNode[] {
   const result: MenuNode[] = []
   for (const node of nodes) {
@@ -145,12 +159,14 @@ function pruneTree(nodes: MenuNode[], ids: number[]): MenuNode[] {
   return result
 }
 
+/** 汇总角色权限：管理员返回通配权限 */
 function collectPerms(role: Role): string[] {
   if (role.perms.includes('*:*:*')) return ['*:*:*']
   // 非管理员角色：权限以角色上保存的权限集为准（菜单控制可见性，权限控制按钮操作）
   return role.perms || []
 }
 
+/** 获取角色可见的菜单树 */
 function userMenus(role: Role): MenuNode[] {
   return pruneTree(buildTree(db.menus), role.menuIds)
 }
@@ -163,18 +179,22 @@ function fail(code: number, message: string): MockResult {
   return { code, data: null, message }
 }
 
+/** 模拟网络延迟，让交互更接近真实接口 */
 function delay(): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, 150 + Math.random() * 250))
 }
 
+/** 生成自增 id */
 function nextId(list: Array<{ id: number }>): number {
   return list.length ? Math.max(...list.map((i) => i.id)) + 1 : 1
 }
 
+/** 当前时间格式化（YYYY-MM-DD HH:mm:ss） */
 function formatNow(): string {
   return new Date().toISOString().slice(0, 19).replace('T', ' ')
 }
 
+/** 接口路由表：按 method + pattern 匹配请求 */
 const routes: MockRoute[] = [
   {
     method: 'post',

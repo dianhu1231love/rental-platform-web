@@ -1,3 +1,4 @@
+<!-- 图表封装组件：初始化/销毁 ECharts 实例，支持自适应与数据更新 -->
 <script setup lang="ts">
 import * as echarts from 'echarts'
 import type { EChartsOption } from 'echarts'

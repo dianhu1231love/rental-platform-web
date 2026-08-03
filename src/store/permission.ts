@@ -1,3 +1,7 @@
+/**
+ * 权限状态：菜单树与动态路由
+ * 登录后根据后端菜单数据生成路由并注册到 vue-router
+ */
 import { defineStore } from 'pinia'
 import type { RouteRecordRaw } from 'vue-router'
 import Layout from '@/layout/index.vue'
@@ -5,6 +9,7 @@ import type { Menu } from '@/types'
 
 const viewModules = import.meta.glob('/src/views/**/*.vue')
 
+/** 将后端菜单节点转换为 vue-router 路由记录 */
 function menuToRoute(menu: Menu): RouteRecordRaw {
   const route = {
     path: menu.path,
@@ -35,6 +40,7 @@ export const usePermissionStore = defineStore('permission', {
     routes: [] as RouteRecordRaw[],
   }),
   actions: {
+    /** 根据菜单列表生成动态路由（含缓存标记 keepAlive） */
     generateRoutes(menus: Menu[]): RouteRecordRaw[] {
       this.menus = menus || []
       const children: RouteRecordRaw[] = []
@@ -57,6 +63,7 @@ export const usePermissionStore = defineStore('permission', {
       this.routes = [rootRoute]
       return this.routes
     },
+    /** 清空菜单与路由（登出时调用） */
     reset(): void {
       this.menus = []
       this.routes = []

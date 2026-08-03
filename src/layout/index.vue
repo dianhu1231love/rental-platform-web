@@ -1,3 +1,4 @@
+<!-- 主布局：侧边栏 + 顶栏/标签页 + 内容区 -->
 <script setup lang="ts">
 import { useAppStore } from '@/store/app'
 import settings from '@/settings'

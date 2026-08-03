@@ -1,3 +1,4 @@
+<!-- 近六个月计划/实际回款对比柱状图 -->
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { EChartsOption } from 'echarts'

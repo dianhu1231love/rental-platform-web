@@ -1,3 +1,11 @@
+/**
+ * 统一的 Axios 请求封装
+ * - 自动携带 Token
+ * - 统一处理响应码与错误提示
+ * - 401 自动登出并跳转登录页
+ * - 拦截器将响应解包为 { code, data, message }，因此泛型返回类型为 ApiResponse<T>
+ */
+
 import axios, { type AxiosError, type AxiosRequestConfig, type AxiosResponse } from 'axios'
 import { ElMessage } from 'element-plus'
 import { getToken, removeToken } from './auth'
@@ -43,6 +51,7 @@ service.interceptors.request.use(
   (error: AxiosError) => Promise.reject(error),
 )
 
+/** 登录态失效：清除本地凭证并跳转登录页 */
 function handleUnauthorized(): void {
   removeToken()
   import('../store').then(({ useUserStore }) => {

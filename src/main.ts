@@ -1,3 +1,7 @@
+/**
+ * 应用入口：创建 Vue 实例并挂载全局插件
+ * Element Plus 全量引入 + 全局图标注册
+ */
 import { createApp } from 'vue'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'

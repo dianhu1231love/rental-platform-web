@@ -1,3 +1,6 @@
+/**
+ * 简体中文语言包
+ */
 export default {
   common: {
     confirm: '确定',

@@ -1,3 +1,4 @@
+<!-- 语言切换下拉 -->
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/store/app'

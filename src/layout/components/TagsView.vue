@@ -1,3 +1,4 @@
+<!-- 多标签页：拖拽排序、右键菜单、拖到顶部关闭、首页固定 -->
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'

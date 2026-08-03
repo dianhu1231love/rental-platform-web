@@ -1,3 +1,7 @@
+/**
+ * Mock 种子数据
+ * 首次运行时写入 localStorage，之后系统内编辑会持久化保存
+ */
 import type {
   DashboardStats,
   EquipmentBoard,
@@ -9,6 +13,7 @@ import type {
   TodoItem,
 } from '@/types'
 
+/** 演示用户（phone 可选，用于找回账户演示） */
 export interface SeedUser {
   id: number
   username: string

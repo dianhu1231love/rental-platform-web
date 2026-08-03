@@ -1,5 +1,16 @@
+/**
+ * 树结构工具
+ */
+
+/** 树节点：在原数据基础上附加 children 字段 */
 export type TreeNode<T> = T & { children: TreeNode<T>[] }
 
+/**
+ * 将扁平的父子列表构建为树
+ * @param list 含 id / parentId / 可选 sort 的扁平数据
+ * @param parentId 根节点所属的父级 id
+ * @returns 按 sort 排序后的树形结构
+ */
 export function buildTree<T extends { id: number; parentId: number; sort?: number }>(
   list: T[],
   parentId = 0,

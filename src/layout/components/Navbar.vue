@@ -1,3 +1,4 @@
+<!-- 顶栏：折叠按钮、面包屑、用户下拉菜单 -->
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { ElMessageBox, ElMessage } from 'element-plus'

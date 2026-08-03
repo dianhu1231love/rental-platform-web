@@ -1,9 +1,11 @@
+<!-- 待办事项列表：支持通过/驳回 -->
 <script setup lang="ts">
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { handleTodo } from '@/api/dashboard'
 import { useI18n } from 'vue-i18n'
-import type { TodoItem, TodoType } from '@/types'
+import { TODO_PRIORITY_COLORS, TODO_TYPE_MAP } from '@/constants'
+import type { TodoItem } from '@/types'
 
 defineProps<{ todos: TodoItem[] }>()
 
@@ -11,18 +13,7 @@ const emit = defineEmits<{ handled: [id: number] }>()
 const { t } = useI18n()
 const loadingId = ref<number | null>(null)
 
-const typeMap: Record<TodoType, { labelKey: string; type: 'primary' | 'warning' | 'success' }> = {
-  contract: { labelKey: 'dashboard.todoContract', type: 'primary' },
-  distribute: { labelKey: 'dashboard.todoDistribute', type: 'warning' },
-  invoice: { labelKey: 'dashboard.todoInvoice', type: 'success' },
-}
-
-const priorityMap: Record<string, string> = {
-  high: '#f56c6c',
-  medium: '#e6a23c',
-  low: '#67c23a',
-}
-
+/** 处理待办（通过/驳回），成功后通知父组件移除 */
 async function handle(todo: TodoItem, action: 'approve' | 'reject'): Promise<void> {
   loadingId.value = todo.id
   try {
@@ -40,15 +31,15 @@ async function handle(todo: TodoItem, action: 'approve' | 'reject'): Promise<voi
     <div v-for="todo in todos" :key="todo.id" class="todo-item">
       <div class="todo-main">
         <div class="todo-head">
-          <el-tag :type="typeMap[todo.type]?.type || 'info'" size="small">
-            {{ $t(typeMap[todo.type]?.labelKey || '') }}
+          <el-tag :type="TODO_TYPE_MAP[todo.type]?.type || 'info'" size="small">
+            {{ $t(TODO_TYPE_MAP[todo.type]?.labelKey || '') }}
           </el-tag>
           <span class="todo-time">{{ todo.time }}</span>
         </div>
         <p class="todo-title" :title="todo.title">{{ todo.title }}</p>
         <div class="todo-meta">
           <span class="todo-applicant">{{ todo.applicant }}</span>
-          <span class="priority-dot" :style="{ background: priorityMap[todo.priority] }" />
+          <span class="priority-dot" :style="{ background: TODO_PRIORITY_COLORS[todo.priority] }" />
         </div>
       </div>
       <div class="todo-actions">

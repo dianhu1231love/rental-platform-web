@@ -1,3 +1,4 @@
+<!-- 侧边菜单项：递归渲染目录/菜单 -->
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
