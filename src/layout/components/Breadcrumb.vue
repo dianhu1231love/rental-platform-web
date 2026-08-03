@@ -31,12 +31,12 @@ function itemLabel(meta) {
   font-size: 14px;
 
   :deep(.el-breadcrumb__separator) {
-    color: rgba(255, 255, 255, 0.55);
+    color: rgb(255 255 255 / 55%);
   }
 
   :deep(.el-breadcrumb__inner),
   :deep(.el-breadcrumb__inner a) {
-    color: rgba(255, 255, 255, 0.85);
+    color: rgb(255 255 255 / 85%);
     font-weight: 400;
 
     &:hover {

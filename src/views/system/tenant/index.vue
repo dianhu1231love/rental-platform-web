@@ -197,13 +197,13 @@ onMounted(loadList)
           </el-button>
           <el-button @click="handleReset">{{ $t('common.reset') }}</el-button>
         </div>
-        <el-button type="primary" v-permission="['system:tenant:add']" @click="openCreate">
+        <el-button v-permission="['system:tenant:add']" type="primary" @click="openCreate">
           <el-icon><Plus /></el-icon>
           {{ $t('tenant.add') }}
         </el-button>
       </div>
 
-      <el-table :data="list" v-loading="loading" border stripe>
+      <el-table v-loading="loading" :data="list" border stripe>
         <el-table-column type="index" label="#" width="55" align="center" />
         <el-table-column
           :label="$t('tenant.name')"
@@ -229,9 +229,9 @@ onMounted(loadList)
           <template #default="{ row }">
             <el-switch
               v-model="row.status"
+              v-permission="['system:tenant:edit']"
               :active-value="1"
               :inactive-value="0"
-              v-permission="['system:tenant:edit']"
               @change="handleToggleStatus(row)"
             />
           </template>
@@ -246,19 +246,19 @@ onMounted(loadList)
         <el-table-column :label="$t('common.action')" width="140" fixed="right">
           <template #default="{ row }">
             <el-button
+              v-permission="['system:tenant:edit']"
               size="small"
               type="primary"
               link
-              v-permission="['system:tenant:edit']"
               @click="openEdit(row)"
             >
               {{ $t('common.edit') }}
             </el-button>
             <el-button
+              v-permission="['system:tenant:delete']"
               size="small"
               type="danger"
               link
-              v-permission="['system:tenant:delete']"
               @click="handleDelete(row)"
             >
               {{ $t('common.delete') }}

@@ -21,11 +21,13 @@ const router = useRouter()
   justify-content: center;
   background: #f6f9fd;
 }
+
 .code {
   font-size: 96px;
   font-weight: 700;
   color: #2f7bfe;
 }
+
 .desc {
   margin: 12px 0 24px;
   color: #909399;

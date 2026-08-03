@@ -4,7 +4,7 @@ import { ElMessage } from 'element-plus'
 import { handleTodo } from '@/api/dashboard'
 import { useI18n } from 'vue-i18n'
 
-const props = defineProps({
+defineProps({
   todos: { type: Array, default: () => [] },
 })
 

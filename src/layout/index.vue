@@ -64,9 +64,11 @@ const appStore = useAppStore()
     .sidebar-container {
       width: $sidebar-collapsed-width;
     }
+
     .main-container {
       margin-left: $sidebar-collapsed-width;
     }
+
     .fixed-header {
       left: $sidebar-collapsed-width;
     }

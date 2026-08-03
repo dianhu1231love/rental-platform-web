@@ -43,12 +43,13 @@ a {
 
 .page-card {
   border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(31, 60, 120, 0.06);
+  box-shadow: 0 2px 10px rgb(31 60 120 / 6%);
 }
 
 /* Element Plus 卡片 */
 .el-card {
   --el-card-border-color: #e6eefb;
+
   border-radius: 10px;
 }
 
@@ -60,6 +61,7 @@ a {
   --el-table-row-hover-bg-color: #{$table-hover-bg};
   --el-table-bg-color: #fff;
   --el-table-tr-bg-color: #fff;
+
   font-size: 15px;
 
   th.el-table__cell {
@@ -85,7 +87,7 @@ a {
 .el-menu--popup {
   background-color: $menu-bg;
   border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(31, 60, 120, 0.12);
+  box-shadow: 0 8px 24px rgb(31 60 120 / 12%);
 
   .el-menu-item,
   .el-sub-menu__title {
@@ -120,10 +122,12 @@ a {
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #b8cbe6;
   border-radius: 3px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }

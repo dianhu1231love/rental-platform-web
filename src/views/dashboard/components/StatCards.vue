@@ -49,14 +49,14 @@ defineProps({
   background: #fff;
   border: 1px solid #e6eefb;
   margin-bottom: 16px;
-  box-shadow: 0 2px 10px rgba(31, 60, 120, 0.06);
+  box-shadow: 0 2px 10px rgb(31 60 120 / 6%);
   transition:
     transform 0.2s,
     box-shadow 0.2s;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(31, 60, 120, 0.12);
+    box-shadow: 0 6px 16px rgb(31 60 120 / 12%);
   }
 }
 

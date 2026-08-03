@@ -115,9 +115,11 @@ const pieOption = computed(() => ({
     &.renting {
       color: #67c23a;
     }
+
     &.idle {
       color: #909399;
     }
+
     &.maintenance {
       color: #f56c6c;
     }

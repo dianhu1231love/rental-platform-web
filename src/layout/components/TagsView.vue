@@ -336,12 +336,12 @@ onBeforeUnmount(() => {
     color: #fff;
     background: linear-gradient(90deg, #4b9bff 0%, #2f7bfe 100%);
     border-color: transparent;
-    box-shadow: 0 2px 6px rgba(47, 123, 254, 0.35);
+    box-shadow: 0 2px 6px rgb(47 123 254 / 35%);
   }
 
   .tag-close:hover {
     border-radius: 50%;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgb(0 0 0 / 20%);
   }
 
   &.dragging {
@@ -369,12 +369,12 @@ onBeforeUnmount(() => {
   color: #fff;
   background: linear-gradient(90deg, #4b9bff 0%, #2f7bfe 100%);
   border-radius: 24px;
-  box-shadow: 0 6px 20px rgba(47, 123, 254, 0.35);
+  box-shadow: 0 6px 20px rgb(47 123 254 / 35%);
   cursor: pointer;
 
   &.active {
     background: linear-gradient(90deg, #ff6b6b 0%, #ef4444 100%);
-    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+    box-shadow: 0 6px 20px rgb(239 68 68 / 40%);
     transform: translateX(-50%) scale(1.08);
   }
 }
@@ -390,7 +390,7 @@ onBeforeUnmount(() => {
   background: #fff;
   border: 1px solid #e6eefb;
   border-radius: 10px;
-  box-shadow: 0 10px 32px rgba(31, 60, 120, 0.18);
+  box-shadow: 0 10px 32px rgb(31 60 120 / 18%);
 }
 
 .context-item {

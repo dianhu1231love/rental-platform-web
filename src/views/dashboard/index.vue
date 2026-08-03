@@ -1,7 +1,7 @@
 <script setup>
 defineOptions({ name: 'Dashboard' })
 
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import {
   getDashboardStats,
   getPaymentTrend,
@@ -108,7 +108,7 @@ onMounted(loadAll)
 </script>
 
 <template>
-  <div class="app-container dashboard" v-loading="loading">
+  <div v-loading="loading" class="app-container dashboard">
     <div class="welcome-bar">
       <h2>{{ $t('dashboard.title') }}</h2>
       <span class="welcome-text">{{ $t('dashboard.welcome') }}，{{ userStore.name }} 👋</span>

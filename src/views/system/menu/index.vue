@@ -265,15 +265,15 @@ onMounted(loadMenus)
           style="width: 260px"
           :prefix-icon="'Search'"
         />
-        <el-button type="primary" v-permission="['system:menu:add']" @click="openCreate()">
+        <el-button v-permission="['system:menu:add']" type="primary" @click="openCreate()">
           <el-icon><Plus /></el-icon>
           {{ $t('common.add') }}
         </el-button>
       </div>
 
       <el-table
-        :data="filteredMenus"
         v-loading="loading"
+        :data="filteredMenus"
         row-key="id"
         border
         default-expand-all
@@ -334,29 +334,29 @@ onMounted(loadMenus)
           <template #default="{ row }">
             <template v-if="row.type !== 'button'">
               <el-button
+                v-permission="['system:menu:add']"
                 size="small"
                 type="primary"
                 link
-                v-permission="['system:menu:add']"
                 @click="openCreate(row.id)"
               >
                 {{ $t('menuManage.addChild') }}
               </el-button>
             </template>
             <el-button
+              v-permission="['system:menu:edit']"
               size="small"
               type="primary"
               link
-              v-permission="['system:menu:edit']"
               @click="openEdit(row)"
             >
               {{ $t('common.edit') }}
             </el-button>
             <el-button
+              v-permission="['system:menu:delete']"
               size="small"
               type="danger"
               link
-              v-permission="['system:menu:delete']"
               @click="handleDelete(row)"
             >
               {{ $t('common.delete') }}

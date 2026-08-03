@@ -202,13 +202,13 @@ onMounted(async () => {
           style="width: 260px"
           :prefix-icon="'Search'"
         />
-        <el-button type="primary" v-permission="['system:role:add']" @click="openCreate">
+        <el-button v-permission="['system:role:add']" type="primary" @click="openCreate">
           <el-icon><Plus /></el-icon>
           {{ $t('common.add') }}
         </el-button>
       </div>
 
-      <el-table :data="filteredRoles" v-loading="loading" border stripe>
+      <el-table v-loading="loading" :data="filteredRoles" border stripe>
         <el-table-column :label="$t('role.name')" prop="name" min-width="140" />
         <el-table-column :label="$t('role.code')" prop="code" min-width="110" />
         <el-table-column :label="$t('role.permissionScope')" min-width="150">
@@ -225,9 +225,9 @@ onMounted(async () => {
           <template #default="{ row }">
             <el-switch
               v-model="row.status"
+              v-permission="['system:role:edit']"
               :active-value="1"
               :inactive-value="0"
-              v-permission="['system:role:edit']"
               @change="handleToggleStatus(row)"
             />
             <el-tag v-if="row.status === 1" type="success" size="small">
@@ -246,19 +246,19 @@ onMounted(async () => {
         <el-table-column :label="$t('common.action')" width="180" fixed="right">
           <template #default="{ row }">
             <el-button
+              v-permission="['system:role:edit']"
               size="small"
               type="primary"
               link
-              v-permission="['system:role:edit']"
               @click="openEdit(row)"
             >
               {{ $t('role.assignPermission') }}
             </el-button>
             <el-button
+              v-permission="['system:role:delete']"
               size="small"
               type="danger"
               link
-              v-permission="['system:role:delete']"
               @click="handleDelete(row)"
             >
               {{ $t('common.delete') }}

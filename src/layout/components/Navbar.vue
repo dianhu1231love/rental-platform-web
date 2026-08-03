@@ -74,7 +74,7 @@ async function handleCommand(command) {
   justify-content: space-between;
   padding: 0 16px;
   background: linear-gradient(90deg, #4b9bff 0%, #2f7bfe 100%);
-  box-shadow: 0 2px 8px rgba(47, 123, 254, 0.25);
+  box-shadow: 0 2px 8px rgb(47 123 254 / 25%);
 }
 
 .navbar-left {
@@ -105,13 +105,13 @@ async function handleCommand(command) {
 }
 
 .user-avatar {
-  background: rgba(255, 255, 255, 0.28);
+  background: rgb(255 255 255 / 28%);
   color: #fff;
   font-size: 14px;
 }
 
 .user-name {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.92);
+  color: rgb(255 255 255 / 92%);
 }
 </style>

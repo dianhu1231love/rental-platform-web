@@ -39,6 +39,7 @@ function changeLang(lang) {
   color: #fff;
   outline: none;
 }
+
 .lang-text {
   font-size: 14px;
 }

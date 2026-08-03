@@ -134,7 +134,7 @@ const activeTab = ref('password')
   padding: 32px 36px;
   background: #fff;
   border-radius: 10px;
-  box-shadow: 0 6px 24px rgba(0, 21, 41, 0.12);
+  box-shadow: 0 6px 24px rgb(0 21 41 / 12%);
 }
 
 .login-title {
@@ -173,7 +173,7 @@ const activeTab = ref('password')
   }
 }
 
-@media (max-width: 900px) {
+@media (width <= 900px) {
   .login-brand {
     display: none;
   }
