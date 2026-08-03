@@ -136,6 +136,9 @@ const emit = defineEmits<{
 const page = defineModel<number>('page', { default: 1 })
 const pageSize = defineModel<number>('pageSize', { default: 10 })
 
+// ---------- 列宽拖拽 ----------
+const colWidths = reactive<Record<string, number>>({})
+
 // ---------- 列显隐 ----------
 const visibleProps = ref<string[]>(props.columns.map((c) => c.prop))
 watch(
@@ -150,9 +153,6 @@ watch(
 const displayColumns = computed(() =>
   props.columns.filter((c) => visibleProps.value.includes(c.prop)),
 )
-
-// ---------- 列宽拖拽 ----------
-const colWidths = reactive<Record<string, number>>({})
 
 function initColWidths(cols: TableColumn[]): void {
   cols.forEach((c) => {
