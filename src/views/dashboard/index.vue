@@ -93,16 +93,16 @@ onMounted(loadAll)
       <StatCards :stats="stats" />
 
       <el-row :gutter="16" class="dashboard-row">
-        <el-col :xs="24" :lg="14">
-          <el-card class="page-card">
+        <el-col :xs="24" :lg="14" class="dashboard-col">
+          <el-card class="page-card dashboard-card">
             <template #header>
               <span class="card-title">{{ $t('dashboard.equipmentBoard') }}</span>
             </template>
             <EquipmentBoard v-if="equipment" :data="equipment" />
           </el-card>
         </el-col>
-        <el-col :xs="24" :lg="10">
-          <el-card class="page-card">
+        <el-col :xs="24" :lg="10" class="dashboard-col">
+          <el-card class="page-card dashboard-card">
             <template #header>
               <span class="card-title">{{ $t('dashboard.todos') }}</span>
             </template>
@@ -162,5 +162,24 @@ onMounted(loadAll)
 
 .load-error {
   margin-top: 12px;
+}
+
+/* 设备看板与待办卡片等高，内容区弹性填满 */
+.dashboard-col {
+  display: flex;
+
+  .dashboard-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+
+    :deep(.el-card__body) {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+  }
 }
 </style>

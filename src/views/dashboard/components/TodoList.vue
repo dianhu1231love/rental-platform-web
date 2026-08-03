@@ -64,13 +64,18 @@ async function handle(todo: TodoItem, action: 'approve' | 'reject'): Promise<voi
       </div>
     </div>
   </div>
-  <el-empty v-else :description="$t('dashboard.todoEmpty')" :image-size="90" />
+  <el-empty v-else class="todo-empty" :description="$t('dashboard.todoEmpty')" :image-size="90" />
 </template>
 
 <style lang="scss" scoped>
 .todo-list {
-  max-height: 330px;
+  flex: 1;
   overflow-y: auto;
+  min-height: 0;
+}
+
+.todo-empty {
+  flex: 1;
 }
 
 .todo-item {

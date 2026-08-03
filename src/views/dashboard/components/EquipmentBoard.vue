@@ -78,7 +78,7 @@ const pieOption = computed<EChartsOption>(() => ({
     </div>
     <div class="equipment-right">
       <p class="chart-title">{{ $t('dashboard.statusDistribute') }}</p>
-      <BaseChart :option="pieOption" height="220px" />
+      <BaseChart :option="pieOption" height="100%" />
     </div>
   </div>
 </template>
@@ -87,6 +87,8 @@ const pieOption = computed<EChartsOption>(() => ({
 .equipment-board {
   display: flex;
   gap: 20px;
+  flex: 1;
+  min-height: 0;
 }
 
 .equipment-left {
@@ -148,12 +150,20 @@ const pieOption = computed<EChartsOption>(() => ({
 
 .equipment-right {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 
   .chart-title {
     margin: 0 0 4px;
     font-size: 13px;
     color: #606266;
     text-align: center;
+  }
+
+  :deep(.base-chart) {
+    flex: 1;
+    min-height: 0;
   }
 }
 </style>
