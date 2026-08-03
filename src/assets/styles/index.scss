@@ -1,0 +1,144 @@
+@use './variables.scss' as *;
+
+:root {
+  --el-color-primary: #{$primary-color};
+  --el-color-primary-light-3: #5f97ff;
+  --el-color-primary-light-5: #8fb7ff;
+  --el-color-primary-light-7: #bfd5ff;
+  --el-color-primary-light-8: #d7e5ff;
+  --el-color-primary-light-9: #{$primary-light};
+  --el-color-primary-dark-2: #2562cb;
+  --el-border-radius-base: 6px;
+  --el-font-size-base: 15px;
+  --el-font-size-small: 14px;
+  --el-font-size-extra-small: 13px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', Arial, sans-serif;
+  font-size: 15px;
+  color: #303133;
+  background-color: $body-bg;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.app-container {
+  padding: 16px;
+}
+
+.page-card {
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(31, 60, 120, 0.06);
+}
+
+/* Element Plus 卡片 */
+.el-card {
+  --el-card-border-color: #e6eefb;
+  border-radius: 10px;
+}
+
+/* 白蓝表格主题 */
+.el-table {
+  --el-table-header-bg-color: #{$table-header-bg};
+  --el-table-header-text-color: #{$table-header-color};
+  --el-table-border-color: #{$table-border-color};
+  --el-table-row-hover-bg-color: #{$table-hover-bg};
+  --el-table-bg-color: #fff;
+  --el-table-tr-bg-color: #fff;
+  font-size: 15px;
+
+  th.el-table__cell {
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  .el-table__cell {
+    padding: 9px 0;
+  }
+}
+
+.el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
+  background-color: $table-stripe-bg;
+}
+
+.el-table--border,
+.el-table--group {
+  border-color: $table-border-color;
+}
+
+/* 白色侧边菜单弹出层 */
+.el-menu--popup {
+  background-color: $menu-bg;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(31, 60, 120, 0.12);
+
+  .el-menu-item,
+  .el-sub-menu__title {
+    color: $menu-text;
+
+    &:hover {
+      background-color: $menu-hover;
+      color: $menu-active-text;
+    }
+  }
+
+  .el-menu-item.is-active {
+    background-color: $menu-active-bg;
+    color: $menu-active-text;
+  }
+}
+
+/* 分页蓝色调 */
+.el-pagination {
+  --el-pagination-hover-color: #{$primary-color};
+  --el-pagination-button-bg-color: #fff;
+}
+
+/* NProgress 主题色 */
+#nprogress .bar {
+  background: $primary-color !important;
+  height: 2px !important;
+}
+
+/* 滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: #b8cbe6;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 表格工具栏 */
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pagination-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
