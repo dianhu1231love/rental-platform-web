@@ -1,6 +1,7 @@
 <!-- 主布局：侧边栏 + 顶栏/标签页 + 内容区 -->
 <script setup lang="ts">
 import { useAppStore } from '@/store/app'
+import { onBeforeUnmount, onMounted } from 'vue'
 import settings from '@/settings'
 import Sidebar from './components/Sidebar/index.vue'
 import Navbar from './components/Navbar.vue'
@@ -8,6 +9,29 @@ import TagsView from './components/TagsView.vue'
 import AppMain from './components/AppMain.vue'
 
 const appStore = useAppStore()
+
+/** 低分辨率断点：视口宽度 <= 1024px 时自动收起侧边栏 */
+const LOW_RES_MEDIA = '(max-width: 1024px)'
+let mediaQuery: MediaQueryList | null = null
+
+function applyCollapsed(matches: boolean): void {
+  appStore.sidebarCollapsed = matches
+}
+
+function handleLowResChange(event: MediaQueryListEvent): void {
+  applyCollapsed(event.matches)
+}
+
+onMounted(() => {
+  mediaQuery = window.matchMedia(LOW_RES_MEDIA)
+  // 进入页面时按当前视口宽度同步一次
+  applyCollapsed(mediaQuery.matches)
+  mediaQuery.addEventListener('change', handleLowResChange)
+})
+
+onBeforeUnmount(() => {
+  mediaQuery?.removeEventListener('change', handleLowResChange)
+})
 </script>
 
 <template>
