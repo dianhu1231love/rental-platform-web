@@ -117,6 +117,7 @@ export default {
     accountNotFound: '未找到关联账户，请核对后重试',
     roleNotFound: '角色不存在',
     userNotFound: '用户不存在',
+    userDisabled: '账号已停用，请联系管理员',
   },
   system: {
     dictRequired: '字典类型与标签不能为空',
@@ -127,7 +128,9 @@ export default {
     userExists: '用户名已存在',
     userRequired: '用户名与姓名不能为空',
     userBuiltinProtected: '内置管理员不可删除',
+    userBuiltinDisableProtected: '内置管理员不可停用',
     userSelfProtected: '不能删除当前登录用户',
+    userSelfDisableProtected: '不能停用当前登录用户',
     deleteChildFirst: '请先删除该菜单下的子菜单',
   },
   dashboard: {
@@ -262,6 +265,10 @@ export default {
     permissionPreview: '权限预览',
     currentRole: '当前角色',
     currentTenant: '当前租户',
+    disable: '停用',
+    enable: '启用',
+    disableConfirm: '确定要停用该用户吗？停用后将无法登录系统。',
+    enableConfirm: '确定要启用该用户吗？',
   },
   equipment: {
     code: '整机编码',

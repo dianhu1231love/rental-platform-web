@@ -43,7 +43,8 @@ const searchParams = reactive({
   keyword: '',
   roleId: '' as number | '',
   tenantId: '' as number | '',
-  status: '' as number | '',
+  // 默认只查询未停用用户，管理员可通过状态筛选查看全部/已停用
+  status: 1 as number | '',
 })
 
 /** 角色名称（id → 名称） */
@@ -89,7 +90,10 @@ const columns: TableColumn[] = [
     label: t('common.status'),
     width: 90,
     align: 'center',
-    formatter: (_row, value) => (value === 1 ? t('common.enabled') : t('common.disabled')),
+    statusMap: {
+      1: { label: t('common.enabled'), type: 'success' },
+      0: { label: t('common.disabled'), type: 'info' },
+    },
   },
   { prop: 'remark', label: t('common.remark'), minWidth: 130, showOverflowTooltip: true },
   { prop: 'createdAt', label: t('common.createdAt'), width: 165 },
@@ -156,7 +160,7 @@ function handleReset(): void {
   searchParams.keyword = ''
   searchParams.roleId = ''
   searchParams.tenantId = ''
-  searchParams.status = ''
+  searchParams.status = 1
   query.page = 1
   loadList()
 }
@@ -269,13 +273,24 @@ async function handleSave(): Promise<void> {
   }
 }
 
-/** 启停用户（失败时回滚开关状态） */
+/** 停用/启用用户（含确认；停用后无法登录系统） */
 async function handleToggleStatus(row: SysUser): Promise<void> {
+  const disabling = row.status === 1
   try {
-    await updateUserStatus(row.id, row.status)
+    await ElMessageBox.confirm(
+      disabling ? t('user.disableConfirm') : t('user.enableConfirm'),
+      t('common.confirmTitle'),
+      {
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
+        type: 'warning',
+      },
+    )
+    await updateUserStatus(row.id, disabling ? 0 : 1)
     ElMessage.success(t('common.success'))
+    loadList()
   } catch {
-    row.status = row.status === 1 ? 0 : 1
+    // 取消或失败
   }
 }
 
@@ -426,18 +441,6 @@ onMounted(async () => {
           <span v-else>{{ tenantName(row.tenantId) }}</span>
         </template>
 
-        <template #col-status="{ row }">
-          <div class="status-cell">
-            <el-switch
-              v-model="row.status"
-              v-permission="['system:user:edit']"
-              :active-value="1"
-              :inactive-value="0"
-              @change="handleToggleStatus(row)"
-            />
-          </div>
-        </template>
-
         <template #col-action="{ row }">
           <el-button
             v-permission="['system:user:edit']"
@@ -465,6 +468,15 @@ onMounted(async () => {
             @click="openAssignTenant(row)"
           >
             {{ $t('user.assignTenant') }}
+          </el-button>
+          <el-button
+            v-permission="['system:user:edit']"
+            size="small"
+            :type="row.status === 1 ? 'warning' : 'success'"
+            link
+            @click="handleToggleStatus(row)"
+          >
+            {{ row.status === 1 ? $t('user.disable') : $t('user.enable') }}
           </el-button>
           <el-button
             v-permission="['system:user:delete']"
@@ -649,12 +661,6 @@ onMounted(async () => {
 </template>
 
 <style lang="scss" scoped>
-.status-cell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .assign-form {
   margin-top: 14px;
 }

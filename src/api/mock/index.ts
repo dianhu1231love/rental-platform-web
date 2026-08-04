@@ -363,6 +363,8 @@ const routes: MockRoute[] = [
       const { username, password } = (data || {}) as { username?: string; password?: string }
       const user = db.users.find((u) => u.username === username && u.password === password)
       if (!user) return fail(500, 'auth.loginError')
+      // 停用用户不允许登录
+      if (user.status === 0) return fail(500, 'auth.userDisabled')
       return ok({ token: createToken(user) })
     },
   },
@@ -373,6 +375,8 @@ const routes: MockRoute[] = [
       const username = ((data || {}) as { username?: string }).username || 'admin'
       const user = db.users.find((u) => u.username === username)
       if (!user) return fail(500, 'auth.ssoError')
+      // 停用用户不允许 SSO 登录
+      if (user.status === 0) return fail(500, 'auth.userDisabled')
       return ok({ token: createToken(user) })
     },
   },
@@ -792,12 +796,20 @@ const routes: MockRoute[] = [
     method: 'put',
     pattern: /^\/system\/users\/(\d+)\/status$/,
     auth: true,
-    handler: async (_config, match, { data }) => {
+    handler: async (_config, match, config) => {
       const id = Number(match[1])
+      const data = (config.data || {}) as { status?: number }
+      const status = data.status ? 1 : 0
       const users = db.users
       const index = users.findIndex((u) => u.id === id)
       if (index === -1) return fail(500, 'system.userNotFound')
-      users[index].status = (data as { status?: number } | undefined)?.status ? 1 : 0
+      // 停用保护：内置管理员与当前登录用户不可停用
+      if (status === 0) {
+        if (id === 1) return fail(500, 'system.userBuiltinDisableProtected')
+        const current = currentUser(config)
+        if (current && current.id === id) return fail(500, 'system.userSelfDisableProtected')
+      }
+      users[index].status = status
       db.users = users
       return ok(users[index])
     },

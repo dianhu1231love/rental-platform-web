@@ -118,6 +118,7 @@ export default {
     accountNotFound: 'No matching account found, please check and retry',
     roleNotFound: 'Role not found',
     userNotFound: 'User not found',
+    userDisabled: 'Account disabled, please contact the administrator',
   },
   system: {
     dictRequired: 'Dict type and label are required',
@@ -128,7 +129,9 @@ export default {
     userExists: 'Username already exists',
     userRequired: 'Username and name are required',
     userBuiltinProtected: 'Built-in admin cannot be deleted',
+    userBuiltinDisableProtected: 'Built-in admin cannot be disabled',
     userSelfProtected: 'Cannot delete the currently signed-in user',
+    userSelfDisableProtected: 'Cannot disable the currently signed-in user',
     deleteChildFirst: 'Please delete child menus first',
   },
   dashboard: {
@@ -266,6 +269,10 @@ export default {
     permissionPreview: 'Permission Preview',
     currentRole: 'Current Role',
     currentTenant: 'Current Tenant',
+    disable: 'Disable',
+    enable: 'Enable',
+    disableConfirm: 'Disable this user? They will not be able to sign in.',
+    enableConfirm: 'Enable this user?',
   },
   equipment: {
     code: 'Machine Code',
