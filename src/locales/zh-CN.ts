@@ -37,6 +37,8 @@ export default {
     dataSheet: '数据',
     startDate: '开始日期',
     endDate: '结束日期',
+    zhCN: '简体中文',
+    enUS: 'English',
   },
   menu: {
     dashboard: '首页',
@@ -187,6 +189,9 @@ export default {
     autoRefresh: '点击标签自动刷新',
     autoRefreshTip:
       '开启：每次点击该标签页都会重新加载页面；关闭：保留页面数据，点击标签不重新加载',
+    i18nName: '多语言名称',
+    translate: '自动翻译',
+    translateTip: '输入中文名称后自动翻译并填充其他语言，也可手动修改',
     saveSuccess: '菜单保存成功，重新登录后生效',
   },
   tenant: {

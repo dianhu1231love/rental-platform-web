@@ -6,7 +6,7 @@ import type { Menu } from '@/types'
 
 const props = defineProps<{ item: Menu }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const visibleChildren = computed<Menu[]>(() =>
   (props.item.children || []).filter((c) => c.type !== 'button' && c.visible !== false),
@@ -17,6 +17,8 @@ const isDirectory = computed(
 )
 
 const label = computed(() => {
+  const current = locale.value
+  if (props.item.i18n?.[current]) return props.item.i18n[current]
   if (props.item.i18nKey) return t(props.item.i18nKey)
   return props.item.title
 })

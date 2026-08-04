@@ -2,11 +2,13 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAppStore, HOME_PATH, type VisitedView } from '@/store/app'
 
 const route = useRoute()
 const router = useRouter()
 const appStore = useAppStore()
+const { locale } = useI18n()
 
 const visitedViews = computed(() => appStore.visitedViews)
 
@@ -19,6 +21,8 @@ function isActive(path: string): boolean {
 }
 
 function tagLabel(view: VisitedView): string {
+  const current = locale.value
+  if (view.i18n?.[current]) return view.i18n[current]
   if (view.i18nKey) return view.i18nKey
   return view.title || ''
 }

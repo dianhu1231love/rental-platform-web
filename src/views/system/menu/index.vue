@@ -2,16 +2,20 @@
 <script setup lang="ts">
 defineOptions({ name: 'MenuManage' })
 
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
-import { getMenuList, createMenu, updateMenu, deleteMenu } from '@/api/system'
+import { useDebounceFn } from '@vueuse/core'
+import { getMenuList, createMenu, updateMenu, deleteMenu, translateText } from '@/api/system'
 import { buildTree, type TreeNode } from '@/utils/tree'
 import { useI18n } from 'vue-i18n'
-import { MENU_ICON_OPTIONS } from '@/constants'
+import { MENU_ICON_OPTIONS, SUPPORTED_LOCALES } from '@/constants'
 import type { TableColumn, FilterField } from '@/components/SmartTable.vue'
 import type { Menu, MenuFormModel } from '@/types'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
+
+/** 除主语言（zh-CN）外的其他语言，用于自动翻译填充 */
+const otherLocales = SUPPORTED_LOCALES.filter((l) => l.code !== 'zh-CN')
 
 const loading = ref(false)
 const menus = ref<TreeNode<Menu>[]>([])
@@ -99,6 +103,7 @@ const form = reactive<MenuFormModel>({
   visible: true,
   autoRefresh: false,
   buttons: [],
+  i18n: {},
 })
 
 const formRules: FormRules = {
@@ -178,6 +183,7 @@ function openCreate(parentId = 0): void {
     visible: true,
     autoRefresh: false,
     buttons: [],
+    i18n: {},
   })
   dialogVisible.value = true
 }
@@ -198,9 +204,41 @@ function openEdit(row: TreeNode<Menu>): void {
     visible: !!row.visible,
     autoRefresh: !!row.autoRefresh,
     buttons: (row.buttons || []).map((b) => (b.perm ? b.perm.split(':').pop() : '')),
+    i18n: row.i18n ? { ...row.i18n } : {},
   })
   dialogVisible.value = true
 }
+
+/** 多语言自动翻译（输入名称后防抖触发） */
+const translating = ref(false)
+const autoTranslate = useDebounceFn(async () => {
+  const name = form.name.trim()
+  if (!name) return
+  const targets = otherLocales.map((l) => l.code)
+  if (!targets.length) return
+  translating.value = true
+  try {
+    const res = await translateText({ text: name, targets })
+    targets.forEach((code) => {
+      const value = res.data.translations[code]
+      if (value) form.i18n[code] = value
+    })
+  } catch {
+    // 翻译失败不阻塞编辑
+  } finally {
+    translating.value = false
+  }
+}, 600)
+
+/** 手动触发自动翻译 */
+function handleTranslate(): void {
+  autoTranslate()
+}
+
+watch(
+  () => form.name,
+  () => autoTranslate(),
+)
 
 /** 提取按钮权限的基础前缀（去掉末位的 list/操作后缀） */
 function permBase(): string {
@@ -238,6 +276,7 @@ async function handleSave(): Promise<void> {
       sort: form.sort,
       visible: form.visible,
       autoRefresh: form.autoRefresh,
+      i18n: { ...form.i18n, 'zh-CN': form.name },
     }
     if (payload.type === 'menu') {
       const base = permBase()
@@ -321,7 +360,7 @@ onMounted(loadMenus)
         <template #col-name="{ row }">
           <span class="menu-name">
             <el-icon v-if="row.icon" class="menu-icon"><component :is="row.icon" /></el-icon>
-            {{ row.title }}
+            {{ row.i18n?.[locale] || (row.i18nKey ? t(row.i18nKey) : '') || row.title }}
           </span>
         </template>
 
@@ -401,7 +440,27 @@ onMounted(loadMenus)
         </el-row>
 
         <el-form-item :label="$t('menuManage.name')" prop="name">
-          <el-input v-model="form.name" :placeholder="$t('menuManage.name')" />
+          <div class="name-row">
+            <el-input v-model="form.name" :placeholder="$t('menuManage.name')" />
+            <el-button
+              v-if="form.type !== 'button'"
+              :loading="translating"
+              @click="handleTranslate"
+            >
+              <el-icon><MagicStick /></el-icon>
+              {{ $t('menuManage.translate') }}
+            </el-button>
+          </div>
+        </el-form-item>
+
+        <el-form-item v-if="form.type !== 'button'" :label="$t('menuManage.i18nName')">
+          <div class="i18n-fields">
+            <div v-for="lang in otherLocales" :key="lang.code" class="i18n-field">
+              <span class="i18n-label">{{ $t(lang.labelKey) }}</span>
+              <el-input v-model="form.i18n[lang.code]" :placeholder="$t(lang.labelKey)" />
+            </div>
+            <p class="i18n-tip">{{ $t('menuManage.translateTip') }}</p>
+          </div>
         </el-form-item>
 
         <el-form-item v-if="form.type !== 'button'" :label="$t('menuManage.path')" prop="path">
@@ -511,6 +570,36 @@ onMounted(loadMenus)
 
 .auto-refresh-tip {
   margin: 6px 0 0;
+  font-size: 12px;
+  color: #909399;
+}
+
+.name-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.i18n-fields {
+  width: 100%;
+}
+
+.i18n-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+
+  .i18n-label {
+    flex-shrink: 0;
+    width: 80px;
+    font-size: 13px;
+    color: #606266;
+  }
+}
+
+.i18n-tip {
+  margin: 4px 0 0;
   font-size: 12px;
   color: #909399;
 }

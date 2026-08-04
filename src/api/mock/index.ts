@@ -15,6 +15,7 @@ import {
   seedBrands,
   seedTenants,
   seedTodos,
+  seedTranslationDict,
   seedUsers,
   type SeedUser,
 } from './seed'
@@ -597,6 +598,23 @@ const routes: MockRoute[] = [
       dicts.push(item)
       db.dicts = dicts
       return ok(item)
+    },
+  },
+  {
+    method: 'post',
+    pattern: /^\/system\/translate$/,
+    auth: true,
+    handler: async (_config, _match, { data }) => {
+      const { text, targets } = (data || {}) as { text?: string; targets?: string[] }
+      const translations: Record<string, string> = {}
+      ;(targets || []).forEach((target) => {
+        if (target === 'en-US') {
+          translations[target] = seedTranslationDict[text || ''] || text || ''
+        } else {
+          translations[target] = text || ''
+        }
+      })
+      return ok({ text, translations })
     },
   },
   {

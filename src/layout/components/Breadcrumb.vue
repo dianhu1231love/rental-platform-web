@@ -2,8 +2,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, type RouteMeta } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 const route = useRoute()
+const { locale } = useI18n()
 
 const levelList = computed(() => {
   const matched = route.matched.filter((r) => r.meta?.title)
@@ -11,6 +13,9 @@ const levelList = computed(() => {
 })
 
 function itemLabel(meta: RouteMeta): string {
+  const current = locale.value
+  const i18nMap = meta.i18n as Record<string, string> | undefined
+  if (i18nMap?.[current]) return i18nMap[current]
   if (meta.i18nKey) return meta.i18nKey as string
   return (meta.title as string) || ''
 }

@@ -41,6 +41,8 @@ export interface Menu {
   component: string
   title: string
   i18nKey?: string
+  /** 多语言标题：语言代码 -> 译文（如 { 'zh-CN': '首页', 'en-US': 'Dashboard' }） */
+  i18n?: Record<string, string>
   icon?: string
   sort?: number
   visible?: boolean
@@ -144,6 +146,8 @@ export interface MenuFormModel {
   visible: boolean
   autoRefresh: boolean
   buttons: string[]
+  /** 多语言标题（各语言译文） */
+  i18n: Record<string, string>
 }
 
 /** 租户 */

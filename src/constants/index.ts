@@ -1,6 +1,15 @@
 import type { DashboardStats, TodoPriority, TodoType } from '@/types'
 
 /**
+ * 系统支持的语言列表
+ * zh-CN 作为主语言（菜单名称以中文为准），其余语言由自动翻译填充
+ */
+export const SUPPORTED_LOCALES: Array<{ code: string; labelKey: string }> = [
+  { code: 'zh-CN', labelKey: 'common.zhCN' },
+  { code: 'en-US', labelKey: 'common.enUS' },
+]
+
+/**
  * 菜单设置页可选的图标列表
  * 对应 @element-plus/icons-vue 中注册的全局图标组件名
  */

@@ -70,3 +70,14 @@ export function updateTenantStatus(id: number, status: number) {
     status,
   })
 }
+
+/**
+ * 多语言自动翻译
+ * 演示环境由 Mock 字典返回；接入真实后端后可替换为百度/DeepL 等翻译服务
+ */
+export function translateText(data: { text: string; targets: string[] }) {
+  return request.post<{ text: string; translations: Record<string, string> }>(
+    '/system/translate',
+    data,
+  )
+}

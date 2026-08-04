@@ -18,6 +18,8 @@ export interface VisitedView {
   name?: string
   title?: string
   i18nKey?: string
+  /** 多语言标题（语言代码 -> 译文） */
+  i18n?: Record<string, string>
   keepAlive: boolean
 }
 
@@ -52,6 +54,7 @@ export const useAppStore = defineStore('app', {
         name: view.name as string | undefined,
         title: view.meta?.title as string | undefined,
         i18nKey: view.meta?.i18nKey as string | undefined,
+        i18n: view.meta?.i18n as Record<string, string> | undefined,
         keepAlive: !!view.meta?.keepAlive,
       }
       // 首页固定在最前

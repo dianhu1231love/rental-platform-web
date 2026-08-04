@@ -502,6 +502,35 @@ export const seedDicts: DictItem[] = [
   { id: 3, type: 'asset_owner', label: '苏州金穗机械租赁' },
 ]
 
+/**
+ * 演示用中译英字典
+ * 菜单名称自动翻译的 Mock 实现；接入真实翻译服务（百度/DeepL 等）后由后端替换
+ */
+export const seedTranslationDict: Record<string, string> = {
+  首页: 'Dashboard',
+  数据看板: 'Dashboard',
+  系统设置: 'System Settings',
+  权限设置: 'Role Permissions',
+  菜单设置: 'Menu Settings',
+  租户管理: 'Tenant Management',
+  设备管理: 'Equipment',
+  设备列表: 'Equipment List',
+  设备品牌: 'Brands',
+  产品组: 'Product Groups',
+  产品型号: 'Product Models',
+  用户管理: 'User Management',
+  角色管理: 'Role Management',
+  新增: 'Add',
+  编辑: 'Edit',
+  删除: 'Delete',
+  查看: 'View',
+  备注: 'Remark',
+  操作: 'Actions',
+  状态: 'Status',
+  启用: 'Enabled',
+  停用: 'Disabled',
+}
+
 /** 设备列表种子数据 */
 export const seedEquipment: EquipmentItem[] = [
   {

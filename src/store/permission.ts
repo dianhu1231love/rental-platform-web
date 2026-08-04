@@ -17,6 +17,7 @@ function menuToRoute(menu: Menu): RouteRecordRaw {
     meta: {
       title: menu.title || '',
       i18nKey: menu.i18nKey || '',
+      i18n: menu.i18n || {},
       icon: menu.icon || '',
       perms: menu.perms || '',
       buttons: menu.buttons || [],

@@ -37,6 +37,8 @@ export default {
     dataSheet: 'Data',
     startDate: 'Start date',
     endDate: 'End date',
+    zhCN: '简体中文',
+    enUS: 'English',
   },
   menu: {
     dashboard: 'Dashboard',
@@ -189,6 +191,10 @@ export default {
     autoRefresh: 'Auto refresh on tab click',
     autoRefreshTip:
       'On: reload the page every time its tab is clicked. Off: keep page state and do not reload.',
+    i18nName: 'Multilingual Name',
+    translate: 'Auto Translate',
+    translateTip:
+      'Enter the Chinese name and translations for other languages will be filled in automatically.',
     saveSuccess: 'Menu saved, takes effect after next sign-in',
   },
   tenant: {
