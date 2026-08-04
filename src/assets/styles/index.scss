@@ -32,6 +32,11 @@ body,
   background-color: $body-bg;
 }
 
+/* 预留滚动条空间：内容高度变化时页面宽度不跳动，避免布局重排 */
+html {
+  scrollbar-gutter: stable;
+}
+
 a {
   text-decoration: none;
   color: inherit;

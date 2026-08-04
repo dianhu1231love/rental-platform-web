@@ -543,10 +543,13 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
   gap: 12px;
   max-height: 40px;
   overflow: hidden;
-  transition: max-height 0.2s;
+
+  /* 支持 interpolate-size 的浏览器：max-height 可在 40px 与 auto 间平滑过渡，不再瞬间展开 */
+  interpolate-size: allow-keywords;
+  transition: max-height 0.25s ease;
 
   &.expanded {
-    max-height: none;
+    max-height: auto;
   }
 }
 
