@@ -124,6 +124,40 @@ function migrateEquipment(): EquipmentItem[] {
   return updated
 }
 
+/**
+ * 用户数据迁移：历史 localStorage 中的用户缺少新字段（租户/状态/备注等）时补齐默认值
+ */
+function migrateUsers(): SeedUser[] {
+  const stored = load(KEYS.users, seedUsers)
+  let changed = false
+  const updated = stored.map((user) => {
+    const next: SeedUser = { ...user }
+    if (next.email === undefined) {
+      next.email = ''
+      changed = true
+    }
+    if (next.tenantId === undefined) {
+      next.tenantId = null
+      changed = true
+    }
+    if (next.status === undefined) {
+      next.status = 1
+      changed = true
+    }
+    if (next.remark === undefined) {
+      next.remark = ''
+      changed = true
+    }
+    if (next.createdAt === undefined) {
+      next.createdAt = formatNow()
+      changed = true
+    }
+    return next
+  })
+  if (changed) save(KEYS.users, updated)
+  return updated
+}
+
 /** 模拟数据库：读写时即时持久化 */
 interface MockDb {
   menus: Menu[]
@@ -152,7 +186,7 @@ const db: MockDb = {
     save(KEYS.roles, v)
   },
   get users() {
-    return load(KEYS.users, seedUsers)
+    return migrateUsers()
   },
   set users(v) {
     save(KEYS.users, v)
@@ -683,6 +717,160 @@ const routes: MockRoute[] = [
       const next = tenants.filter((t) => t.id !== id)
       if (next.length === tenants.length) return fail(500, 'system.tenantNotFound')
       db.tenants = next
+      return ok(null)
+    },
+  },
+  {
+    method: 'get',
+    pattern: /^\/system\/users$/,
+    auth: true,
+    handler: async (_config, _match, config) => {
+      const params = (config.params || {}) as {
+        page?: string | number
+        pageSize?: string | number
+        keyword?: string
+        roleId?: string | number
+        tenantId?: string | number
+        status?: string | number | null
+      }
+      const page = Number(params.page) || 1
+      const pageSize = Number(params.pageSize) || 10
+      let list = db.users
+      if (params.keyword) {
+        const kw = String(params.keyword).toLowerCase()
+        list = list.filter(
+          (u) =>
+            u.username.toLowerCase().includes(kw) ||
+            u.name.toLowerCase().includes(kw) ||
+            (u.phone || '').toLowerCase().includes(kw) ||
+            (u.email || '').toLowerCase().includes(kw),
+        )
+      }
+      if (params.roleId !== undefined && params.roleId !== '') {
+        list = list.filter((u) => u.roleId === Number(params.roleId))
+      }
+      if (params.tenantId !== undefined && params.tenantId !== '') {
+        list = list.filter((u) => u.tenantId === Number(params.tenantId))
+      }
+      if (params.status !== undefined && params.status !== '' && params.status !== null) {
+        list = list.filter((u) => u.status === Number(params.status))
+      }
+      const total = list.length
+      const start = (page - 1) * pageSize
+      return ok({ list: list.slice(start, start + pageSize), total })
+    },
+  },
+  {
+    method: 'post',
+    pattern: /^\/system\/users$/,
+    auth: true,
+    handler: async (_config, _match, { data }) => {
+      const users = db.users
+      const input = (data || {}) as Partial<SeedUser>
+      if (!input.username || !input.name) return fail(500, 'system.userRequired')
+      if (users.some((u) => u.username === input.username)) return fail(500, 'system.userExists')
+      const user: SeedUser = {
+        id: nextId(users),
+        username: input.username,
+        password: input.password || '123456',
+        name: input.name,
+        roleId: Number(input.roleId) || 1,
+        avatar: input.avatar || '',
+        phone: input.phone || '',
+        email: input.email || '',
+        tenantId: input.tenantId ?? null,
+        status: input.status === 0 ? 0 : 1,
+        remark: input.remark || '',
+        createdAt: formatNow(),
+      }
+      users.push(user)
+      db.users = users
+      return ok(user)
+    },
+  },
+  {
+    method: 'put',
+    pattern: /^\/system\/users\/(\d+)\/status$/,
+    auth: true,
+    handler: async (_config, match, { data }) => {
+      const id = Number(match[1])
+      const users = db.users
+      const index = users.findIndex((u) => u.id === id)
+      if (index === -1) return fail(500, 'system.userNotFound')
+      users[index].status = (data as { status?: number } | undefined)?.status ? 1 : 0
+      db.users = users
+      return ok(users[index])
+    },
+  },
+  {
+    method: 'put',
+    pattern: /^\/system\/users\/(\d+)\/role$/,
+    auth: true,
+    handler: async (_config, match, { data }) => {
+      const id = Number(match[1])
+      const roleId = Number((data as { roleId?: number } | undefined)?.roleId)
+      const users = db.users
+      const index = users.findIndex((u) => u.id === id)
+      if (index === -1) return fail(500, 'system.userNotFound')
+      if (!db.roles.some((r) => r.id === roleId)) return fail(500, 'system.roleNotFound')
+      users[index].roleId = roleId
+      db.users = users
+      return ok({ id, roleId })
+    },
+  },
+  {
+    method: 'put',
+    pattern: /^\/system\/users\/(\d+)\/tenant$/,
+    auth: true,
+    handler: async (_config, match, { data }) => {
+      const id = Number(match[1])
+      const tenantId = (data as { tenantId?: number | null } | undefined)?.tenantId ?? null
+      const users = db.users
+      const index = users.findIndex((u) => u.id === id)
+      if (index === -1) return fail(500, 'system.userNotFound')
+      users[index].tenantId = tenantId === null ? null : Number(tenantId)
+      db.users = users
+      return ok({ id, tenantId: users[index].tenantId })
+    },
+  },
+  {
+    method: 'put',
+    pattern: /^\/system\/users\/(\d+)$/,
+    auth: true,
+    handler: async (_config, match, { data }) => {
+      const id = Number(match[1])
+      const users = db.users
+      const index = users.findIndex((u) => u.id === id)
+      if (index === -1) return fail(500, 'system.userNotFound')
+      const input = (data || {}) as Partial<SeedUser>
+      if (input.username && users.some((u) => u.username === input.username && u.id !== id)) {
+        return fail(500, 'system.userExists')
+      }
+      const prev = users[index]
+      users[index] = {
+        ...prev,
+        ...input,
+        id,
+        // 密码留空时不覆盖原密码
+        password: input.password ? input.password : prev.password,
+      }
+      db.users = users
+      return ok(users[index])
+    },
+  },
+  {
+    method: 'delete',
+    pattern: /^\/system\/users\/(\d+)$/,
+    auth: true,
+    handler: async (_config, match, config) => {
+      const id = Number(match[1])
+      if (id === 1) return fail(500, 'system.userBuiltinProtected')
+      const current = currentUser(config)
+      if (current && current.id === id) return fail(500, 'system.userSelfProtected')
+      const users = db.users
+      const next = users.filter((u) => u.id !== id)
+      if (next.length === users.length) return fail(500, 'system.userNotFound')
+      db.users = next
       return ok(null)
     },
   },

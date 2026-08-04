@@ -174,6 +174,55 @@ export interface TenantQuery {
   status?: number | ''
 }
 
+/** 系统用户（用户管理） */
+export interface SysUser {
+  id: number
+  /** 登录账号 */
+  username: string
+  /** 姓名 */
+  name: string
+  /** 手机号 */
+  phone: string
+  /** 邮箱 */
+  email: string
+  /** 头像地址 */
+  avatar: string
+  /** 角色 id（决定菜单与按钮权限） */
+  roleId: number
+  /** 关联租户 id，null 表示平台级用户 */
+  tenantId: number | null
+  /** 状态：1 启用 / 0 停用 */
+  status: number
+  /** 备注 */
+  remark: string
+  createdAt: string
+}
+
+/** 用户新增/编辑表单模型 */
+export interface UserFormModel {
+  id: number | null
+  username: string
+  /** 登录密码（编辑时留空表示不修改） */
+  password: string
+  name: string
+  phone: string
+  email: string
+  roleId: number | null
+  tenantId: number | null
+  status: number
+  remark: string
+}
+
+/** 用户分页查询参数 */
+export interface UserQuery {
+  page?: number
+  pageSize?: number
+  keyword?: string
+  roleId?: number | ''
+  tenantId?: number | ''
+  status?: number | ''
+}
+
 /** 指标项（数值 + 环比） */
 export interface StatItem {
   value: number

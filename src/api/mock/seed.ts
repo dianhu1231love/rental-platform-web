@@ -28,6 +28,13 @@ export interface SeedUser {
   avatar: string
   phone?: string
   email?: string
+  /** 关联租户 id，null 表示平台级用户 */
+  tenantId?: number | null
+  /** 状态：1 启用 / 0 停用 */
+  status?: number
+  /** 备注 */
+  remark?: string
+  createdAt?: string
 }
 
 // 种子数据：首次运行时写入 localStorage，之后系统内编辑会持久化保存
@@ -124,6 +131,28 @@ export const seedMenus: Menu[] = [
       { label: '编辑', perm: 'system:tenant:edit' },
       { label: '删除', perm: 'system:tenant:delete' },
       { label: '查看', perm: 'system:tenant:view' },
+    ],
+  },
+  {
+    id: 11,
+    parentId: 2,
+    type: 'menu',
+    name: 'UserManage',
+    path: '/system/user',
+    component: 'system/user/index',
+    title: '用户管理',
+    i18nKey: 'menu.userManage',
+    icon: 'UserFilled',
+    sort: 1,
+    visible: true,
+    autoRefresh: false,
+    perms: 'system:user:list',
+    buttons: [
+      { label: '新增', perm: 'system:user:add' },
+      { label: '编辑', perm: 'system:user:edit' },
+      { label: '删除', perm: 'system:user:delete' },
+      { label: '查看', perm: 'system:user:view' },
+      { label: '分配权限', perm: 'system:user:assign' },
     ],
   },
   {
@@ -232,7 +261,7 @@ export const seedRoles: Role[] = [
     id: 1,
     name: '超级管理员',
     code: 'admin',
-    menuIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    menuIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
     perms: ['*:*:*'],
     status: 1,
     remark: '拥有系统全部权限',
@@ -270,6 +299,10 @@ export const seedUsers: SeedUser[] = [
     avatar: '',
     phone: '13800000001',
     email: 'admin@example.com',
+    tenantId: null,
+    status: 1,
+    remark: '平台超级管理员',
+    createdAt: '2026-01-01 09:00:00',
   },
   {
     id: 2,
@@ -280,6 +313,10 @@ export const seedUsers: SeedUser[] = [
     avatar: '',
     phone: '13800000002',
     email: 'finance@example.com',
+    tenantId: 1,
+    status: 1,
+    remark: '',
+    createdAt: '2026-01-02 09:00:00',
   },
   {
     id: 3,
@@ -290,6 +327,38 @@ export const seedUsers: SeedUser[] = [
     avatar: '',
     phone: '13800000003',
     email: 'operator@example.com',
+    tenantId: 2,
+    status: 1,
+    remark: '',
+    createdAt: '2026-01-03 09:00:00',
+  },
+  {
+    id: 4,
+    username: 'finance2',
+    password: '123456',
+    name: '财务专员-小陈',
+    roleId: 2,
+    avatar: '',
+    phone: '13700000004',
+    email: 'xiaochen@example.com',
+    tenantId: 3,
+    status: 1,
+    remark: '苏州租户财务',
+    createdAt: '2026-03-12 10:00:00',
+  },
+  {
+    id: 5,
+    username: 'operator2',
+    password: '123456',
+    name: '运营专员-小周',
+    roleId: 3,
+    avatar: '',
+    phone: '13600000005',
+    email: 'xiaozhou@example.com',
+    tenantId: 1,
+    status: 0,
+    remark: '已停用',
+    createdAt: '2026-05-20 14:00:00',
   },
 ]
 

@@ -1,8 +1,17 @@
 /**
- * 系统管理相关接口（角色 / 菜单 / 租户）
+ * 系统管理相关接口（角色 / 菜单 / 租户 / 用户）
  */
 import request from '@/utils/request'
-import type { Menu, PageResult, Role, Tenant, TenantQuery } from '@/types'
+import type {
+  Menu,
+  PageResult,
+  Role,
+  SysUser,
+  Tenant,
+  TenantQuery,
+  UserFormModel,
+  UserQuery,
+} from '@/types'
 
 /** 获取角色列表 */
 export function getRoleList() {
@@ -68,6 +77,43 @@ export function deleteTenant(id: number) {
 export function updateTenantStatus(id: number, status: number) {
   return request.put<{ id: number; status: number }>(`/system/tenants/${id}/status`, {
     status,
+  })
+}
+
+/** 分页查询用户 */
+export function getUserList(params: UserQuery) {
+  return request.get<PageResult<SysUser>>('/system/users', { params })
+}
+
+/** 新增用户 */
+export function createUser(data: Omit<UserFormModel, 'id'>) {
+  return request.post<SysUser>('/system/users', data)
+}
+
+/** 更新用户（密码留空表示不修改） */
+export function updateUser(id: number, data: Partial<SysUser> & { password?: string }) {
+  return request.put<SysUser>(`/system/users/${id}`, data)
+}
+
+/** 删除用户 */
+export function deleteUser(id: number) {
+  return request.delete<null>(`/system/users/${id}`)
+}
+
+/** 启停用户 */
+export function updateUserStatus(id: number, status: number) {
+  return request.put<{ id: number; status: number }>(`/system/users/${id}/status`, { status })
+}
+
+/** 为用户分配角色（角色决定菜单与按钮权限） */
+export function assignUserRole(id: number, roleId: number) {
+  return request.put<{ id: number; roleId: number }>(`/system/users/${id}/role`, { roleId })
+}
+
+/** 为用户分配租户（null 表示平台级用户） */
+export function assignUserTenant(id: number, tenantId: number | null) {
+  return request.put<{ id: number; tenantId: number | null }>(`/system/users/${id}/tenant`, {
+    tenantId,
   })
 }
 
