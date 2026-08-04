@@ -153,6 +153,13 @@ onMounted(loadAll)
 
 .dashboard-row {
   margin-top: 16px;
+
+  /* 窄屏下列堆叠时，Element Plus gutter 只产生水平间距，需补充垂直间距 */
+  :deep(.el-col + .el-col) {
+    @media (width <= 1199px) {
+      margin-top: 16px;
+    }
+  }
 }
 
 .card-title {
