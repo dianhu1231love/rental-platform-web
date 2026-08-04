@@ -230,6 +230,7 @@ docs: 更新 README 文档
 ## 相关文档
 
 - [短信验证码技术方案](docs/sms-verification-design.md)：短信验证码的 Redis 设计、短信平台选型、防刷策略、"是否需要 Kafka"的判断与演进路线
+- [MinIO + Spring Boot + KKFileView 文件预览接入指南](docs/file-preview-minio-spring-kkfileview.md)：附件上传/预览/下载的后端接入方案与前端现状说明
 
 ## Git 分支规范
 

@@ -12,6 +12,7 @@ import {
 } from 'element-plus'
 import { createVisit, deleteVisit, getVisitList, updateVisit } from '@/api/visit'
 import { getCustomerOptions } from '@/api/market'
+import { buildKKFileViewPreviewUrl, isHttpUrl } from '@/utils/preview'
 import { useI18n } from 'vue-i18n'
 import type { TableColumn, FilterField } from '@/components/SmartTable.vue'
 import type {
@@ -324,6 +325,12 @@ const previewIndex = ref(0)
 const currentPreview = computed<VisitAttachment | null>(
   () => previewList.value[previewIndex.value] || null,
 )
+
+/** KKFileView 预览地址（附件为 HTTP 文件地址且已配置 KKFileView 服务时使用） */
+const kkPreviewUrl = computed(() => {
+  const att = currentPreview.value
+  return att && isHttpUrl(att.url) ? buildKKFileViewPreviewUrl(att.url) : ''
+})
 
 function openPreview(list: VisitAttachment[], index = 0): void {
   previewList.value = list
@@ -638,8 +645,14 @@ onMounted(async () => {
             <el-icon><Document /></el-icon>
             <span>{{ currentPreview.name }}</span>
           </div>
+          <iframe
+            v-if="kkPreviewUrl"
+            :src="kkPreviewUrl"
+            class="preview-frame"
+            :title="currentPreview?.name"
+          />
           <img
-            v-if="currentPreview && isImage(currentPreview) && currentPreview.url"
+            v-else-if="currentPreview && isImage(currentPreview) && currentPreview.url"
             :src="currentPreview.url"
             class="preview-image"
             :alt="currentPreview.name"
