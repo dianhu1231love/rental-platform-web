@@ -230,3 +230,17 @@ docs: 更新 README 文档
 ## 相关文档
 
 - [短信验证码技术方案](docs/sms-verification-design.md)：短信验证码的 Redis 设计、短信平台选型、防刷策略、"是否需要 Kafka"的判断与演进路线
+
+## Git 分支规范
+
+采用 Git Flow 简化模型：
+
+| 分支 | 用途 |
+| ---- | ---- |
+| main | 生产分支，始终可部署，仅通过合并 release / hotfix 更新 |
+| develop | 日常开发集成分支，功能开发完成后合并到此 |
+| feature/* | 功能分支，从 develop 检出，完成后合并回 develop |
+| release/* | 发布分支，从 develop 检出，验收后合并到 main 并打 tag |
+| hotfix | 紧急修复分支，从 main 检出，修复后合并回 main 和 develop |
+
+提交信息遵循 Conventional Commits：`feat:` / `fix:` / `style:` / `refactor:` / `docs:` / `chore:` 等，提交前由 Husky 自动检查。
