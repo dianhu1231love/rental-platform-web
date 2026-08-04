@@ -52,89 +52,88 @@ const searchParams = reactive({
   status: '' as EquipmentStatus | '',
 })
 
-/** 设备状态元信息（标签文案 + 颜色） */
-const STATUS_META: Record<
-  EquipmentStatus,
-  { label: string; type: 'success' | 'info' | 'warning' | 'danger' }
-> = {
+/** 设备状态元信息（computed：语言切换时自动重建文案） */
+const STATUS_META = computed<
+  Record<EquipmentStatus, { label: string; type: 'success' | 'info' | 'warning' | 'danger' }>
+>(() => ({
   renting: { label: t('equipment.statusRenting'), type: 'success' },
   idle: { label: t('equipment.statusIdle'), type: 'info' },
   preparing: { label: t('equipment.statusPreparing'), type: 'warning' },
   maintenance: { label: t('equipment.statusMaintenance'), type: 'danger' },
-}
-
-const STATUS_OPTIONS = Object.entries(STATUS_META).map(([value, meta]) => ({
-  value,
-  label: meta.label,
 }))
 
-/** 设备是否完好标签颜色映射（值即字典标签） */
-const INTACT_META: Record<string, { type: 'success' | 'danger' }> = {
-  完好: { type: 'success' },
-  不完好: { type: 'danger' },
-}
+const STATUS_OPTIONS = computed(() =>
+  Object.entries(STATUS_META.value).map(([value, meta]) => ({
+    value,
+    label: meta.label,
+  })),
+)
 
-const columns: TableColumn[] = [
-  { prop: 'code', label: t('equipment.code'), width: 180, fixed: 'left' },
-  { prop: 'brand', label: t('equipment.brand'), width: 110 },
-  { prop: 'model', label: t('equipment.model'), width: 160 },
-  { prop: 'owner', label: t('equipment.owner'), minWidth: 170, showOverflowTooltip: true },
-  {
-    prop: 'purchaseAmount',
-    label: t('equipment.purchaseAmount'),
-    width: 120,
-    align: 'right',
-    formatter: (_row, value) => formatMoney(value as number),
-  },
-  {
-    prop: 'status',
-    label: t('equipment.status'),
-    width: 100,
-    align: 'center',
-    statusMap: {
-      renting: STATUS_META.renting,
-      idle: STATUS_META.idle,
-      preparing: STATUS_META.preparing,
-      maintenance: STATUS_META.maintenance,
+/** 表格列配置（computed：语言切换时自动重建文案） */
+const columns = computed<TableColumn[]>(() => {
+  const cols: TableColumn[] = [
+    { prop: 'code', label: t('equipment.code'), width: 180, fixed: 'left' },
+    { prop: 'brand', label: t('equipment.brand'), width: 110 },
+    { prop: 'model', label: t('equipment.model'), width: 160 },
+    { prop: 'owner', label: t('equipment.owner'), minWidth: 170, showOverflowTooltip: true },
+    {
+      prop: 'purchaseAmount',
+      label: t('equipment.purchaseAmount'),
+      width: 120,
+      align: 'right',
+      formatter: (_row, value) => formatMoney(value as number),
     },
-  },
-  {
-    prop: 'intact',
-    label: t('equipment.intact'),
-    width: 110,
-    align: 'center',
-    statusMap: {
-      完好: { label: t('equipment.intactOk'), type: INTACT_META.完好.type },
-      不完好: { label: t('equipment.intactBroken'), type: INTACT_META.不完好.type },
+    {
+      prop: 'status',
+      label: t('equipment.status'),
+      width: 100,
+      align: 'center',
+      statusMap: {
+        renting: STATUS_META.value.renting,
+        idle: STATUS_META.value.idle,
+        preparing: STATUS_META.value.preparing,
+        maintenance: STATUS_META.value.maintenance,
+      },
     },
-  },
-  {
-    prop: 'invoiceAmount',
-    label: t('equipment.invoiceAmount'),
-    width: 130,
-    align: 'right',
-    formatter: (_row, value) => formatMoney(value as number),
-  },
-  {
-    prop: 'maintenanceCost',
-    label: t('equipment.maintenanceCost'),
-    width: 130,
-    align: 'right',
-    formatter: (_row, value) => formatMoney(value as number),
-  },
-  {
-    prop: 'expenseTotal',
-    label: t('equipment.expenseTotal'),
-    width: 130,
-    align: 'right',
-    formatter: (_row, value) => formatMoney(value as number),
-  },
-  { prop: 'certificates', label: t('equipment.certificates'), width: 90, align: 'center' },
-  { prop: 'insurance', label: t('equipment.insurance'), width: 90, align: 'center' },
-  { prop: 'spareParts', label: t('equipment.spareParts'), width: 130, align: 'center' },
-  { prop: 'remark', label: t('equipment.remark'), minWidth: 140, showOverflowTooltip: true },
-  { prop: 'action', label: t('common.action'), width: 130, fixed: 'right', hideable: false },
-]
+    {
+      prop: 'intact',
+      label: t('equipment.intact'),
+      width: 110,
+      align: 'center',
+      statusMap: {
+        完好: { label: t('equipment.intactOk'), type: 'success' },
+        不完好: { label: t('equipment.intactBroken'), type: 'danger' },
+      },
+    },
+    {
+      prop: 'invoiceAmount',
+      label: t('equipment.invoiceAmount'),
+      width: 130,
+      align: 'right',
+      formatter: (_row, value) => formatMoney(value as number),
+    },
+    {
+      prop: 'maintenanceCost',
+      label: t('equipment.maintenanceCost'),
+      width: 130,
+      align: 'right',
+      formatter: (_row, value) => formatMoney(value as number),
+    },
+    {
+      prop: 'expenseTotal',
+      label: t('equipment.expenseTotal'),
+      width: 130,
+      align: 'right',
+      formatter: (_row, value) => formatMoney(value as number),
+    },
+    { prop: 'certificates', label: t('equipment.certificates'), width: 90, align: 'center' },
+    { prop: 'insurance', label: t('equipment.insurance'), width: 90, align: 'center' },
+    { prop: 'spareParts', label: t('equipment.spareParts'), width: 130, align: 'center' },
+    { prop: 'remark', label: t('equipment.remark'), minWidth: 140, showOverflowTooltip: true },
+    { prop: 'action', label: t('common.action'), width: 130, fixed: 'right', hideable: false },
+  ]
+  return cols
+})
 
 /** 筛选面板配置（品牌选项随字典异步加载后更新） */
 const filters = computed<FilterField[]>(() => [
@@ -145,7 +144,12 @@ const filters = computed<FilterField[]>(() => [
     type: 'select',
     options: brands.value.map((b) => ({ label: b.name, value: b.id })),
   },
-  { prop: 'status', label: t('equipment.status'), type: 'select', options: STATUS_OPTIONS },
+  {
+    prop: 'status',
+    label: t('equipment.status'),
+    type: 'select',
+    options: STATUS_OPTIONS.value,
+  },
 ])
 
 function brandName(id: number): string {

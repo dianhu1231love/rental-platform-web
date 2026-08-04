@@ -65,8 +65,8 @@ const ROLE_TAG_TYPE: Record<number, 'danger' | 'warning' | 'primary'> = {
   3: 'primary',
 }
 
-/** 表格列配置 */
-const columns: TableColumn[] = [
+/** 表格列配置（computed：语言切换时自动重建文案） */
+const columns = computed<TableColumn[]>(() => [
   { prop: 'username', label: t('user.username'), width: 110 },
   { prop: 'name', label: t('user.name'), width: 120 },
   {
@@ -98,7 +98,7 @@ const columns: TableColumn[] = [
   { prop: 'remark', label: t('common.remark'), minWidth: 130, showOverflowTooltip: true },
   { prop: 'createdAt', label: t('common.createdAt'), width: 165 },
   { prop: 'action', label: t('common.action'), width: 220, fixed: 'right', hideable: false },
-]
+])
 
 /** 筛选面板配置（角色/租户选项随数据加载后更新） */
 const filters = computed<FilterField[]>(() => [

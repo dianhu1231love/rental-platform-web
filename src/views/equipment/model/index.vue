@@ -26,15 +26,18 @@ const filteredList = computed(() => {
   )
 })
 
-const columns: TableColumn[] = [
+/** 表格列配置（computed：语言切换时自动重建文案） */
+const columns = computed<TableColumn[]>(() => [
   { prop: 'name', label: t('equipment.modelName'), minWidth: 180 },
   { prop: 'group', label: t('equipment.group'), width: 150 },
   { prop: 'remark', label: t('common.remark'), minWidth: 200, showOverflowTooltip: true },
   { prop: 'createdAt', label: t('common.createdAt'), width: 170 },
   { prop: 'action', label: t('common.action'), width: 130, fixed: 'right', hideable: false },
-]
+])
 
-const filters: FilterField[] = [{ prop: 'keyword', label: t('equipment.modelName'), type: 'input' }]
+const filters = computed<FilterField[]>(() => [
+  { prop: 'keyword', label: t('equipment.modelName'), type: 'input' },
+])
 
 const dialogVisible = ref(false)
 const dialogMode = ref<'create' | 'edit'>('create')

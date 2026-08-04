@@ -30,16 +30,15 @@ const brands = ref<EquipmentBrand[]>([])
 const models = ref<EquipmentModel[]>([])
 const location = ref<{ lng: number; lat: number; address: string } | null>(null)
 
-/** 设备状态元信息 */
-const STATUS_META: Record<
-  EquipmentStatus,
-  { label: string; type: 'success' | 'info' | 'warning' | 'danger' }
-> = {
+/** 设备状态元信息（computed：语言切换时自动重建文案） */
+const STATUS_META = computed<
+  Record<EquipmentStatus, { label: string; type: 'success' | 'info' | 'warning' | 'danger' }>
+>(() => ({
   renting: { label: t('equipment.statusRenting'), type: 'success' },
   idle: { label: t('equipment.statusIdle'), type: 'info' },
   preparing: { label: t('equipment.statusPreparing'), type: 'warning' },
   maintenance: { label: t('equipment.statusMaintenance'), type: 'danger' },
-}
+}))
 
 /** 设备是否完好标签颜色映射（值即字典标签） */
 const INTACT_META: Record<string, { type: 'success' | 'danger' }> = {

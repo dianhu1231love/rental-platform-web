@@ -24,8 +24,8 @@ const filteredRoles = computed(() => {
   )
 })
 
-/** 表格列配置 */
-const columns: TableColumn[] = [
+/** 表格列配置（computed：语言切换时自动重建文案） */
+const columns = computed<TableColumn[]>(() => [
   { prop: 'name', label: t('role.name'), minWidth: 140 },
   { prop: 'code', label: t('role.code'), minWidth: 110 },
   { prop: 'permissionScope', label: t('role.permissionScope'), minWidth: 150 },
@@ -33,12 +33,12 @@ const columns: TableColumn[] = [
   { prop: 'remark', label: t('common.remark'), minWidth: 180, showOverflowTooltip: true },
   { prop: 'createdAt', label: t('common.createdAt'), width: 170 },
   { prop: 'action', label: t('common.action'), width: 180, fixed: 'right', hideable: false },
-]
+])
 
 /** 筛选面板配置 */
-const filters: FilterField[] = [
+const filters = computed<FilterField[]>(() => [
   { prop: 'keyword', label: t('role.namePlaceholder'), type: 'input' },
-]
+])
 
 /** 搜索：按名称/编码本地过滤 */
 function handleSearch(condition: Record<string, unknown>): void {

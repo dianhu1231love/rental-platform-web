@@ -2,7 +2,7 @@
 <script setup lang="ts">
 defineOptions({ name: 'TenantManage' })
 
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import {
   getTenantList,
@@ -35,8 +35,8 @@ const searchParams = reactive({
   status: '' as number | '',
 })
 
-/** 表格列配置 */
-const columns: TableColumn[] = [
+/** 表格列配置（computed：语言切换时自动重建文案） */
+const columns = computed<TableColumn[]>(() => [
   { prop: 'name', label: t('tenant.name'), minWidth: 200, showOverflowTooltip: true },
   { prop: 'code', label: t('tenant.code'), width: 110 },
   { prop: 'contact', label: t('tenant.contact'), width: 110 },
@@ -57,10 +57,10 @@ const columns: TableColumn[] = [
   { prop: 'remark', label: t('common.remark'), minWidth: 140, showOverflowTooltip: true },
   { prop: 'createdAt', label: t('common.createdAt'), width: 165 },
   { prop: 'action', label: t('common.action'), width: 140, fixed: 'right', hideable: false },
-]
+])
 
 /** 筛选面板配置 */
-const filters: FilterField[] = [
+const filters = computed<FilterField[]>(() => [
   { prop: 'keyword', label: t('tenant.namePlaceholder'), type: 'input' },
   {
     prop: 'status',
@@ -71,7 +71,7 @@ const filters: FilterField[] = [
       { label: t('common.disabled'), value: 0 },
     ],
   },
-]
+])
 
 const dialogVisible = ref(false)
 const dialogMode = ref('create')
