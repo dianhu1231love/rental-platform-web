@@ -18,6 +18,7 @@ import {
   seedTodos,
   seedTranslationDict,
   seedUsers,
+  seedVisits,
   type SeedUser,
 } from './seed'
 import type {
@@ -31,6 +32,9 @@ import type {
   Role,
   Tenant,
   TodoItem,
+  VisitAttachment,
+  VisitRecord,
+  VisitType,
 } from '@/types'
 
 const PREFIX = '/api'
@@ -42,6 +46,7 @@ const KEYS = {
   users: 'rp_mock_users',
   tenants: 'rp_mock_tenants',
   customers: 'rp_mock_customers',
+  visits: 'rp_mock_visits',
   todos: 'rp_mock_todos',
   equipment: 'rp_mock_equipment',
   brands: 'rp_mock_brands',
@@ -177,6 +182,7 @@ interface MockDb {
   users: SeedUser[]
   tenants: Tenant[]
   customers: Customer[]
+  visits: VisitRecord[]
   todos: TodoItem[]
   equipment: EquipmentItem[]
   brands: EquipmentBrand[]
@@ -215,6 +221,12 @@ const db: MockDb = {
   },
   set customers(v) {
     save(KEYS.customers, v)
+  },
+  get visits() {
+    return load(KEYS.visits, seedVisits)
+  },
+  set visits(v) {
+    save(KEYS.visits, v)
   },
   get todos() {
     return load(KEYS.todos, seedTodos)
@@ -919,6 +931,17 @@ const routes: MockRoute[] = [
   },
   {
     method: 'get',
+    pattern: /^\/market\/customers\/options$/,
+    auth: true,
+    handler: async () =>
+      ok(
+        db.customers
+          .filter((c) => c.status === 1)
+          .map((c) => ({ id: c.id, name: c.name, contact: c.contact, phone: c.phone })),
+      ),
+  },
+  {
+    method: 'get',
     pattern: /^\/market\/customers$/,
     auth: true,
     handler: async (_config, _match, config) => {
@@ -1033,6 +1056,116 @@ const routes: MockRoute[] = [
       const next = customers.filter((c) => c.id !== id)
       if (next.length === customers.length) return fail(500, 'market.customerNotFound')
       db.customers = next
+      return ok(null)
+    },
+  },
+  {
+    method: 'get',
+    pattern: /^\/market\/visits$/,
+    auth: true,
+    handler: async (_config, _match, config) => {
+      const params = (config.params || {}) as {
+        page?: string | number
+        pageSize?: string | number
+        keyword?: string
+        visitType?: string
+        visitTimeStart?: string
+        visitTimeEnd?: string
+      }
+      const page = Number(params.page) || 1
+      const pageSize = Number(params.pageSize) || 10
+      let list = db.visits
+      if (params.keyword) {
+        const kw = String(params.keyword).toLowerCase()
+        list = list.filter((v) =>
+          [
+            v.opportunityCode,
+            v.customerName,
+            v.contact,
+            v.phone,
+            v.visitAddress,
+            v.workPoints,
+            v.visitResult,
+          ].some((field) =>
+            String(field || '')
+              .toLowerCase()
+              .includes(kw),
+          ),
+        )
+      }
+      if (params.visitType) list = list.filter((v) => v.visitType === params.visitType)
+      if (params.visitTimeStart) {
+        const start = String(params.visitTimeStart)
+        list = list.filter((v) => v.visitTime.slice(0, 10) >= start)
+      }
+      if (params.visitTimeEnd) {
+        const end = String(params.visitTimeEnd)
+        list = list.filter((v) => v.visitTime.slice(0, 10) <= end)
+      }
+      const total = list.length
+      const start = (page - 1) * pageSize
+      return ok({ list: list.slice(start, start + pageSize), total })
+    },
+  },
+  {
+    method: 'post',
+    pattern: /^\/market\/visits$/,
+    auth: true,
+    handler: async (_config, _match, config) => {
+      const visits = db.visits
+      const input = (config.data || {}) as Partial<VisitRecord>
+      if (!input.customerName || !input.visitType || !input.visitTime) {
+        return fail(500, 'market.visitRequired')
+      }
+      const current = currentUser(config)
+      const visit: VisitRecord = {
+        id: nextId(visits),
+        opportunityCode: input.opportunityCode || '',
+        customerId: input.customerId || 0,
+        customerName: input.customerName,
+        visitType: input.visitType as VisitType,
+        visitTime: input.visitTime,
+        visitAddress: input.visitAddress || '',
+        contact: input.contact || '',
+        phone: input.phone || '',
+        workPoints: input.workPoints || '',
+        visitResult: input.visitResult || '',
+        attachments: input.attachments || [],
+        creator: current?.name || '',
+        createdAt: formatNow(),
+      }
+      visits.unshift(visit)
+      db.visits = visits
+      return ok(visit)
+    },
+  },
+  {
+    method: 'put',
+    pattern: /^\/market\/visits\/(\d+)$/,
+    auth: true,
+    handler: async (_config, match, { data }) => {
+      const id = Number(match[1])
+      const visits = db.visits
+      const index = visits.findIndex((v) => v.id === id)
+      if (index === -1) return fail(500, 'market.visitNotFound')
+      const input = (data || {}) as { visitResult?: string; attachments?: VisitAttachment[] }
+      // 编辑仅允许修改拜访结果与附件
+      if (input.visitResult !== undefined) visits[index].visitResult = input.visitResult
+      if (input.attachments !== undefined) visits[index].attachments = input.attachments
+      db.visits = visits
+      return ok(visits[index])
+    },
+  },
+  {
+    method: 'delete',
+    pattern: /^\/market\/visits\/(\d+)$/,
+    auth: true,
+    handler: async (_config, match) => {
+      const id = Number(match[1])
+      const visits = db.visits
+      const next = visits.filter((v) => v.id !== id)
+      if (next.length === visits.length) return fail(500, 'market.visitNotFound')
+      db.visits = next
       return ok(null)
     },
   },
