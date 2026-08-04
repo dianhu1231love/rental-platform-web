@@ -15,11 +15,11 @@ const countdown = ref(0)
 const resultVisible = ref(false)
 const matchedAccounts = ref<{ username: string; name: string }[]>([])
 
-/** 匹配账户表格列配置 */
-const resultColumns: TableColumn[] = [
+/** 匹配账户表格列配置（computed：语言切换时自动重建文案） */
+const resultColumns = computed<TableColumn[]>(() => [
   { prop: 'name', label: t('layout.profile'), width: 160 },
   { prop: 'username', label: t('login.username'), minWidth: 160 },
-]
+])
 
 const form = reactive<ForgotFormModel>({
   account: '',
