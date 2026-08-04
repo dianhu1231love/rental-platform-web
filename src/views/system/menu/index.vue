@@ -344,6 +344,7 @@ onMounted(loadMenus)
         :filters="filters"
         :loading="loading"
         :paginated="false"
+        exportable
         row-key="id"
         :tree-props="{ children: 'children' }"
         default-expand-all
