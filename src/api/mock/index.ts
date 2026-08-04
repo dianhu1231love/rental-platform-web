@@ -5,6 +5,7 @@
  */
 import type { AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import {
+  seedCustomers,
   seedDashboard,
   seedDicts,
   seedEquipment,
@@ -20,6 +21,7 @@ import {
   type SeedUser,
 } from './seed'
 import type {
+  Customer,
   DictItem,
   EquipmentBrand,
   EquipmentGroup,
@@ -39,6 +41,7 @@ const KEYS = {
   roles: 'rp_mock_roles',
   users: 'rp_mock_users',
   tenants: 'rp_mock_tenants',
+  customers: 'rp_mock_customers',
   todos: 'rp_mock_todos',
   equipment: 'rp_mock_equipment',
   brands: 'rp_mock_brands',
@@ -164,6 +167,7 @@ interface MockDb {
   roles: Role[]
   users: SeedUser[]
   tenants: Tenant[]
+  customers: Customer[]
   todos: TodoItem[]
   equipment: EquipmentItem[]
   brands: EquipmentBrand[]
@@ -196,6 +200,12 @@ const db: MockDb = {
   },
   set tenants(v) {
     save(KEYS.tenants, v)
+  },
+  get customers() {
+    return load(KEYS.customers, seedCustomers)
+  },
+  set customers(v) {
+    save(KEYS.customers, v)
   },
   get todos() {
     return load(KEYS.todos, seedTodos)
@@ -352,6 +362,18 @@ function nextId(list: Array<{ id: number }>): number {
 /** 当前时间格式化（YYYY-MM-DD HH:mm:ss） */
 function formatNow(): string {
   return new Date().toISOString().slice(0, 19).replace('T', ' ')
+}
+
+/** 生成客户编码：KH-年份-4 位流水号，全局唯一 */
+function nextCustomerCode(list: Customer[]): string {
+  const year = new Date().getFullYear()
+  const prefix = `KH-${year}-`
+  const max = list.reduce((m, c) => {
+    if (!c.code.startsWith(prefix)) return m
+    const num = Number(c.code.slice(prefix.length)) || 0
+    return Math.max(m, num)
+  }, 0)
+  return `${prefix}${String(max + 1).padStart(4, '0')}`
 }
 
 /** 接口路由表：按 method + pattern 匹配请求 */
@@ -883,6 +905,125 @@ const routes: MockRoute[] = [
       const next = users.filter((u) => u.id !== id)
       if (next.length === users.length) return fail(500, 'system.userNotFound')
       db.users = next
+      return ok(null)
+    },
+  },
+  {
+    method: 'get',
+    pattern: /^\/market\/customers$/,
+    auth: true,
+    handler: async (_config, _match, config) => {
+      const params = (config.params || {}) as {
+        page?: string | number
+        pageSize?: string | number
+        keyword?: string
+        type?: string
+        status?: string | number | null
+        blacklisted?: string | number | null
+      }
+      const page = Number(params.page) || 1
+      const pageSize = Number(params.pageSize) || 10
+      let list = db.customers
+      if (params.keyword) {
+        const kw = String(params.keyword).toLowerCase()
+        list = list.filter(
+          (c) =>
+            c.code.toLowerCase().includes(kw) ||
+            c.name.toLowerCase().includes(kw) ||
+            c.contact.toLowerCase().includes(kw) ||
+            c.phone.toLowerCase().includes(kw),
+        )
+      }
+      if (params.type) list = list.filter((c) => c.type === params.type)
+      if (params.status !== undefined && params.status !== '' && params.status !== null) {
+        list = list.filter((c) => c.status === Number(params.status))
+      }
+      if (
+        params.blacklisted !== undefined &&
+        params.blacklisted !== '' &&
+        params.blacklisted !== null
+      ) {
+        list = list.filter((c) => c.blacklisted === Number(params.blacklisted))
+      }
+      const total = list.length
+      const start = (page - 1) * pageSize
+      return ok({ list: list.slice(start, start + pageSize), total })
+    },
+  },
+  {
+    method: 'post',
+    pattern: /^\/market\/customers$/,
+    auth: true,
+    handler: async (_config, _match, config) => {
+      const customers = db.customers
+      const input = (config.data || {}) as Partial<Customer>
+      if (!input.name) return fail(500, 'market.customerRequired')
+      const current = currentUser(config)
+      const customer: Customer = {
+        id: nextId(customers),
+        code: nextCustomerCode(customers),
+        name: input.name,
+        type: input.type || 'enterprise',
+        idNumber: input.idNumber || '',
+        sapCode: input.sapCode || '',
+        level: input.level || 'normal',
+        industry: input.industry || '',
+        source: input.source || 'self',
+        contact: input.contact || '',
+        phone: input.phone || '',
+        email: input.email || '',
+        address: input.address || '',
+        bank: input.bank || '',
+        bankAccount: input.bankAccount || '',
+        invoiceTitle: input.invoiceTitle || '',
+        status: input.status === 0 ? 0 : 1,
+        blacklisted: input.blacklisted === 1 ? 1 : 0,
+        creator: current?.name || '',
+        createdAt: formatNow(),
+      }
+      customers.unshift(customer)
+      db.customers = customers
+      return ok(customer)
+    },
+  },
+  {
+    method: 'put',
+    pattern: /^\/market\/customers\/(\d+)\/status$/,
+    auth: true,
+    handler: async (_config, match, { data }) => {
+      const id = Number(match[1])
+      const customers = db.customers
+      const index = customers.findIndex((c) => c.id === id)
+      if (index === -1) return fail(500, 'market.customerNotFound')
+      customers[index].status = (data as { status?: number } | undefined)?.status ? 1 : 0
+      db.customers = customers
+      return ok(customers[index])
+    },
+  },
+  {
+    method: 'put',
+    pattern: /^\/market\/customers\/(\d+)$/,
+    auth: true,
+    handler: async (_config, match, { data }) => {
+      const id = Number(match[1])
+      const customers = db.customers
+      const index = customers.findIndex((c) => c.id === id)
+      if (index === -1) return fail(500, 'market.customerNotFound')
+      customers[index] = { ...customers[index], ...(data as Partial<Customer>), id }
+      db.customers = customers
+      return ok(customers[index])
+    },
+  },
+  {
+    method: 'delete',
+    pattern: /^\/market\/customers\/(\d+)$/,
+    auth: true,
+    handler: async (_config, match) => {
+      const id = Number(match[1])
+      const customers = db.customers
+      const next = customers.filter((c) => c.id !== id)
+      if (next.length === customers.length) return fail(500, 'market.customerNotFound')
+      db.customers = next
       return ok(null)
     },
   },

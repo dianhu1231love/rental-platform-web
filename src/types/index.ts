@@ -223,6 +223,88 @@ export interface UserQuery {
   status?: number | ''
 }
 
+/** 客户性质：个人 / 企业 */
+export type CustomerType = 'individual' | 'enterprise'
+
+/** 客户等级 */
+export type CustomerLevel = 'key' | 'normal' | 'potential'
+
+/** 客户来源 */
+export type CustomerSource = 'referral' | 'exhibition' | 'online' | 'self'
+
+/** 市场管理-客户 */
+export interface Customer {
+  id: number
+  /** 客户编码（系统自动生成，全局唯一流水码） */
+  code: string
+  /** 客户名称 */
+  name: string
+  /** 客户性质 */
+  type: CustomerType
+  /** 社会信用代码（企业）/ 身份证号（个人） */
+  idNumber: string
+  /** SAP 编码 */
+  sapCode: string
+  /** 客户等级 */
+  level: CustomerLevel
+  /** 所属行业 */
+  industry: string
+  /** 客户来源 */
+  source: CustomerSource
+  /** 主要联系人 */
+  contact: string
+  /** 联系电话 */
+  phone: string
+  /** 邮箱 */
+  email: string
+  /** 联系地址 */
+  address: string
+  /** 开户银行 */
+  bank: string
+  /** 银行账号 */
+  bankAccount: string
+  /** 发票抬头 */
+  invoiceTitle: string
+  /** 状态：1 启用 / 0 停用 */
+  status: number
+  /** 是否进入黑名单：1 是 / 0 否（黑名单功能后续开发） */
+  blacklisted: number
+  /** 创建人 */
+  creator: string
+  createdAt: string
+}
+
+/** 客户新增/编辑表单模型 */
+export interface CustomerFormModel {
+  id: number | null
+  name: string
+  type: CustomerType
+  idNumber: string
+  sapCode: string
+  level: CustomerLevel
+  industry: string
+  source: CustomerSource
+  contact: string
+  phone: string
+  email: string
+  address: string
+  bank: string
+  bankAccount: string
+  invoiceTitle: string
+  status: number
+  blacklisted: number
+}
+
+/** 客户分页查询参数 */
+export interface CustomerQuery {
+  page?: number
+  pageSize?: number
+  keyword?: string
+  type?: CustomerType | ''
+  status?: number | ''
+  blacklisted?: number | ''
+}
+
 /** 指标项（数值 + 环比） */
 export interface StatItem {
   value: number
