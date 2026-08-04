@@ -27,6 +27,7 @@ export interface SeedUser {
   roleId: number
   avatar: string
   phone?: string
+  email?: string
 }
 
 // 种子数据：首次运行时写入 localStorage，之后系统内编辑会持久化保存
@@ -260,9 +261,36 @@ export const seedRoles: Role[] = [
 ]
 
 export const seedUsers: SeedUser[] = [
-  { id: 1, username: 'admin', password: '123456', name: '系统管理员', roleId: 1, avatar: '' },
-  { id: 2, username: 'finance', password: '123456', name: '财务专员-小李', roleId: 2, avatar: '' },
-  { id: 3, username: 'operator', password: '123456', name: '运营专员-小王', roleId: 3, avatar: '' },
+  {
+    id: 1,
+    username: 'admin',
+    password: '123456',
+    name: '系统管理员',
+    roleId: 1,
+    avatar: '',
+    phone: '13800000001',
+    email: 'admin@example.com',
+  },
+  {
+    id: 2,
+    username: 'finance',
+    password: '123456',
+    name: '财务专员-小李',
+    roleId: 2,
+    avatar: '',
+    phone: '13800000002',
+    email: 'finance@example.com',
+  },
+  {
+    id: 3,
+    username: 'operator',
+    password: '123456',
+    name: '运营专员-小王',
+    roleId: 3,
+    avatar: '',
+    phone: '13800000003',
+    email: 'operator@example.com',
+  },
 ]
 
 export const seedTenants: Tenant[] = [

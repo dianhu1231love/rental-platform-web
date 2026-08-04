@@ -39,6 +39,20 @@ export const constantRoutes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: Layout,
+    meta: { hidden: true, title: '个人中心' },
+    children: [
+      {
+        path: '',
+        name: 'ProfilePage',
+        component: () => import('@/views/profile/index.vue'),
+        meta: { hidden: true, title: '个人中心' },
+      },
+    ],
+  },
 ]
 
 const router = createRouter({

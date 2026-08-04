@@ -72,6 +72,8 @@ export interface UserInfo {
   name: string
   username: string
   avatar: string
+  phone?: string
+  email?: string
   roles: string[]
   perms: string[]
   roleId: number | null

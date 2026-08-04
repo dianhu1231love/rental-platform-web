@@ -214,6 +214,14 @@ function currentUser(config: MockConfig): SeedUser | null {
   return db.users.find((u) => u.username === username) || null
 }
 
+/** 用户联系方式：兼容历史 localStorage 中缺少手机号/邮箱的数据 */
+function userContact(user: SeedUser): { phone: string; email: string } {
+  return {
+    phone: user.phone || `1380000${String(user.id).padStart(4, '0')}`,
+    email: user.email || `${user.username}@example.com`,
+  }
+}
+
 type MenuNode = Menu & { children: MenuNode[] }
 
 /** 将扁平菜单列表构建为树 */
@@ -335,14 +343,78 @@ const routes: MockRoute[] = [
       if (!user) return fail(401, '登录状态已失效，请重新登录')
       const role = db.roles.find((r) => r.id === user.roleId)
       if (!role) return fail(500, '角色不存在')
+      const { phone, email } = userContact(user)
       return ok({
         name: user.name,
         username: user.username,
         avatar: user.avatar,
+        phone,
+        email,
         roles: [role.code],
         perms: collectPerms(role),
         roleId: role.id,
         menus: userMenus(role),
+      })
+    },
+  },
+  {
+    method: 'get',
+    pattern: /^\/auth\/profile$/,
+    auth: true,
+    handler: async (config) => {
+      const user = currentUser(config)
+      if (!user) return fail(401, '登录状态已失效，请重新登录')
+      const { phone, email } = userContact(user)
+      return ok({
+        name: user.name,
+        username: user.username,
+        avatar: user.avatar,
+        phone,
+        email,
+      })
+    },
+  },
+  {
+    method: 'post',
+    pattern: /^\/auth\/send-code$/,
+    auth: true,
+    handler: async (_config, _match, { data }) => {
+      const target = ((data || {}) as { target?: string }).target || ''
+      // 演示环境不真正发送短信/邮件，验证码固定为 123456
+      return ok({ sent: true, target })
+    },
+  },
+  {
+    method: 'post',
+    pattern: /^\/auth\/profile\/update$/,
+    auth: true,
+    handler: async (config, _match, { data }) => {
+      const user = currentUser(config)
+      if (!user) return fail(401, '登录状态已失效，请重新登录')
+      const { code, name, avatar, phone, email } = (data || {}) as {
+        code?: string
+        name?: string
+        avatar?: string
+        phone?: string
+        email?: string
+      }
+      if (code !== '123456') return fail(500, '验证码错误（演示环境请使用 123456）')
+      const users = db.users
+      const index = users.findIndex((u) => u.id === user.id)
+      if (index === -1) return fail(500, '用户不存在')
+      if (name !== undefined) users[index].name = name
+      if (avatar !== undefined) users[index].avatar = avatar
+      if (phone !== undefined) users[index].phone = phone
+      if (email !== undefined) users[index].email = email
+      db.users = users
+      const updated = users[index]
+      const contact = userContact(updated)
+      return ok({
+        name: updated.name,
+        username: updated.username,
+        avatar: updated.avatar,
+        phone: contact.phone,
+        email: contact.email,
       })
     },
   },

@@ -26,7 +26,7 @@ async function handleCommand(command: string): Promise<void> {
       // 取消操作
     }
   } else if (command === 'profile') {
-    ElMessage.info('个人中心开发中')
+    router.push('/profile')
   }
 }
 </script>
