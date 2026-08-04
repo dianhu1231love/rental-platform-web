@@ -46,6 +46,8 @@ export function sendCode(target: string) {
 /** 提交个人资料变更（需验证码校验） */
 export function updateProfile(data: {
   code: string
+  phoneCode?: string
+  emailCode?: string
   name?: string
   avatar?: string
   phone?: string

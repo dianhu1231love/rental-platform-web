@@ -72,7 +72,8 @@ service.interceptors.response.use(
       handleUnauthorized()
       return Promise.reject(new Error(res.message))
     }
-    ElMessage.error(res.message || i18n.global.t('common.requestError'))
+    // 后端错误消息优先按 i18n key 翻译（非 key 的原始消息原样展示）
+    ElMessage.error(res.message ? i18n.global.t(res.message) : i18n.global.t('common.requestError'))
     return Promise.reject(new Error(res.message))
   },
   (error: AxiosError) => {

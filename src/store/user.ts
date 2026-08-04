@@ -58,6 +58,8 @@ export const useUserStore = defineStore('user', {
     /** 更新个人资料（需验证码），成功后同步本地状态 */
     async updateProfile(payload: {
       code: string
+      phoneCode?: string
+      emailCode?: string
       name?: string
       avatar?: string
       phone?: string

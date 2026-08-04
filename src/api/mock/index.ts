@@ -297,7 +297,7 @@ const routes: MockRoute[] = [
     handler: async ({ data }) => {
       const { username, password } = (data || {}) as { username?: string; password?: string }
       const user = db.users.find((u) => u.username === username && u.password === password)
-      if (!user) return fail(500, '用户名或密码错误')
+      if (!user) return fail(500, 'auth.loginError')
       return ok({ token: createToken(user) })
     },
   },
@@ -307,7 +307,7 @@ const routes: MockRoute[] = [
     handler: async ({ data }) => {
       const username = ((data || {}) as { username?: string }).username || 'admin'
       const user = db.users.find((u) => u.username === username)
-      if (!user) return fail(500, 'SSO 票据无效或已过期')
+      if (!user) return fail(500, 'auth.ssoError')
       return ok({ token: createToken(user) })
     },
   },
@@ -321,11 +321,11 @@ const routes: MockRoute[] = [
     pattern: /^\/auth\/forgot$/,
     handler: async ({ data }) => {
       const { account, code } = (data || {}) as { account?: string; code?: string }
-      if (code !== '123456') return fail(500, '验证码错误（演示环境请使用 123456）')
+      if (code !== '123456') return fail(500, 'auth.verifyCodeError')
       const matched = db.users.filter(
         (u) => u.username === account || (u.phone && u.phone === account),
       )
-      if (matched.length === 0) return fail(500, '未找到关联账户，请核对后重试')
+      if (matched.length === 0) return fail(500, 'auth.accountNotFound')
       return ok(
         matched.map((u) => ({
           username: u.username.slice(0, 1) + '***' + u.username.slice(-1),
@@ -340,9 +340,9 @@ const routes: MockRoute[] = [
     auth: true,
     handler: async (config) => {
       const user = currentUser(config)
-      if (!user) return fail(401, '登录状态已失效，请重新登录')
+      if (!user) return fail(401, 'common.sessionExpired')
       const role = db.roles.find((r) => r.id === user.roleId)
-      if (!role) return fail(500, '角色不存在')
+      if (!role) return fail(500, 'auth.roleNotFound')
       const { phone, email } = userContact(user)
       return ok({
         name: user.name,
@@ -363,7 +363,7 @@ const routes: MockRoute[] = [
     auth: true,
     handler: async (config) => {
       const user = currentUser(config)
-      if (!user) return fail(401, '登录状态已失效，请重新登录')
+      if (!user) return fail(401, 'common.sessionExpired')
       const { phone, email } = userContact(user)
       return ok({
         name: user.name,
@@ -390,18 +390,27 @@ const routes: MockRoute[] = [
     auth: true,
     handler: async (config, _match, { data }) => {
       const user = currentUser(config)
-      if (!user) return fail(401, '登录状态已失效，请重新登录')
-      const { code, name, avatar, phone, email } = (data || {}) as {
+      if (!user) return fail(401, 'common.sessionExpired')
+      const { code, phoneCode, emailCode, name, avatar, phone, email } = (data || {}) as {
         code?: string
+        phoneCode?: string
+        emailCode?: string
         name?: string
         avatar?: string
         phone?: string
         email?: string
       }
-      if (code !== '123456') return fail(500, '验证码错误（演示环境请使用 123456）')
       const users = db.users
       const index = users.findIndex((u) => u.id === user.id)
-      if (index === -1) return fail(500, '用户不存在')
+      if (index === -1) return fail(500, 'auth.userNotFound')
+      const current = users[index]
+      // 手机号/邮箱有变更时，分别校验对应渠道的验证码；仅改名称/头像时校验通用验证码
+      const phoneChanged = phone !== undefined && phone !== current.phone
+      const emailChanged = email !== undefined && email !== current.email
+      if (phoneChanged && phoneCode !== '123456') return fail(500, 'auth.verifyCodeError')
+      if (emailChanged && emailCode !== '123456') return fail(500, 'auth.verifyCodeError')
+      if (!phoneChanged && !emailChanged && code !== '123456')
+        return fail(500, 'auth.verifyCodeError')
       if (name !== undefined) users[index].name = name
       if (avatar !== undefined) users[index].avatar = avatar
       if (phone !== undefined) users[index].phone = phone
@@ -457,7 +466,7 @@ const routes: MockRoute[] = [
       const action = (data as { action?: string } | undefined)?.action
       const todos = db.todos
       const index = todos.findIndex((t) => t.id === id)
-      if (index === -1) return fail(500, '待办事项不存在')
+      if (index === -1) return fail(500, 'dashboard.todoNotFound')
       todos.splice(index, 1)
       db.todos = todos
       return ok({ id, action })
@@ -493,7 +502,7 @@ const routes: MockRoute[] = [
       const id = Number(match[1])
       const roles = db.roles
       const index = roles.findIndex((r) => r.id === id)
-      if (index === -1) return fail(500, '角色不存在')
+      if (index === -1) return fail(500, 'system.roleNotFound')
       roles[index] = { ...roles[index], ...(data as Partial<Role>), id }
       db.roles = roles
       return ok(roles[index])
@@ -507,7 +516,7 @@ const routes: MockRoute[] = [
       const id = Number(match[1])
       const roles = db.roles
       const next = roles.filter((r) => r.id !== id)
-      if (next.length === roles.length) return fail(500, '角色不存在')
+      if (next.length === roles.length) return fail(500, 'system.roleNotFound')
       db.roles = next
       return ok(null)
     },
@@ -538,7 +547,7 @@ const routes: MockRoute[] = [
       const id = Number(match[1])
       const menus = db.menus
       const index = menus.findIndex((m) => m.id === id)
-      if (index === -1) return fail(500, '菜单不存在')
+      if (index === -1) return fail(500, 'system.menuNotFound')
       menus[index] = { ...menus[index], ...(data as Partial<Menu>), id }
       db.menus = menus
       return ok(menus[index])
@@ -551,9 +560,9 @@ const routes: MockRoute[] = [
     handler: async (_config, match) => {
       const id = Number(match[1])
       const menus = db.menus
-      if (menus.some((m) => m.parentId === id)) return fail(500, '请先删除该菜单下的子菜单')
+      if (menus.some((m) => m.parentId === id)) return fail(500, 'system.deleteChildFirst')
       const next = menus.filter((m) => m.id !== id)
-      if (next.length === menus.length) return fail(500, '菜单不存在')
+      if (next.length === menus.length) return fail(500, 'system.menuNotFound')
       db.menus = next
       return ok(null)
     },
@@ -613,7 +622,7 @@ const routes: MockRoute[] = [
       const id = Number(match[1])
       const tenants = db.tenants
       const index = tenants.findIndex((t) => t.id === id)
-      if (index === -1) return fail(500, '租户不存在')
+      if (index === -1) return fail(500, 'system.tenantNotFound')
       tenants[index] = { ...tenants[index], ...(data as Partial<Tenant>), id }
       db.tenants = tenants
       return ok(tenants[index])
@@ -627,7 +636,7 @@ const routes: MockRoute[] = [
       const id = Number(match[1])
       const tenants = db.tenants
       const index = tenants.findIndex((t) => t.id === id)
-      if (index === -1) return fail(500, '租户不存在')
+      if (index === -1) return fail(500, 'system.tenantNotFound')
       tenants[index].status = (data as { status?: number } | undefined)?.status ? 1 : 0
       db.tenants = tenants
       return ok(tenants[index])
@@ -641,7 +650,7 @@ const routes: MockRoute[] = [
       const id = Number(match[1])
       const tenants = db.tenants
       const next = tenants.filter((t) => t.id !== id)
-      if (next.length === tenants.length) return fail(500, '租户不存在')
+      if (next.length === tenants.length) return fail(500, 'system.tenantNotFound')
       db.tenants = next
       return ok(null)
     },
@@ -663,7 +672,7 @@ const routes: MockRoute[] = [
     handler: async (_config, _match, { data }) => {
       const dicts = db.dicts
       const { type, label } = (data || {}) as { type?: string; label?: string }
-      if (!type || !label) return fail(500, '字典类型与标签不能为空')
+      if (!type || !label) return fail(500, 'system.dictRequired')
       const exists = dicts.find((d) => d.type === type && d.label === label)
       if (exists) return ok(exists)
       const item: DictItem = { id: nextId(dicts), type, label }
@@ -761,7 +770,7 @@ const routes: MockRoute[] = [
     handler: async (_config, match) => {
       const id = Number(match[1])
       const item = db.equipment.find((e) => e.id === id)
-      if (!item) return fail(500, '设备不存在')
+      if (!item) return fail(500, 'equipment.notFound')
       return ok(item)
     },
   },
@@ -773,7 +782,7 @@ const routes: MockRoute[] = [
       const id = Number(match[1])
       const equipment = db.equipment
       const index = equipment.findIndex((e) => e.id === id)
-      if (index === -1) return fail(500, '设备不存在')
+      if (index === -1) return fail(500, 'equipment.notFound')
       equipment[index] = { ...equipment[index], ...(data as Partial<EquipmentItem>), id }
       db.equipment = equipment
       return ok(equipment[index])
@@ -787,7 +796,7 @@ const routes: MockRoute[] = [
       const id = Number(match[1])
       const equipment = db.equipment
       const next = equipment.filter((e) => e.id !== id)
-      if (next.length === equipment.length) return fail(500, '设备不存在')
+      if (next.length === equipment.length) return fail(500, 'equipment.notFound')
       db.equipment = next
       return ok(null)
     },
@@ -822,7 +831,7 @@ const routes: MockRoute[] = [
       const id = Number(match[1])
       const list = db.brands
       const index = list.findIndex((b) => b.id === id)
-      if (index === -1) return fail(500, '品牌不存在')
+      if (index === -1) return fail(500, 'equipment.brandNotFound')
       list[index] = { ...list[index], ...(data as Partial<EquipmentBrand>), id }
       db.brands = list
       return ok(list[index])
@@ -836,7 +845,7 @@ const routes: MockRoute[] = [
       const id = Number(match[1])
       const list = db.brands
       const next = list.filter((b) => b.id !== id)
-      if (next.length === list.length) return fail(500, '品牌不存在')
+      if (next.length === list.length) return fail(500, 'equipment.brandNotFound')
       db.brands = next
       return ok(null)
     },
@@ -871,7 +880,7 @@ const routes: MockRoute[] = [
       const id = Number(match[1])
       const list = db.groups
       const index = list.findIndex((g) => g.id === id)
-      if (index === -1) return fail(500, '产品组不存在')
+      if (index === -1) return fail(500, 'equipment.groupNotFound')
       list[index] = { ...list[index], ...(data as Partial<EquipmentGroup>), id }
       db.groups = list
       return ok(list[index])
@@ -885,7 +894,7 @@ const routes: MockRoute[] = [
       const id = Number(match[1])
       const list = db.groups
       const next = list.filter((g) => g.id !== id)
-      if (next.length === list.length) return fail(500, '产品组不存在')
+      if (next.length === list.length) return fail(500, 'equipment.groupNotFound')
       db.groups = next
       return ok(null)
     },
@@ -920,7 +929,7 @@ const routes: MockRoute[] = [
       const id = Number(match[1])
       const list = db.models
       const index = list.findIndex((m) => m.id === id)
-      if (index === -1) return fail(500, '产品型号不存在')
+      if (index === -1) return fail(500, 'equipment.modelNotFound')
       list[index] = { ...list[index], ...(data as Partial<EquipmentModel>), id }
       db.models = list
       return ok(list[index])
@@ -934,7 +943,7 @@ const routes: MockRoute[] = [
       const id = Number(match[1])
       const list = db.models
       const next = list.filter((m) => m.id !== id)
-      if (next.length === list.length) return fail(500, '产品型号不存在')
+      if (next.length === list.length) return fail(500, 'equipment.modelNotFound')
       db.models = next
       return ok(null)
     },
@@ -955,7 +964,7 @@ export function createMockAdapter() {
         if (!user) {
           await delay()
           return {
-            data: fail(401, '登录状态已失效，请重新登录'),
+            data: fail(401, 'common.sessionExpired'),
             status: 200,
             statusText: 'OK',
             headers: {},

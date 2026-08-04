@@ -24,7 +24,8 @@ interface ProfileForm {
   email: string
   avatar: string
   code: string
-  channel: 'phone' | 'email'
+  phoneCode: string
+  emailCode: string
 }
 
 const form = reactive<ProfileForm>({
@@ -34,7 +35,8 @@ const form = reactive<ProfileForm>({
   email: '',
   avatar: '',
   code: '',
-  channel: 'phone',
+  phoneCode: '',
+  emailCode: '',
 })
 
 /** 初始资料快照，用于判断是否有变更 */
@@ -45,11 +47,13 @@ const original = reactive({
   avatar: '',
 })
 
+const phoneChanged = computed(() => original.phone !== form.phone)
+const emailChanged = computed(() => original.email !== form.email)
 const changed = computed(
   () =>
     original.name !== form.name ||
-    original.phone !== form.phone ||
-    original.email !== form.email ||
+    phoneChanged.value ||
+    emailChanged.value ||
     original.avatar !== form.avatar,
 )
 
@@ -75,7 +79,6 @@ const rules: FormRules = {
       trigger: 'blur',
     },
   ],
-  code: [{ required: true, message: () => t('profile.codePlaceholder'), trigger: 'blur' }],
 }
 
 /** 加载当前用户资料 */
@@ -91,7 +94,8 @@ async function loadProfile(): Promise<void> {
       email: profile.email,
       avatar: profile.avatar,
       code: '',
-      channel: 'phone',
+      phoneCode: '',
+      emailCode: '',
     })
     Object.assign(original, {
       name: profile.name,
@@ -119,20 +123,19 @@ function onAvatarChange(uploadFile: UploadFile): void {
   reader.readAsDataURL(raw)
 }
 
-/** 发送验证码到所选验证渠道 */
-async function handleSendCode(): Promise<void> {
-  const target = form.channel === 'phone' ? form.phone : form.email
-  if (form.channel === 'phone' && !isValidPhone(target)) {
+/** 发送验证码到指定手机号/邮箱 */
+async function handleSendCode(target: string, isPhone: boolean): Promise<void> {
+  if (isPhone && !isValidPhone(target)) {
     ElMessage.warning(t('profile.phoneInvalid'))
     return
   }
-  if (form.channel === 'email' && !isValidEmail(target)) {
+  if (!isPhone && !isValidEmail(target)) {
     ElMessage.warning(t('profile.emailInvalid'))
     return
   }
   sending.value = true
   try {
-    await sendCode(`${form.channel}:${target}`)
+    await sendCode(`${isPhone ? 'phone' : 'email'}:${target}`)
     ElMessage.success(t('profile.codeSent', { target }))
   } finally {
     sending.value = false
@@ -143,10 +146,25 @@ async function handleSendCode(): Promise<void> {
 async function handleSave(): Promise<void> {
   if (!formRef.value) return
   await formRef.value.validate()
+  // 按变更渠道分别校验验证码：仅改名称/头像时校验通用验证码
+  if (!phoneChanged.value && !emailChanged.value && !form.code) {
+    ElMessage.warning(t('profile.codePlaceholder'))
+    return
+  }
+  if (phoneChanged.value && !form.phoneCode) {
+    ElMessage.warning(t('profile.phoneCodeRequired'))
+    return
+  }
+  if (emailChanged.value && !form.emailCode) {
+    ElMessage.warning(t('profile.emailCodeRequired'))
+    return
+  }
   saving.value = true
   try {
     await userStore.updateProfile({
       code: form.code,
+      phoneCode: form.phoneCode,
+      emailCode: form.emailCode,
       name: form.name,
       phone: form.phone,
       email: form.email,
@@ -160,6 +178,8 @@ async function handleSave(): Promise<void> {
       avatar: form.avatar,
     })
     form.code = ''
+    form.phoneCode = ''
+    form.emailCode = ''
   } finally {
     saving.value = false
   }
@@ -208,20 +228,38 @@ onMounted(loadProfile)
           <el-input v-model="form.email" />
         </el-form-item>
 
-        <el-form-item :label="$t('profile.verifyChannel')">
-          <el-radio-group v-model="form.channel">
-            <el-radio value="phone">{{ $t('profile.phone') }}</el-radio>
-            <el-radio value="email">{{ $t('profile.email') }}</el-radio>
-          </el-radio-group>
+        <el-form-item v-if="phoneChanged" :label="$t('profile.phoneCode')">
+          <div class="code-row">
+            <el-input
+              v-model="form.phoneCode"
+              :placeholder="$t('profile.phoneCodePlaceholder')"
+              maxlength="6"
+            />
+            <el-button :loading="sending" @click="handleSendCode(form.phone, true)">
+              {{ $t('profile.getCode') }}
+            </el-button>
+          </div>
         </el-form-item>
-        <el-form-item :label="$t('profile.code')" prop="code">
+        <el-form-item v-if="emailChanged" :label="$t('profile.emailCode')">
+          <div class="code-row">
+            <el-input
+              v-model="form.emailCode"
+              :placeholder="$t('profile.emailCodePlaceholder')"
+              maxlength="6"
+            />
+            <el-button :loading="sending" @click="handleSendCode(form.email, false)">
+              {{ $t('profile.getCode') }}
+            </el-button>
+          </div>
+        </el-form-item>
+        <el-form-item v-if="!phoneChanged && !emailChanged" :label="$t('profile.code')">
           <div class="code-row">
             <el-input
               v-model="form.code"
               :placeholder="$t('profile.codePlaceholder')"
               maxlength="6"
             />
-            <el-button :loading="sending" @click="handleSendCode">
+            <el-button :loading="sending" @click="handleSendCode(original.phone, true)">
               {{ $t('profile.getCode') }}
             </el-button>
           </div>
