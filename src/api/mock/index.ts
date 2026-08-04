@@ -67,15 +67,24 @@ function save(key: string, value: unknown): void {
 
 /**
  * 菜单数据迁移：历史 localStorage 中可能缺少新增的种子菜单，
- * 按 id 补齐，保证升级后新模块自动出现
+ * 按 id 补齐，并同步种子菜单的排序（菜单结构调整时历史数据跟随最新顺序）
  */
 function migrateMenus(): Menu[] {
   const stored = load(KEYS.menus, seedMenus)
-  const missing = seedMenus.filter((sm) => !stored.some((m) => m.id === sm.id))
-  if (missing.length === 0) return stored
-  const merged = [...stored, ...missing]
-  save(KEYS.menus, merged)
-  return merged
+  let changed = false
+  const updated = stored.map((menu) => {
+    const seed = seedMenus.find((sm) => sm.id === menu.id)
+    if (!seed || seed.sort === undefined || menu.sort === seed.sort) return menu
+    changed = true
+    return { ...menu, sort: seed.sort }
+  })
+  const missing = seedMenus.filter((sm) => !updated.some((m) => m.id === sm.id))
+  if (missing.length > 0) {
+    changed = true
+    updated.push(...missing)
+  }
+  if (changed) save(KEYS.menus, updated)
+  return updated
 }
 
 /**
