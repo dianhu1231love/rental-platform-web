@@ -256,11 +256,11 @@ watch(
   { immediate: true },
 )
 
-/** 检测筛选项是否超过一行，超过则显示“展开”按钮 */
+/** 检测筛选项是否超过一行（与固定的收起高度 40px 比较，避免动画过程中按钮闪烁） */
 function checkFilterOverflow(): void {
   const el = filterWrap.value
   if (!el) return
-  needExpand.value = el.scrollHeight > el.clientHeight + 2
+  needExpand.value = el.scrollHeight > 42
 }
 
 /** 防抖后的溢出检测（窗口/内容尺寸变化时高频触发） */
