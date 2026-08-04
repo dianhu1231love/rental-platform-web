@@ -43,6 +43,7 @@ const total = ref(0)
 const brands = ref<EquipmentBrand[]>([])
 const models = ref<EquipmentModel[]>([])
 const owners = ref<DictItem[]>([])
+const intactOptions = ref<DictItem[]>([])
 
 const query = reactive({ page: 1, pageSize: 10 })
 const searchParams = reactive({
@@ -67,6 +68,12 @@ const STATUS_OPTIONS = Object.entries(STATUS_META).map(([value, meta]) => ({
   label: meta.label,
 }))
 
+/** 设备是否完好标签颜色映射（值即字典标签） */
+const INTACT_META: Record<string, { type: 'success' | 'danger' }> = {
+  完好: { type: 'success' },
+  不完好: { type: 'danger' },
+}
+
 const columns: TableColumn[] = [
   { prop: 'code', label: t('equipment.code'), width: 180, fixed: 'left' },
   { prop: 'brand', label: t('equipment.brand'), width: 110 },
@@ -89,6 +96,16 @@ const columns: TableColumn[] = [
       idle: STATUS_META.idle,
       preparing: STATUS_META.preparing,
       maintenance: STATUS_META.maintenance,
+    },
+  },
+  {
+    prop: 'intact',
+    label: t('equipment.intact'),
+    width: 110,
+    align: 'center',
+    statusMap: {
+      完好: { label: t('equipment.intactOk'), type: INTACT_META.完好.type },
+      不完好: { label: t('equipment.intactBroken'), type: INTACT_META.不完好.type },
     },
   },
   {
@@ -198,6 +215,7 @@ const form = reactive({
   brandId: null as number | null,
   modelId: null as number | null,
   owner: '',
+  intact: '',
   purchaseAmount: 0,
   status: 'idle' as EquipmentStatus,
   invoiceAmount: 0,
@@ -241,6 +259,7 @@ function openCreate(): void {
     brandId: null,
     modelId: null,
     owner: '',
+    intact: '',
     purchaseAmount: 0,
     status: 'idle',
     invoiceAmount: 0,
@@ -262,6 +281,7 @@ function openEdit(row: EquipmentItem): void {
     brandId: row.brandId,
     modelId: row.modelId,
     owner: row.owner,
+    intact: row.intact,
     purchaseAmount: row.purchaseAmount,
     status: row.status,
     invoiceAmount: row.invoiceAmount,
@@ -286,6 +306,7 @@ async function handleSave(): Promise<void> {
       brandId: form.brandId as number,
       modelId: form.modelId as number,
       owner: form.owner,
+      intact: form.intact,
       purchaseAmount: form.purchaseAmount,
       status: form.status,
       invoiceAmount: form.invoiceAmount,
@@ -340,6 +361,9 @@ onMounted(async () => {
     }),
     getDictList('asset_owner').then((res) => {
       owners.value = res.data
+    }),
+    getDictList('equipment_intact').then((res) => {
+      intactOptions.value = res.data
     }),
   ])
 })
@@ -503,6 +527,25 @@ onMounted(async () => {
                   :key="opt.value"
                   :label="opt.label"
                   :value="opt.value"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="16">
+          <el-col :span="12">
+            <el-form-item :label="$t('equipment.intact')" prop="intact">
+              <el-select
+                v-model="form.intact"
+                style="width: 100%"
+                clearable
+                :placeholder="$t('equipment.intactPlaceholder')"
+              >
+                <el-option
+                  v-for="o in intactOptions"
+                  :key="o.id"
+                  :label="o.label"
+                  :value="o.label"
                 />
               </el-select>
             </el-form-item>

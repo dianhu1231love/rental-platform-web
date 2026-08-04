@@ -268,6 +268,8 @@ export interface EquipmentItem {
   modelId: number
   /** 资产归属（来自数据字典，可自定义） */
   owner: string
+  /** 设备是否完好（来自数据字典，如完好/不完好） */
+  intact: string
   /** 采购金额 */
   purchaseAmount: number
   /** 当前状态 */

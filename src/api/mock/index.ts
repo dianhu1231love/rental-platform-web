@@ -93,6 +93,37 @@ function migrateRoles(): Role[] {
   return updated
 }
 
+/**
+ * 字典数据迁移：历史 localStorage 中可能缺少新增的种子字典项，
+ * 按 id 或 type+label 补齐，保证升级后新字典（如设备是否完好）自动出现
+ */
+function migrateDicts(): DictItem[] {
+  const stored = load(KEYS.dicts, seedDicts)
+  const missing = seedDicts.filter(
+    (sd) => !stored.some((d) => d.id === sd.id || (d.type === sd.type && d.label === sd.label)),
+  )
+  if (missing.length === 0) return stored
+  const merged = [...stored, ...missing]
+  save(KEYS.dicts, merged)
+  return merged
+}
+
+/**
+ * 设备数据迁移：历史 localStorage 中的设备缺少“设备是否完好”字段时，
+ * 默认补齐为“完好”，保证新列与详情正常展示
+ */
+function migrateEquipment(): EquipmentItem[] {
+  const stored = load(KEYS.equipment, seedEquipment)
+  let changed = false
+  const updated = stored.map((item) => {
+    if (item.intact) return item
+    changed = true
+    return { ...item, intact: '完好' }
+  })
+  if (changed) save(KEYS.equipment, updated)
+  return updated
+}
+
 /** 模拟数据库：读写时即时持久化 */
 interface MockDb {
   menus: Menu[]
@@ -139,7 +170,7 @@ const db: MockDb = {
     save(KEYS.todos, v)
   },
   get equipment() {
-    return load(KEYS.equipment, seedEquipment)
+    return migrateEquipment()
   },
   set equipment(v) {
     save(KEYS.equipment, v)
@@ -163,7 +194,7 @@ const db: MockDb = {
     save(KEYS.models, v)
   },
   get dicts() {
-    return load(KEYS.dicts, seedDicts)
+    return migrateDicts()
   },
   set dicts(v) {
     save(KEYS.dicts, v)

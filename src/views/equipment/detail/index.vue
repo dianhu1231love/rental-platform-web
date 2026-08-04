@@ -41,6 +41,12 @@ const STATUS_META: Record<
   maintenance: { label: t('equipment.statusMaintenance'), type: 'danger' },
 }
 
+/** 设备是否完好标签颜色映射（值即字典标签） */
+const INTACT_META: Record<string, { type: 'success' | 'danger' }> = {
+  完好: { type: 'success' },
+  不完好: { type: 'danger' },
+}
+
 const mapUrl = computed(() => {
   if (!location.value) return ''
   const { lng, lat } = location.value
@@ -105,6 +111,16 @@ onMounted(async () => {
                 <el-tag :type="STATUS_META[detail.status].type" size="small">
                   {{ STATUS_META[detail.status].label }}
                 </el-tag>
+              </el-descriptions-item>
+              <el-descriptions-item :label="$t('equipment.intact')">
+                <el-tag
+                  v-if="detail.intact"
+                  :type="INTACT_META[detail.intact]?.type || 'info'"
+                  size="small"
+                >
+                  {{ detail.intact }}
+                </el-tag>
+                <span v-else>-</span>
               </el-descriptions-item>
               <el-descriptions-item :label="$t('equipment.brand')">
                 {{ brandName(detail.brandId) }}
