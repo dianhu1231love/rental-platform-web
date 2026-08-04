@@ -60,6 +60,7 @@ import type { Directive, DirectiveBinding } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import * as XLSX from 'xlsx'
 import { useI18n } from 'vue-i18n'
+import { animate } from 'motion-v'
 
 const { t } = useI18n()
 
@@ -238,6 +239,13 @@ const filterExpanded = ref(false)
 const needExpand = ref(false)
 let lastEmittedSignature = ''
 
+/** 展开/收起：用 Motion 在 40px 与内容实际高度（auto）之间平滑过渡 */
+watch(filterExpanded, (expanded) => {
+  const el = filterWrap.value
+  if (!el) return
+  animate(el, { height: expanded ? 'auto' : 40 }, { duration: 0.25, ease: 'easeInOut' })
+})
+
 watch(
   () => props.filters,
   (fields) => {
@@ -356,7 +364,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
   <div class="smart-table">
     <!-- 筛选面板：默认一行，超出显示展开按钮 -->
     <div v-if="filters.length" class="smart-filter">
-      <div ref="filterWrap" class="filter-fields" :class="{ expanded: filterExpanded }">
+      <div ref="filterWrap" class="filter-fields">
         <div v-for="field in filters" :key="field.prop" class="filter-field">
           <el-input
             v-if="field.type === 'input' || !field.type"
@@ -414,7 +422,12 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
           <el-icon><RefreshLeft /></el-icon>
           {{ $t('common.reset') }}
         </el-button>
-        <el-button v-if="needExpand" link type="primary" @click="filterExpanded = !filterExpanded">
+        <el-button
+          v-if="needExpand || filterExpanded"
+          link
+          type="primary"
+          @click="filterExpanded = !filterExpanded"
+        >
           {{ filterExpanded ? $t('common.collapse') : $t('common.expand') }}
           <el-icon>
             <ArrowDown v-if="!filterExpanded" />
@@ -538,19 +551,13 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 .filter-fields {
   flex: 1;
   min-width: 0;
+
+  /* 收起时固定显示一行，展开时由 Motion 动画过渡到内容实际高度 */
+  height: 40px;
+  overflow: hidden;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 12px;
-  max-height: 40px;
-  overflow: hidden;
-
-  /* 支持 interpolate-size 的浏览器：max-height 可在 40px 与 auto 间平滑过渡，不再瞬间展开 */
-  interpolate-size: allow-keywords;
-  transition: max-height 0.25s ease;
-
-  &.expanded {
-    max-height: auto;
-  }
 }
 
 .filter-actions {
