@@ -529,10 +529,15 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 
 /* 筛选面板 */
 .smart-filter {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
   margin-bottom: 14px;
 }
 
 .filter-fields {
+  flex: 1;
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 12px;
@@ -549,7 +554,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
   display: flex;
   align-items: center;
   gap: 4px;
-  margin-top: 12px;
+  flex-shrink: 0;
 }
 
 /* 工具栏 */
