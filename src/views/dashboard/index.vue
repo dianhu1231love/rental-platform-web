@@ -93,25 +93,6 @@ onMounted(loadAll)
       <StatCards :stats="stats" />
 
       <el-row :gutter="16" class="dashboard-row">
-        <el-col :xs="24" :lg="14" class="dashboard-col">
-          <el-card class="page-card dashboard-card">
-            <template #header>
-              <span class="card-title">{{ $t('dashboard.equipmentBoard') }}</span>
-            </template>
-            <EquipmentBoard v-if="equipment" :data="equipment" />
-          </el-card>
-        </el-col>
-        <el-col :xs="24" :lg="10" class="dashboard-col">
-          <el-card class="page-card dashboard-card">
-            <template #header>
-              <span class="card-title">{{ $t('dashboard.todos') }}</span>
-            </template>
-            <TodoList :todos="todos" @handled="handleTodoHandled" />
-          </el-card>
-        </el-col>
-      </el-row>
-
-      <el-row :gutter="16" class="dashboard-row">
         <el-col :xs="24" :lg="12">
           <el-card class="page-card">
             <template #header>
@@ -126,6 +107,25 @@ onMounted(loadAll)
               <span class="card-title">{{ $t('dashboard.hoursStat') }}</span>
             </template>
             <HoursChart v-if="hours" :data="hours" />
+          </el-card>
+        </el-col>
+      </el-row>
+
+      <el-row :gutter="16" class="dashboard-row">
+        <el-col :xs="24" :lg="14" class="dashboard-col">
+          <el-card class="page-card dashboard-card">
+            <template #header>
+              <span class="card-title">{{ $t('dashboard.equipmentBoard') }}</span>
+            </template>
+            <EquipmentBoard v-if="equipment" :data="equipment" />
+          </el-card>
+        </el-col>
+        <el-col :xs="24" :lg="10" class="dashboard-col">
+          <el-card class="page-card dashboard-card">
+            <template #header>
+              <span class="card-title">{{ $t('dashboard.todos') }}</span>
+            </template>
+            <TodoList :todos="todos" @handled="handleTodoHandled" />
           </el-card>
         </el-col>
       </el-row>
