@@ -498,7 +498,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
             {{ col.statusMap[String(row[col.prop])]?.label ?? row[col.prop] }}
           </el-tag>
         </template>
-        <template v-else-if="$slots[`col-${col.prop}`]" #[`col-${col.prop}`]="{ row }">
+        <template v-else-if="$slots[`col-${col.prop}`]" #default="{ row }">
           <slot :name="`col-${col.prop}`" :row="row" />
         </template>
         <template v-else-if="col.formatter" #default="{ row }">
