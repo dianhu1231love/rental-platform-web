@@ -44,24 +44,26 @@ const searchParams = reactive({
   visitTimeEnd: '',
 })
 
-/** 拜访类型选项 */
-const TYPE_OPTIONS: Array<{ value: VisitType; label: string }> = [
-  { value: 'onsite', label: t('visit.typeOnsite') },
-  { value: 'phone', label: t('visit.typePhone') },
-]
-
-/** 拜访类型标签颜色映射 */
-const TYPE_META: Record<VisitType, { label: string; type: 'success' | 'info' }> = {
+/** 拜访类型标签颜色映射（computed：语言切换时自动重建文案） */
+const TYPE_META = computed<Record<VisitType, { label: string; type: 'success' | 'info' }>>(() => ({
   onsite: { label: t('visit.typeOnsite'), type: 'success' },
   phone: { label: t('visit.typePhone'), type: 'info' },
-}
+}))
+
+/** 拜访类型选项（computed：语言切换时自动重建文案） */
+const TYPE_OPTIONS = computed<Array<{ value: VisitType; label: string }>>(() =>
+  Object.entries(TYPE_META.value).map(([value, meta]) => ({
+    value: value as VisitType,
+    label: meta.label,
+  })),
+)
 
 function typeLabel(type: VisitType): string {
-  return TYPE_META[type]?.label || '-'
+  return TYPE_META.value[type]?.label || '-'
 }
 
 function typeTagType(type: VisitType): 'success' | 'info' {
-  return TYPE_META[type]?.type || 'info'
+  return TYPE_META.value[type]?.type || 'info'
 }
 
 /** 文件大小格式化 */
@@ -106,7 +108,7 @@ const columns = computed<TableColumn[]>(() => [
 /** 筛选面板配置 */
 const filters = computed<FilterField[]>(() => [
   { prop: 'keyword', label: t('visit.customerName'), type: 'input' },
-  { prop: 'visitType', label: t('visit.visitType'), type: 'select', options: TYPE_OPTIONS },
+  { prop: 'visitType', label: t('visit.visitType'), type: 'select', options: TYPE_OPTIONS.value },
   { prop: 'visitTimeRange', label: t('visit.visitTime'), type: 'daterange' },
 ])
 
