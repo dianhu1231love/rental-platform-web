@@ -346,7 +346,7 @@ export const seedRoles: Role[] = [
     id: 1,
     name: '超级管理员',
     code: 'admin',
-    menuIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+    menuIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
     perms: ['*:*:*'],
     status: 1,
     remark: '拥有系统全部权限',
