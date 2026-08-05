@@ -419,6 +419,33 @@ function nextOpportunityCode(list: Opportunity[]): string {
   return `${prefix}${String(max + 1).padStart(4, '0')}`
 }
 
+/** 生成品牌编码：PP-4 位流水号 */
+function nextBrandCode(list: EquipmentBrand[]): string {
+  const max = list.reduce((m, b) => {
+    const num = Number(b.code?.slice(3)) || 0
+    return Math.max(m, num)
+  }, 0)
+  return `PP-${String(max + 1).padStart(4, '0')}`
+}
+
+/** 生成产品组编码：PZ-4 位流水号 */
+function nextGroupCode(list: EquipmentGroup[]): string {
+  const max = list.reduce((m, g) => {
+    const num = Number(g.code?.slice(3)) || 0
+    return Math.max(m, num)
+  }, 0)
+  return `PZ-${String(max + 1).padStart(4, '0')}`
+}
+
+/** 生成产品型号编码：XH-4 位流水号 */
+function nextModelCode(list: EquipmentModel[]): string {
+  const max = list.reduce((m, model) => {
+    const num = Number(model.code?.slice(3)) || 0
+    return Math.max(m, num)
+  }, 0)
+  return `XH-${String(max + 1).padStart(4, '0')}`
+}
+
 /** 接口路由表：按 method + pattern 匹配请求 */
 const routes: MockRoute[] = [
   {
@@ -1469,6 +1496,7 @@ const routes: MockRoute[] = [
       const item = {
         ...(data as Partial<EquipmentBrand>),
         id: nextId(list),
+        code: nextBrandCode(list),
         createdAt: formatNow(),
       } as EquipmentBrand
       list.push(item)
@@ -1518,6 +1546,7 @@ const routes: MockRoute[] = [
       const item = {
         ...(data as Partial<EquipmentGroup>),
         id: nextId(list),
+        code: nextGroupCode(list),
         createdAt: formatNow(),
       } as EquipmentGroup
       list.push(item)
@@ -1567,6 +1596,7 @@ const routes: MockRoute[] = [
       const item = {
         ...(data as Partial<EquipmentModel>),
         id: nextId(list),
+        code: nextModelCode(list),
         createdAt: formatNow(),
       } as EquipmentModel
       list.push(item)

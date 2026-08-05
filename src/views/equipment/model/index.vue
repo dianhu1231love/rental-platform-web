@@ -14,7 +14,7 @@ import {
 } from '@/api/equipment'
 import { useI18n } from 'vue-i18n'
 import type { TableColumn, FilterField } from '@/components/SmartTable.vue'
-import type { EquipmentBrand, EquipmentGroup, EquipmentModel } from '@/types'
+import type { EquipmentBrand, EquipmentGroup, EquipmentModel, LeaseMode } from '@/types'
 
 const { t } = useI18n()
 
@@ -30,16 +30,21 @@ const filteredList = computed(() => {
   if (!kw) return list.value
   return list.value.filter(
     (item) =>
-      item.name.toLowerCase().includes(kw) || (item.remark || '').toLowerCase().includes(kw),
+      item.code.toLowerCase().includes(kw) ||
+      item.name.toLowerCase().includes(kw) ||
+      brandName(item.brandId).toLowerCase().includes(kw) ||
+      groupName(item.groupId).toLowerCase().includes(kw) ||
+      (item.remark || '').toLowerCase().includes(kw),
   )
 })
 
 /** 表格列配置（computed：语言切换时自动重建文案） */
 const columns = computed<TableColumn[]>(() => [
+  { prop: 'code', label: t('equipment.modelCode'), width: 130 },
   { prop: 'name', label: t('equipment.modelName'), minWidth: 180 },
   { prop: 'brand', label: t('equipment.brand'), width: 150 },
   { prop: 'group', label: t('equipment.group'), width: 150 },
-  { prop: 'leaseTerm', label: t('equipment.leaseTerm'), width: 110 },
+  { prop: 'leaseTerm', label: t('equipment.leaseTerm'), width: 130 },
   { prop: 'unitPrice', label: t('equipment.unitPrice'), width: 130, align: 'right' },
   { prop: 'remark', label: t('common.remark'), minWidth: 200, showOverflowTooltip: true },
   { prop: 'createdAt', label: t('common.createdAt'), width: 170 },
@@ -55,10 +60,12 @@ const dialogMode = ref<'create' | 'edit'>('create')
 const formRef = ref<FormInstance>()
 const form = reactive({
   id: null as number | null,
+  code: '',
   name: '',
   brandId: null as number | null,
   groupId: null as number | null,
-  leaseTerm: '',
+  leaseTerm: 0,
+  leaseUnit: 'month' as LeaseMode,
   unitPrice: 0,
   remark: '',
 })
@@ -74,6 +81,20 @@ function groupName(id: number): string {
 
 function brandName(id: number): string {
   return brands.value.find((b) => b.id === id)?.name || '-'
+}
+
+/** 租赁单位选项（computed：语言切换时自动重建文案） */
+const LEASE_UNIT_OPTIONS = computed<Array<{ value: LeaseMode; label: string }>>(() => [
+  { value: 'year', label: t('equipment.leaseUnitYear') },
+  { value: 'month', label: t('equipment.leaseUnitMonth') },
+  { value: 'day', label: t('equipment.leaseUnitDay') },
+  { value: 'shift', label: t('equipment.leaseUnitShift') },
+  { value: 'square', label: t('equipment.leaseUnitSquare') },
+  { value: 'cube', label: t('equipment.leaseUnitCube') },
+])
+
+function leaseUnitLabel(unit: LeaseMode): string {
+  return LEASE_UNIT_OPTIONS.value.find((o) => o.value === unit)?.label || '-'
 }
 
 async function loadList(): Promise<void> {
@@ -97,10 +118,12 @@ function openCreate(): void {
   dialogMode.value = 'create'
   Object.assign(form, {
     id: null,
+    code: '',
     name: '',
     brandId: null,
     groupId: null,
-    leaseTerm: '',
+    leaseTerm: 0,
+    leaseUnit: 'month',
     unitPrice: 0,
     remark: '',
   })
@@ -111,10 +134,12 @@ function openEdit(row: EquipmentModel): void {
   dialogMode.value = 'edit'
   Object.assign(form, {
     id: row.id,
+    code: row.code,
     name: row.name,
     brandId: row.brandId,
     groupId: row.groupId,
     leaseTerm: row.leaseTerm,
+    leaseUnit: row.leaseUnit,
     unitPrice: row.unitPrice,
     remark: row.remark,
   })
@@ -132,6 +157,7 @@ async function handleSave(): Promise<void> {
         brandId: form.brandId as number,
         groupId: form.groupId as number,
         leaseTerm: form.leaseTerm,
+        leaseUnit: form.leaseUnit,
         unitPrice: form.unitPrice,
         remark: form.remark,
       })
@@ -141,6 +167,7 @@ async function handleSave(): Promise<void> {
         brandId: form.brandId as number,
         groupId: form.groupId as number,
         leaseTerm: form.leaseTerm,
+        leaseUnit: form.leaseUnit,
         unitPrice: form.unitPrice,
         remark: form.remark,
       })
@@ -200,6 +227,9 @@ onMounted(async () => {
         <template #col-group="{ row }">
           {{ groupName(row.groupId) }}
         </template>
+        <template #col-leaseTerm="{ row }">
+          {{ row.leaseTerm }} {{ leaseUnitLabel(row.leaseUnit) }}
+        </template>
         <template #col-unitPrice="{ row }">
           {{ row.unitPrice }}
         </template>
@@ -236,6 +266,13 @@ onMounted(async () => {
       destroy-on-close
     >
       <el-form ref="formRef" :model="form" :rules="formRules" label-width="100px">
+        <el-form-item :label="$t('equipment.modelCode')">
+          <el-input
+            :model-value="form.code"
+            :placeholder="$t('equipment.codePlaceholder')"
+            disabled
+          />
+        </el-form-item>
         <el-form-item :label="$t('equipment.modelName')" prop="name">
           <el-input v-model="form.name" />
         </el-form-item>
@@ -250,7 +287,17 @@ onMounted(async () => {
           </el-select>
         </el-form-item>
         <el-form-item :label="$t('equipment.leaseTerm')">
-          <el-input v-model="form.leaseTerm" :placeholder="$t('equipment.leaseTermPlaceholder')" />
+          <el-input-number v-model="form.leaseTerm" :min="1" :max="999" style="width: 100%" />
+        </el-form-item>
+        <el-form-item :label="$t('equipment.leaseUnit')">
+          <el-select v-model="form.leaseUnit" style="width: 100%">
+            <el-option
+              v-for="o in LEASE_UNIT_OPTIONS"
+              :key="o.value"
+              :label="o.label"
+              :value="o.value"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item :label="$t('equipment.unitPrice')">
           <el-input-number v-model="form.unitPrice" :min="0" :step="1000" style="width: 100%" />

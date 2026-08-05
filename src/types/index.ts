@@ -503,6 +503,8 @@ export interface EquipmentItem {
 /** 设备品牌 */
 export interface EquipmentBrand {
   id: number
+  /** 品牌编码（系统生成，全局唯一） */
+  code: string
   name: string
   remark: string
   createdAt: string
@@ -511,6 +513,8 @@ export interface EquipmentBrand {
 /** 产品组 */
 export interface EquipmentGroup {
   id: number
+  /** 产品组编码（系统生成，全局唯一） */
+  code: string
   name: string
   remark: string
   createdAt: string
@@ -519,13 +523,17 @@ export interface EquipmentGroup {
 /** 产品型号 */
 export interface EquipmentModel {
   id: number
+  /** 型号编码（系统生成，全局唯一） */
+  code: string
   name: string
   /** 所属品牌 id（需求明细选型号后自动带出品牌） */
   brandId: number
   /** 所属产品组 id */
   groupId: number
-  /** 租期（人工填写，如 12个月 / 3年） */
-  leaseTerm: string
+  /** 租期（数字，人工填写） */
+  leaseTerm: number
+  /** 租赁单位（年/月/日/台班/平方/立方，下拉选择） */
+  leaseUnit: LeaseMode
   /** 单价（元/台，人工填写；商机需求明细选型号后自动带出） */
   unitPrice: number
   remark: string
@@ -544,10 +552,16 @@ export type LeaseMode = 'year' | 'month' | 'day' | 'shift' | 'square' | 'cube'
 /** 商机需求明细（可新增/编辑） */
 export interface OpportunityDetail {
   id: number
+  /** 设备品牌编码（选择产品型号后自动带出并保存） */
+  brandCode: string
   /** 设备品牌 id（选择产品型号后自动带出） */
   brandId: number | null
+  /** 产品组编码（选择产品型号后自动带出并保存） */
+  groupCode: string
   /** 产品组 id（选择产品型号后自动带出） */
   groupId: number | null
+  /** 产品型号编码（选择产品型号后自动带出并保存） */
+  modelCode: string
   /** 产品型号 id */
   modelId: number | null
   /** 需求台量 */

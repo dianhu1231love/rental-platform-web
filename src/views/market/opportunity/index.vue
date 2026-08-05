@@ -386,8 +386,11 @@ const detailFormRef = ref<FormInstance>()
 
 const detailForm = reactive<OpportunityDetail>({
   id: 0,
+  brandCode: '',
   brandId: null,
+  groupCode: '',
   groupId: null,
+  modelCode: '',
   modelId: null,
   quantity: 1,
   unitPrice: 0,
@@ -422,6 +425,10 @@ function handleModelChange(id: number | null): void {
   if (model) {
     detailForm.brandId = model.brandId
     detailForm.groupId = model.groupId
+    // 自动带出并保存品牌/产品组/型号编码
+    detailForm.modelCode = model.code
+    detailForm.brandCode = brands.value.find((b) => b.id === model.brandId)?.code || ''
+    detailForm.groupCode = groups.value.find((g) => g.id === model.groupId)?.code || ''
     // 自动带出型号维护的单价（元/台）
     detailForm.unitPrice = model.unitPrice
   }
@@ -458,8 +465,11 @@ function openDetailAdd(): void {
   detailEditIndex.value = -1
   Object.assign(detailForm, {
     id: 0,
+    brandCode: '',
     brandId: null,
+    groupCode: '',
     groupId: null,
+    modelCode: '',
     modelId: null,
     quantity: 1,
     unitPrice: 0,
@@ -732,12 +742,15 @@ onMounted(async () => {
           >
             <template v-if="col.prop === 'brandId'" #default="{ row }">
               {{ brandName(row.brandId) }}
+              <span v-if="row.brandCode" class="code-text">（{{ row.brandCode }}）</span>
             </template>
             <template v-else-if="col.prop === 'groupId'" #default="{ row }">
               {{ groupName(row.groupId) }}
+              <span v-if="row.groupCode" class="code-text">（{{ row.groupCode }}）</span>
             </template>
             <template v-else-if="col.prop === 'modelId'" #default="{ row }">
               {{ modelName(row.modelId) }}
+              <span v-if="row.modelCode" class="code-text">（{{ row.modelCode }}）</span>
             </template>
             <template v-else-if="col.prop === 'unitPrice'" #default="{ row }">
               {{ formatMoney(row.unitPrice) }}
@@ -868,5 +881,10 @@ onMounted(async () => {
 
 .detail-header {
   margin-bottom: 10px;
+}
+
+.code-text {
+  font-size: 12px;
+  color: #909399;
 }
 </style>
