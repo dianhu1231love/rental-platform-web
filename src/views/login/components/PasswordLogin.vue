@@ -1,6 +1,6 @@
 <!-- 密码登录表单 -->
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { useUserStore } from '@/store/user'
@@ -8,13 +8,15 @@ import { getRememberedUsername, setRememberedUsername } from '@/utils/auth'
 import { useI18n } from 'vue-i18n'
 import type { LoginFormModel } from '@/types'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 
 const formRef = ref<FormInstance>()
 const loading = ref(false)
+/** 是否已触发过校验交互（聚焦/失焦或点击登录），用于语言切换后按需重新校验 */
+const touched = ref(false)
 
 const form = reactive<LoginFormModel>({
   username: getRememberedUsername(),
@@ -27,9 +29,17 @@ const rules: FormRules = {
   password: [{ required: true, message: () => t('login.passwordPlaceholder'), trigger: 'blur' }],
 }
 
+/** 切换语言后重新校验，让已展示的校验警告同步切换语言 */
+watch(locale, () => {
+  if (touched.value) {
+    formRef.value?.validate().catch(() => undefined)
+  }
+})
+
 /** 校验表单并登录，成功后跳转回来源页 */
 async function handleLogin(): Promise<void> {
   if (!formRef.value) return
+  touched.value = true
   await formRef.value.validate()
   loading.value = true
   try {
@@ -54,6 +64,7 @@ async function handleLogin(): Promise<void> {
         :placeholder="$t('login.usernamePlaceholder')"
         :prefix-icon="'User'"
         clearable
+        @blur="touched = true"
       />
     </el-form-item>
     <el-form-item prop="password">
@@ -63,6 +74,7 @@ async function handleLogin(): Promise<void> {
         show-password
         :placeholder="$t('login.passwordPlaceholder')"
         :prefix-icon="'Lock'"
+        @blur="touched = true"
       />
     </el-form-item>
     <el-form-item>
