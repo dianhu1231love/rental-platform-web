@@ -1,15 +1,19 @@
 <!-- 设备工时统计：计划/实际工时 + 利用率 -->
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { EChartsOption } from 'echarts'
 import BaseChart from '@/components/BaseChart.vue'
 import type { HoursStat } from '@/types'
 
 const props = defineProps<{ data: HoursStat }>()
+const { t } = useI18n()
 
 const option = computed<EChartsOption>(() => ({
   tooltip: { trigger: 'axis' },
-  legend: { data: ['计划工时', '实际工时', '工时利用率'] },
+  legend: {
+    data: [t('dashboard.planHours'), t('dashboard.actualHours'), t('dashboard.utilizationRate')],
+  },
   grid: { left: 60, right: 60, top: 40, bottom: 30 },
   xAxis: {
     type: 'category',
@@ -19,7 +23,7 @@ const option = computed<EChartsOption>(() => ({
   yAxis: [
     {
       type: 'value',
-      name: '小时',
+      name: t('dashboard.unitHours'),
       splitLine: { lineStyle: { type: 'dashed' } },
     },
     {
@@ -33,21 +37,21 @@ const option = computed<EChartsOption>(() => ({
   ],
   series: [
     {
-      name: '计划工时',
+      name: t('dashboard.planHours'),
       type: 'bar',
       barWidth: 14,
       itemStyle: { color: '#c7d8f2', borderRadius: [4, 4, 0, 0] },
       data: props.data.plan,
     },
     {
-      name: '实际工时',
+      name: t('dashboard.actualHours'),
       type: 'bar',
       barWidth: 14,
       itemStyle: { color: '#2f7bfe', borderRadius: [4, 4, 0, 0] },
       data: props.data.actual,
     },
     {
-      name: '工时利用率',
+      name: t('dashboard.utilizationRate'),
       type: 'line',
       yAxisIndex: 1,
       smooth: true,

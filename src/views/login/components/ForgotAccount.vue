@@ -1,6 +1,6 @@
 <!-- 找回账户：手机号/邮箱 + 验证码校验 -->
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { forgotAccount } from '@/api/auth'
 import { isValidAccount } from '@/utils/validate'
@@ -8,12 +8,14 @@ import { useI18n } from 'vue-i18n'
 import type { TableColumn } from '@/components/SmartTable.vue'
 import type { ForgotFormModel } from '@/types'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const formRef = ref<FormInstance>()
 const loading = ref(false)
 const countdown = ref(0)
 const resultVisible = ref(false)
 const matchedAccounts = ref<{ username: string; name: string }[]>([])
+/** 是否已触发过校验交互（聚焦/失焦或提交查找），用于语言切换后按需重新校验 */
+const touched = ref(false)
 
 /** 匹配账户表格列配置（computed：语言切换时自动重建文案） */
 const resultColumns = computed<TableColumn[]>(() => [
@@ -39,6 +41,13 @@ const rules: FormRules = {
   ],
   code: [{ required: true, message: () => t('login.codePlaceholder'), trigger: 'blur' }],
 }
+
+/** 切换语言后重新校验，让已展示的校验警告同步切换语言 */
+watch(locale, () => {
+  if (touched.value) {
+    formRef.value?.validate().catch(() => undefined)
+  }
+})
 
 const codeButtonText = computed(() =>
   countdown.value > 0 ? `${countdown.value}${t('login.resend')}` : t('login.getCode'),
@@ -66,6 +75,7 @@ function handleGetCode(): void {
 /** 校验并查找匹配账户 */
 async function handleFind(): Promise<void> {
   if (!formRef.value) return
+  touched.value = true
   await formRef.value.validate()
   loading.value = true
   try {
@@ -99,6 +109,7 @@ function handleSendReset(): void {
           :placeholder="$t('login.accountPlaceholder')"
           :prefix-icon="'Message'"
           clearable
+          @blur="touched = true"
         />
       </el-form-item>
       <el-form-item prop="code">
@@ -107,6 +118,7 @@ function handleSendReset(): void {
             v-model="form.code"
             :placeholder="$t('login.codePlaceholder')"
             :prefix-icon="'ChatDotRound'"
+            @blur="touched = true"
           />
           <el-button :disabled="countdown > 0" @click="handleGetCode">
             {{ codeButtonText }}

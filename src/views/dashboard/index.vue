@@ -59,7 +59,8 @@ async function loadAll(): Promise<void> {
     hours.value = hoursRes.data
     todos.value = todosRes.data
   } catch (error) {
-    errorMessage.value = (error as Error | undefined)?.message || '加载失败'
+    // 存储 i18n key（或后端原始消息），模板中再翻译，切换语言后告警文案即时更新
+    errorMessage.value = (error as Error | undefined)?.message || 'dashboard.loadFailed'
   } finally {
     loading.value = false
   }
@@ -82,7 +83,7 @@ onMounted(loadAll)
 
     <el-alert
       v-if="errorMessage"
-      :title="errorMessage"
+      :title="$t(errorMessage)"
       type="error"
       show-icon
       :closable="false"

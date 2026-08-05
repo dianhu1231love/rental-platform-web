@@ -1,6 +1,7 @@
 <!-- 设备看板：设备统计 + 状态分布环形图 -->
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { EChartsOption } from 'echarts'
 import { formatPercent } from '@/utils/format'
 import BaseChart from '@/components/BaseChart.vue'
@@ -8,14 +9,18 @@ import TextEllipsis from '@/components/TextEllipsis.vue'
 import type { EquipmentBoard } from '@/types'
 
 const props = defineProps<{ data: EquipmentBoard }>()
+const { t } = useI18n()
 
 const pieOption = computed<EChartsOption>(() => ({
-  tooltip: { trigger: 'item', formatter: '{b}: {c} 台 ({d}%)' },
+  tooltip: {
+    trigger: 'item',
+    formatter: `{b}: {c}${t('dashboard.unitPiece')} ({d}%)`,
+  },
   legend: { bottom: 0 },
   color: ['#67c23a', '#909399', '#f56c6c'],
   series: [
     {
-      name: '设备状态',
+      name: t('dashboard.equipmentStatus'),
       type: 'pie',
       radius: ['42%', '68%'],
       center: ['50%', '46%'],
@@ -24,9 +29,9 @@ const pieOption = computed<EChartsOption>(() => ({
       label: { show: false },
       emphasis: { label: { show: true, fontWeight: 'bold' } },
       data: [
-        { name: '在租', value: props.data.renting },
-        { name: '空闲', value: props.data.idle },
-        { name: '维修中', value: props.data.maintenance },
+        { name: t('dashboard.renting'), value: props.data.renting },
+        { name: t('dashboard.idle'), value: props.data.idle },
+        { name: t('dashboard.maintenance'), value: props.data.maintenance },
       ],
     },
   ],

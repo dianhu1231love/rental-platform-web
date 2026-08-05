@@ -30,7 +30,19 @@ description: 租赁平台管理系统（rental-platform-web 仓库）的开发�
 
 ## 环境事实（Windows + Codex 沙箱）
 
-- 沙箱不继承 Windows 用户级 PATH：`gh` 实际位于 `C:\Program Files\GitHub CLI\gh.exe`，用 `& 'C:\Program Files\GitHub CLI\gh.exe' ...` 或先 `$env:PATH = 'C:\Program Files\GitHub CLI;' + $env:PATH` 再调用。
+- 沙箱不继承 Windows 用户级 PATH：`gh` 由 WinGet 安装，实际路径为 `$env:LOCALAPPDATA\Microsoft\WinGet\Links\gh.exe`，用 `& "$env:LOCALAPPDATA\Microsoft\WinGet\Links\gh.exe" ...` 调用（旧文档中的 `C:\Program Files\GitHub CLI\gh.exe` 已失效；不同电脑用户名不同，必须用 `$env:LOCALAPPDATA` 定位，勿写死 `C:\Users\...` 前缀）。
+- **`rg` 不可用**：Codex 自带 rg（`C:\Program Files\WindowsApps\OpenAI.Codex_*\app\resources\rg.exe`）受 WindowsApps ACL 限制，沙箱内外均报「拒绝访问」，提权也无法运行，必须本地安装独立的 ripgrep 后全路径调用：
+  - 方式一（gh 下载官方 release，已验证可用）：
+    ```powershell
+    $rgDir = "$env:TEMP\rg"
+    gh release download --repo BurntSushi/ripgrep --pattern '*x86_64-pc-windows-msvc.zip' --dir $rgDir
+    Expand-Archive -Path (Get-ChildItem "$rgDir\*.zip").FullName -DestinationPath "$rgDir\extracted" -Force
+    # 解压路径含版本号，先定位实际 rg.exe 再全路径调用
+    Get-ChildItem "$rgDir\extracted" -Recurse -Filter rg.exe | Select-Object -ExpandProperty FullName
+    ```
+  - 方式二：`winget install BurntSushi.ripgrep.MSVC`（winget 可用时），装好后全路径调用或加入 PATH。
+  - 方式三：`scoop install ripgrep`。
+  - 说明：ripgrep 是独立命令行工具，与项目依赖无关；沙箱内执行检索同样需要提权（`require_escalated`）。版本号与解压目录以实际下载为准，换电脑后按上述步骤重新安装/定位，不要写死具体版本与临时目录名。
 - git 写操作（add/commit/push）、npm/npx、网络下载通常需要提权（`require_escalated`）。
 - 本机 5173 处于 Windows 保留端口段（5118–5217），直接 `npm run dev` 会报 EACCES；开发服务器用 8081 等非保留端口（如 `npm run dev -- --host 127.0.0.1 --port 8081`）。
 - 当前开发地址：http://127.0.0.1:8081/，演示账号 admin/123456。
