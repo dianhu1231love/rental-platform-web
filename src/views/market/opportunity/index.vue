@@ -454,7 +454,7 @@ const detailColumns = computed<TableColumn[]>(() => [
   { prop: 'groupId', label: t('opportunity.group'), width: 130 },
   { prop: 'modelId', label: t('opportunity.model'), minWidth: 150 },
   { prop: 'quantity', label: t('opportunity.quantity'), width: 80, align: 'center' },
-  { prop: 'unitPrice', label: t('opportunity.unitPrice'), width: 130, align: 'right' },
+  { prop: 'unitPrice', label: t('opportunity.unitPrice'), width: 160, align: 'right' },
   { prop: 'startAt', label: t('opportunity.startAt'), width: 120 },
   { prop: 'remark', label: t('common.remark'), minWidth: 120, showOverflowTooltip: true },
   { prop: 'action', label: t('common.action'), width: 100, fixed: 'right', hideable: false },
@@ -728,7 +728,13 @@ onMounted(async () => {
             {{ $t('opportunity.detailAdd') }}
           </el-button>
         </div>
-        <el-table :data="form.details" size="small" border row-key="id">
+        <el-table
+          :data="form.details"
+          size="small"
+          border
+          row-key="id"
+          :header-cell-style="{ whiteSpace: 'nowrap' }"
+        >
           <el-table-column
             v-for="col in detailColumns"
             :key="col.prop"
@@ -782,7 +788,7 @@ onMounted(async () => {
       width="720px"
       destroy-on-close
     >
-      <el-form ref="detailFormRef" :model="detailForm" :rules="detailFormRules" label-width="110px">
+      <el-form ref="detailFormRef" :model="detailForm" :rules="detailFormRules" label-width="130px">
         <el-row :gutter="16">
           <el-col :span="12">
             <el-form-item :label="$t('opportunity.brand')">
