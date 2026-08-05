@@ -17,6 +17,7 @@ import type {
   Role,
   Tenant,
   TodoItem,
+  VisitRecord,
 } from '@/types'
 
 /** 演示用户（phone 可选，用于找回账户演示） */
@@ -37,6 +38,10 @@ export interface SeedUser {
   remark?: string
   createdAt?: string
 }
+
+/** 演示用 1x1 透明 PNG（Data URL），用于附件图片预览演示 */
+const TINY_PNG =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
 
 // 种子数据：首次运行时写入 localStorage，之后系统内编辑会持久化保存
 export const seedMenus: Menu[] = [
@@ -291,6 +296,27 @@ export const seedMenus: Menu[] = [
       { label: '查看', perm: 'market:customer:view' },
     ],
   },
+  {
+    id: 14,
+    parentId: 12,
+    type: 'menu',
+    name: 'VisitManage',
+    path: '/market/visit',
+    component: 'market/visit/index',
+    title: '拜访管理',
+    i18nKey: 'menu.visit',
+    icon: 'Position',
+    sort: 2,
+    visible: true,
+    autoRefresh: false,
+    perms: 'market:visit:list',
+    buttons: [
+      { label: '新增', perm: 'market:visit:add' },
+      { label: '编辑', perm: 'market:visit:edit' },
+      { label: '删除', perm: 'market:visit:delete' },
+      { label: '查看', perm: 'market:visit:view' },
+    ],
+  },
 ]
 
 export const seedRoles: Role[] = [
@@ -298,7 +324,7 @@ export const seedRoles: Role[] = [
     id: 1,
     name: '超级管理员',
     code: 'admin',
-    menuIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
+    menuIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
     perms: ['*:*:*'],
     status: 1,
     remark: '拥有系统全部权限',
@@ -510,6 +536,141 @@ export const seedCustomers: Customer[] = [
     blacklisted: 0,
     creator: '系统管理员',
     createdAt: '2026-05-20 11:10:00',
+  },
+]
+
+/** 拜访记录种子数据 */
+export const seedVisits: VisitRecord[] = [
+  {
+    id: 1,
+    opportunityCode: 'SJ-2026-0001',
+    customerId: 1,
+    customerName: '上海建工机械设备有限公司',
+    visitType: 'onsite',
+    visitTime: '2026-07-18 10:00:00',
+    visitAddress: '上海市浦东新区世纪大道 100 号项目部',
+    contact: '王建国',
+    phone: '13800001111',
+    workPoints: '洽谈高空作业车 10 台年度租赁合作，现场查看施工场地与用电条件。',
+    visitResult: '客户意向明确，约定下周输出租赁方案与报价。',
+    attachments: [
+      {
+        id: 1,
+        name: '现场照片.png',
+        size: 102400,
+        type: 'image/png',
+        url: TINY_PNG,
+      },
+      {
+        id: 2,
+        name: '会议纪要.txt',
+        size: 2048,
+        type: 'text/plain',
+        url:
+          'data:text/plain;charset=utf-8,' +
+          encodeURIComponent(
+            '拜访会议纪要：\n1. 确认 10 台高空作业车租赁需求；\n2. 设备预计 8 月中旬进场。',
+          ),
+      },
+    ],
+    creator: '系统管理员',
+    createdAt: '2026-07-18 14:20:00',
+  },
+  {
+    id: 2,
+    opportunityCode: 'SJ-2026-0002',
+    customerId: 2,
+    customerName: '杭州远大设备租赁有限公司',
+    visitType: 'phone',
+    visitTime: '2026-07-22 15:30:00',
+    visitAddress: '',
+    contact: '李慧',
+    phone: '13900002222',
+    workPoints: '电话回访设备使用情况，确认叉车续租意向。',
+    visitResult: '客户反馈设备运行正常，续租意向较高，等待其内部审批。',
+    attachments: [],
+    creator: '运营专员-小王',
+    createdAt: '2026-07-22 16:10:00',
+  },
+  {
+    id: 3,
+    opportunityCode: '',
+    customerId: 3,
+    customerName: '张伟',
+    visitType: 'onsite',
+    visitTime: '2026-07-25 09:00:00',
+    visitAddress: '上海市闵行区莘庄镇疏影路 88 号',
+    contact: '张伟',
+    phone: '13700003333',
+    workPoints: '现场查看施工进度，沟通小型挖掘机租赁需求。',
+    visitResult: '客户需评估预算后反馈，后续跟进报价单。',
+    attachments: [
+      {
+        id: 3,
+        name: '需求清单.pdf',
+        size: 307200,
+        type: 'application/pdf',
+        url: '',
+      },
+    ],
+    creator: '系统管理员',
+    createdAt: '2026-07-25 15:00:00',
+  },
+  {
+    id: 4,
+    opportunityCode: 'SJ-2026-0003',
+    customerId: 4,
+    customerName: '苏州金穗机械租赁有限公司',
+    visitType: 'phone',
+    visitTime: '2026-07-28 11:00:00',
+    visitAddress: '',
+    contact: '赵强',
+    phone: '13600004444',
+    workPoints: '回访起重机租赁合同执行情况，了解增租需求。',
+    visitResult: '客户提出增加 1 台 25 吨吊车，已登记商机待跟进。',
+    attachments: [],
+    creator: '财务专员-小李',
+    createdAt: '2026-07-28 14:30:00',
+  },
+  {
+    id: 5,
+    opportunityCode: '',
+    customerId: 5,
+    customerName: '李慧',
+    visitType: 'phone',
+    visitTime: '2026-08-01 10:30:00',
+    visitAddress: '',
+    contact: '李慧',
+    phone: '13500005555',
+    workPoints: '回访账期与开票事宜，收集客户意见。',
+    visitResult: '客户已安排付款，发票抬头信息待确认后回传。',
+    attachments: [],
+    creator: '财务专员-小李',
+    createdAt: '2026-08-01 11:20:00',
+  },
+  {
+    id: 6,
+    opportunityCode: '',
+    customerId: 1,
+    customerName: '上海建工机械设备有限公司',
+    visitType: 'onsite',
+    visitTime: '2026-08-03 14:00:00',
+    visitAddress: '上海市浦东新区世纪大道 100 号项目部',
+    contact: '王建国',
+    phone: '13800001111',
+    workPoints: '提交高空作业车租赁方案与报价，现场答疑。',
+    visitResult: '客户对报价方案基本认可，计划 8 月中旬签订合同。',
+    attachments: [
+      {
+        id: 4,
+        name: '租赁方案.docx',
+        size: 51200,
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        url: '',
+      },
+    ],
+    creator: '系统管理员',
+    createdAt: '2026-08-03 17:40:00',
   },
 ]
 
@@ -770,6 +931,7 @@ export const seedTranslationDict: Record<string, string> = {
   产品型号: 'Product Models',
   用户管理: 'User Management',
   角色管理: 'Role Management',
+  拜访管理: 'Visit Records',
   新增: 'Add',
   编辑: 'Edit',
   删除: 'Delete',

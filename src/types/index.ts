@@ -385,6 +385,84 @@ export interface Attachment {
   type: string
 }
 
+/** 拜访记录附件（支持多文件上传与在线预览） */
+export interface VisitAttachment extends Attachment {
+  id: number
+  /** 预览地址（Mock 下为 base64 Data URL，真实后端为文件访问地址） */
+  url: string
+  /** 本地上传时的临时标识（用于文件列表） */
+  uid?: number
+}
+
+/** 拜访类型：现场拜访 / 电话拜访 */
+export type VisitType = 'onsite' | 'phone'
+
+/** 市场管理-拜访记录 */
+export interface VisitRecord {
+  id: number
+  /** 商机编号（来自商机管理模块系统流水码，全局唯一，非必填；商机管理开发后自动带出） */
+  opportunityCode: string
+  /** 关联客户 id */
+  customerId: number
+  /** 客户名称 */
+  customerName: string
+  /** 拜访类型 */
+  visitType: VisitType
+  /** 拜访时间 */
+  visitTime: string
+  /** 拜访地点 */
+  visitAddress: string
+  /** 客户联系人（新增时选择客户自动带出） */
+  contact: string
+  /** 联系电话（新增时选择客户自动带出） */
+  phone: string
+  /** 工作要点（长文本） */
+  workPoints: string
+  /** 拜访结果（长文本，编辑时唯一可编辑字段之一） */
+  visitResult: string
+  /** 附件列表 */
+  attachments: VisitAttachment[]
+  /** 创建人 */
+  creator: string
+  createdAt: string
+}
+
+/** 拜访记录新增/编辑表单模型 */
+export interface VisitFormModel {
+  id: number | null
+  opportunityCode: string
+  customerId: number | null
+  customerName: string
+  visitType: VisitType
+  visitTime: string
+  visitAddress: string
+  contact: string
+  phone: string
+  workPoints: string
+  visitResult: string
+  attachments: VisitAttachment[]
+}
+
+/** 拜访记录分页查询参数 */
+export interface VisitQuery {
+  page?: number
+  pageSize?: number
+  keyword?: string
+  visitType?: VisitType | ''
+  /** 拜访时间起（YYYY-MM-DD） */
+  visitTimeStart?: string
+  /** 拜访时间止（YYYY-MM-DD） */
+  visitTimeEnd?: string
+}
+
+/** 客户下拉选项（拜访记录新增时自动带出联系人与电话） */
+export interface CustomerOption {
+  id: number
+  name: string
+  contact: string
+  phone: string
+}
+
 /** 设备当前状态 */
 export type EquipmentStatus = 'renting' | 'idle' | 'preparing' | 'maintenance'
 
