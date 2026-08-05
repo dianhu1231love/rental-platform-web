@@ -37,8 +37,8 @@ const filteredMenus = computed(() => {
   return filterRec(menus.value)
 })
 
-/** 表格列配置 */
-const columns: TableColumn[] = [
+/** 表格列配置（computed：语言切换时自动重建文案） */
+const columns = computed<TableColumn[]>(() => [
   { prop: 'name', label: t('menuManage.name'), minWidth: 220 },
   {
     prop: 'type',
@@ -64,13 +64,15 @@ const columns: TableColumn[] = [
     statusMap: {
       true: { label: t('common.enabled'), type: 'success' },
       false: { label: t('common.disabled'), type: 'danger' },
-    },
+    } as TableColumn['statusMap'],
   },
   { prop: 'action', label: t('common.action'), width: 230, fixed: 'right', hideable: false },
-]
+])
 
 /** 筛选面板配置 */
-const filters: FilterField[] = [{ prop: 'keyword', label: t('menuManage.name'), type: 'input' }]
+const filters = computed<FilterField[]>(() => [
+  { prop: 'keyword', label: t('menuManage.name'), type: 'input' },
+])
 
 /** 搜索：按名称/权限标识本地过滤 */
 function handleSearch(condition: Record<string, unknown>): void {

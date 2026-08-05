@@ -42,37 +42,37 @@ const searchParams = reactive({
   status: '' as number | '',
 })
 
-/** 客户性质选项 */
-const TYPE_OPTIONS: Array<{ value: CustomerType; label: string; type: 'success' | 'warning' }> = [
+/** 客户性质选项（computed：语言切换时自动重建文案） */
+const TYPE_OPTIONS = computed<
+  Array<{ value: CustomerType; label: string; type: 'success' | 'warning' }>
+>(() => [
   { value: 'enterprise', label: t('customer.typeEnterprise'), type: 'warning' },
   { value: 'individual', label: t('customer.typeIndividual'), type: 'success' },
-]
+])
 
 /** 客户等级选项 */
-const LEVEL_OPTIONS: Array<{
-  value: CustomerLevel
-  label: string
-  type: 'danger' | 'primary' | 'info'
-}> = [
+const LEVEL_OPTIONS = computed<
+  Array<{ value: CustomerLevel; label: string; type: 'danger' | 'primary' | 'info' }>
+>(() => [
   { value: 'key', label: t('customer.levelKey'), type: 'danger' },
   { value: 'normal', label: t('customer.levelNormal'), type: 'primary' },
   { value: 'potential', label: t('customer.levelPotential'), type: 'info' },
-]
+])
 
 /** 客户来源选项 */
-const SOURCE_OPTIONS: Array<{ value: CustomerSource; label: string }> = [
+const SOURCE_OPTIONS = computed<Array<{ value: CustomerSource; label: string }>>(() => [
   { value: 'referral', label: t('customer.sourceReferral') },
   { value: 'exhibition', label: t('customer.sourceExhibition') },
   { value: 'online', label: t('customer.sourceOnline') },
   { value: 'self', label: t('customer.sourceSelf') },
-]
+])
 
 function typeLabel(type: CustomerType): string {
-  return TYPE_OPTIONS.find((o) => o.value === type)?.label || '-'
+  return TYPE_OPTIONS.value.find((o) => o.value === type)?.label || '-'
 }
 
 function levelLabel(level: CustomerLevel): string {
-  return LEVEL_OPTIONS.find((o) => o.value === level)?.label || '-'
+  return LEVEL_OPTIONS.value.find((o) => o.value === level)?.label || '-'
 }
 
 /** 表格列配置（computed：语言切换时自动重建文案） */
@@ -97,7 +97,7 @@ const filters = computed<FilterField[]>(() => [
     prop: 'type',
     label: t('customer.type'),
     type: 'select',
-    options: TYPE_OPTIONS.map((o) => ({ label: o.label, value: o.value })),
+    options: TYPE_OPTIONS.value.map((o) => ({ label: o.label, value: o.value })),
   },
   {
     prop: 'status',
