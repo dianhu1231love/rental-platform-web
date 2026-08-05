@@ -786,6 +786,7 @@ onMounted(async () => {
       v-model="detailVisible"
       :title="detailEditIndex === -1 ? $t('opportunity.detailAdd') : $t('opportunity.detailEdit')"
       width="720px"
+      align-center
       destroy-on-close
     >
       <el-form ref="detailFormRef" :model="detailForm" :rules="detailFormRules" label-width="130px">
