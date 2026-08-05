@@ -7,14 +7,14 @@
 当前开发环境为 Codex 桌面应用（沙箱），沙箱会话**不会继承 Windows 用户级环境变量（PATH 等）**。
 因此 `gh` 等已安装但不在沙箱 PATH 中的工具，无法直接通过命令名调用。
 
-gh 实际安装位置：`C:\Users\xingd\AppData\Local\Microsoft\WinGet\Links\gh.exe`（WinGet 安装；旧文档的 `C:\Program Files\GitHub CLI\gh.exe` 已失效），两种调用方式：
+gh 实际安装位置：`$env:LOCALAPPDATA\Microsoft\WinGet\Links\gh.exe`（WinGet 安装；不同电脑用户名不同，必须用环境变量定位，勿写死 `C:\Users\...` 前缀；旧文档的 `C:\Program Files\GitHub CLI\gh.exe` 已失效），两种调用方式：
 
 ```powershell
 # 方式一：直接使用绝对路径
-& 'C:\Users\xingd\AppData\Local\Microsoft\WinGet\Links\gh.exe' auth status
+& "$env:LOCALAPPDATA\Microsoft\WinGet\Links\gh.exe" auth status
 
 # 方式二：每次命令前临时加入 PATH（只对当前命令生效）
-$env:PATH = 'C:\Users\xingd\AppData\Local\Microsoft\WinGet\Links;' + $env:PATH
+$env:PATH = "$env:LOCALAPPDATA\Microsoft\WinGet\Links;" + $env:PATH
 gh auth status
 ```
 
@@ -28,12 +28,14 @@ Codex 自带的 rg 位于 WindowsApps 包内（`C:\Program Files\WindowsApps\Ope
 因此项目内检索必须使用独立安装的 ripgrep，推荐以下任一方式：
 
 ```powershell
-# 方式一：通过 gh 下载官方 release（已验证）
-gh release download --repo BurntSushi/ripgrep --pattern '*x86_64-pc-windows-msvc.zip' --dir C:\tmp\rg
-Expand-Archive -Path C:\tmp\rg\ripgrep-*.zip -DestinationPath C:\tmp\rg\extracted -Force
+# 方式一：通过 gh 下载官方 release（已验证，版本号以实际下载为准）
+$rgDir = "$env:TEMP\rg"
+gh release download --repo BurntSushi/ripgrep --pattern '*x86_64-pc-windows-msvc.zip' --dir $rgDir
+Expand-Archive -Path (Get-ChildItem "$rgDir\*.zip").FullName -DestinationPath "$rgDir\extracted" -Force
 
-# 调用示例（全路径）
-& 'C:\tmp\rg\extracted\rg-15.2.0-x86_64-pc-windows-msvc\rg.exe' -n "关键词" src
+# 解压路径含版本号，先定位实际 rg.exe，再全路径调用
+Get-ChildItem "$rgDir\extracted" -Recurse -Filter rg.exe | Select-Object -ExpandProperty FullName
+& '上述定位到的完整路径\rg.exe' -n "关键词" src
 ```
 
 ```powershell
@@ -45,6 +47,7 @@ scoop install ripgrep
 ```
 
 注意：ripgrep 是独立工具，与项目依赖无关；沙箱内执行检索同样需要提权（`require_escalated`）。
+版本号与临时目录名不要写死，换电脑后按上述步骤重新安装/定位即可。
 
 ## 2. 分支与提交规范
 
