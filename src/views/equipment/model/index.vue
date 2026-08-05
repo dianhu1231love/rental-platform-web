@@ -39,6 +39,8 @@ const columns = computed<TableColumn[]>(() => [
   { prop: 'name', label: t('equipment.modelName'), minWidth: 180 },
   { prop: 'brand', label: t('equipment.brand'), width: 150 },
   { prop: 'group', label: t('equipment.group'), width: 150 },
+  { prop: 'leaseTerm', label: t('equipment.leaseTerm'), width: 110 },
+  { prop: 'unitPrice', label: t('equipment.unitPrice'), width: 130, align: 'right' },
   { prop: 'remark', label: t('common.remark'), minWidth: 200, showOverflowTooltip: true },
   { prop: 'createdAt', label: t('common.createdAt'), width: 170 },
   { prop: 'action', label: t('common.action'), width: 130, fixed: 'right', hideable: false },
@@ -56,6 +58,8 @@ const form = reactive({
   name: '',
   brandId: null as number | null,
   groupId: null as number | null,
+  leaseTerm: '',
+  unitPrice: 0,
   remark: '',
 })
 const formRules: FormRules = {
@@ -91,7 +95,15 @@ function handleReset(): void {
 
 function openCreate(): void {
   dialogMode.value = 'create'
-  Object.assign(form, { id: null, name: '', brandId: null, groupId: null, remark: '' })
+  Object.assign(form, {
+    id: null,
+    name: '',
+    brandId: null,
+    groupId: null,
+    leaseTerm: '',
+    unitPrice: 0,
+    remark: '',
+  })
   dialogVisible.value = true
 }
 
@@ -102,6 +114,8 @@ function openEdit(row: EquipmentModel): void {
     name: row.name,
     brandId: row.brandId,
     groupId: row.groupId,
+    leaseTerm: row.leaseTerm,
+    unitPrice: row.unitPrice,
     remark: row.remark,
   })
   dialogVisible.value = true
@@ -117,6 +131,8 @@ async function handleSave(): Promise<void> {
         name: form.name,
         brandId: form.brandId as number,
         groupId: form.groupId as number,
+        leaseTerm: form.leaseTerm,
+        unitPrice: form.unitPrice,
         remark: form.remark,
       })
     } else {
@@ -124,6 +140,8 @@ async function handleSave(): Promise<void> {
         name: form.name,
         brandId: form.brandId as number,
         groupId: form.groupId as number,
+        leaseTerm: form.leaseTerm,
+        unitPrice: form.unitPrice,
         remark: form.remark,
       })
     }
@@ -182,6 +200,9 @@ onMounted(async () => {
         <template #col-group="{ row }">
           {{ groupName(row.groupId) }}
         </template>
+        <template #col-unitPrice="{ row }">
+          {{ row.unitPrice }}
+        </template>
         <template #col-brand="{ row }">
           {{ brandName(row.brandId) }}
         </template>
@@ -227,6 +248,12 @@ onMounted(async () => {
           <el-select v-model="form.groupId" style="width: 100%">
             <el-option v-for="g in groups" :key="g.id" :label="g.name" :value="g.id" />
           </el-select>
+        </el-form-item>
+        <el-form-item :label="$t('equipment.leaseTerm')">
+          <el-input v-model="form.leaseTerm" :placeholder="$t('equipment.leaseTermPlaceholder')" />
+        </el-form-item>
+        <el-form-item :label="$t('equipment.unitPrice')">
+          <el-input-number v-model="form.unitPrice" :min="0" :step="1000" style="width: 100%" />
         </el-form-item>
         <el-form-item :label="$t('common.remark')">
           <el-input v-model="form.remark" type="textarea" :rows="3" />

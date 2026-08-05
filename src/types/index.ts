@@ -524,6 +524,10 @@ export interface EquipmentModel {
   brandId: number
   /** 所属产品组 id */
   groupId: number
+  /** 租期（人工填写，如 12个月 / 3年） */
+  leaseTerm: string
+  /** 单价（元/台，人工填写；商机需求明细选型号后自动带出） */
+  unitPrice: number
   remark: string
   createdAt: string
 }

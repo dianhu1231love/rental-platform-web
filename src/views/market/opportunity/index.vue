@@ -422,6 +422,8 @@ function handleModelChange(id: number | null): void {
   if (model) {
     detailForm.brandId = model.brandId
     detailForm.groupId = model.groupId
+    // 自动带出型号维护的单价（元/台）
+    detailForm.unitPrice = model.unitPrice
   }
 }
 
