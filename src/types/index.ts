@@ -520,10 +520,112 @@ export interface EquipmentGroup {
 export interface EquipmentModel {
   id: number
   name: string
+  /** 所属品牌 id（需求明细选型号后自动带出品牌） */
+  brandId: number
   /** 所属产品组 id */
   groupId: number
   remark: string
   createdAt: string
+}
+
+/** 商机类型：租赁 / 试用 / 购买 / 维修 / 其他 */
+export type OpportunityType = 'lease' | 'trial' | 'purchase' | 'maintenance' | 'other'
+
+/** 信息状态：跟进中 / 赢单 / 丢单 / 流单 */
+export type OpportunityStatus = 'following' | 'won' | 'lost' | 'dropped'
+
+/** 租赁模式：包年 / 月 / 日 / 台班 / 平方 / 立方 */
+export type LeaseMode = 'year' | 'month' | 'day' | 'shift' | 'square' | 'cube'
+
+/** 商机需求明细（可新增/编辑） */
+export interface OpportunityDetail {
+  id: number
+  /** 设备品牌 id（选择产品型号后自动带出） */
+  brandId: number | null
+  /** 产品组 id（选择产品型号后自动带出） */
+  groupId: number | null
+  /** 产品型号 id */
+  modelId: number | null
+  /** 需求台量 */
+  quantity: number
+  /** 预计单价（元/台），作为预计收入总额/预计合同金额自动计算基数 */
+  unitPrice: number
+  /** 预计开始时间（YYYY-MM-DD） */
+  startAt: string
+  remark: string
+}
+
+/** 市场管理-商机 */
+export interface Opportunity {
+  id: number
+  /** 商机编号（系统流水码生成，全局唯一） */
+  code: string
+  /** 关联客户 id */
+  customerId: number | null
+  /** 客户名称 */
+  customerName: string
+  /** 商机类型 */
+  type: OpportunityType
+  /** 主要联系人（选择客户后自动带出） */
+  contact: string
+  /** 联系电话（选择客户后自动带出） */
+  phone: string
+  /** 联系地址-省市区编码（如 ['310000', '310100', '310101']） */
+  region: string[]
+  /** 联系地址-详细地址 */
+  addressDetail: string
+  /** 联系地址完整文本（省市区 + 详细地址） */
+  address: string
+  /** 信息状态 */
+  status: OpportunityStatus
+  /** 信息阶段：新增 20，赢单 100，丢单/流单 0 */
+  stage: number
+  /** 预计租期（手动填写，如 12个月） */
+  leaseTerm: string
+  /** 租赁模式 */
+  leaseMode: LeaseMode
+  /** 预计收入总额（系统自动填充） */
+  estimatedIncome: number
+  /** 预计合同金额（系统自动填充） */
+  estimatedContract: number
+  /** 备注 */
+  remark: string
+  /** 需求明细列表 */
+  details: OpportunityDetail[]
+  /** 创建人 */
+  creator: string
+  createdAt: string
+}
+
+/** 商机新增/编辑表单模型 */
+export interface OpportunityFormModel {
+  id: number | null
+  /** 商机编号（新增时系统生成，编辑时回显） */
+  code: string
+  customerId: number | null
+  customerName: string
+  type: OpportunityType
+  contact: string
+  phone: string
+  region: string[]
+  addressDetail: string
+  status: OpportunityStatus
+  stage: number
+  leaseTerm: string
+  leaseMode: LeaseMode
+  estimatedIncome: number
+  estimatedContract: number
+  remark: string
+  details: OpportunityDetail[]
+}
+
+/** 商机分页查询参数 */
+export interface OpportunityQuery {
+  page?: number
+  pageSize?: number
+  keyword?: string
+  type?: OpportunityType | ''
+  status?: OpportunityStatus | ''
 }
 
 /** 数据字典项（如资产归属） */

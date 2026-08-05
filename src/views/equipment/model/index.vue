@@ -4,10 +4,17 @@ defineOptions({ name: 'EquipmentModel' })
 
 import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
-import { createModel, deleteModel, getGroupList, getModelList, updateModel } from '@/api/equipment'
+import {
+  createModel,
+  deleteModel,
+  getBrandList,
+  getGroupList,
+  getModelList,
+  updateModel,
+} from '@/api/equipment'
 import { useI18n } from 'vue-i18n'
 import type { TableColumn, FilterField } from '@/components/SmartTable.vue'
-import type { EquipmentGroup, EquipmentModel } from '@/types'
+import type { EquipmentBrand, EquipmentGroup, EquipmentModel } from '@/types'
 
 const { t } = useI18n()
 
@@ -15,6 +22,7 @@ const loading = ref(false)
 const saving = ref(false)
 const list = ref<EquipmentModel[]>([])
 const groups = ref<EquipmentGroup[]>([])
+const brands = ref<EquipmentBrand[]>([])
 const keyword = ref('')
 
 const filteredList = computed(() => {
@@ -29,6 +37,7 @@ const filteredList = computed(() => {
 /** 表格列配置（computed：语言切换时自动重建文案） */
 const columns = computed<TableColumn[]>(() => [
   { prop: 'name', label: t('equipment.modelName'), minWidth: 180 },
+  { prop: 'brand', label: t('equipment.brand'), width: 150 },
   { prop: 'group', label: t('equipment.group'), width: 150 },
   { prop: 'remark', label: t('common.remark'), minWidth: 200, showOverflowTooltip: true },
   { prop: 'createdAt', label: t('common.createdAt'), width: 170 },
@@ -45,16 +54,22 @@ const formRef = ref<FormInstance>()
 const form = reactive({
   id: null as number | null,
   name: '',
+  brandId: null as number | null,
   groupId: null as number | null,
   remark: '',
 })
 const formRules: FormRules = {
   name: [{ required: true, message: () => t('equipment.modelName'), trigger: 'blur' }],
+  brandId: [{ required: true, message: () => t('equipment.brand'), trigger: 'change' }],
   groupId: [{ required: true, message: () => t('equipment.group'), trigger: 'change' }],
 }
 
 function groupName(id: number): string {
   return groups.value.find((g) => g.id === id)?.name || '-'
+}
+
+function brandName(id: number): string {
+  return brands.value.find((b) => b.id === id)?.name || '-'
 }
 
 async function loadList(): Promise<void> {
@@ -76,7 +91,7 @@ function handleReset(): void {
 
 function openCreate(): void {
   dialogMode.value = 'create'
-  Object.assign(form, { id: null, name: '', groupId: null, remark: '' })
+  Object.assign(form, { id: null, name: '', brandId: null, groupId: null, remark: '' })
   dialogVisible.value = true
 }
 
@@ -85,6 +100,7 @@ function openEdit(row: EquipmentModel): void {
   Object.assign(form, {
     id: row.id,
     name: row.name,
+    brandId: row.brandId,
     groupId: row.groupId,
     remark: row.remark,
   })
@@ -97,10 +113,16 @@ async function handleSave(): Promise<void> {
   saving.value = true
   try {
     if (dialogMode.value === 'create') {
-      await createModel({ name: form.name, groupId: form.groupId as number, remark: form.remark })
+      await createModel({
+        name: form.name,
+        brandId: form.brandId as number,
+        groupId: form.groupId as number,
+        remark: form.remark,
+      })
     } else {
       await updateModel(form.id as number, {
         name: form.name,
+        brandId: form.brandId as number,
         groupId: form.groupId as number,
         remark: form.remark,
       })
@@ -129,7 +151,9 @@ async function handleDelete(row: EquipmentModel): Promise<void> {
 }
 
 onMounted(async () => {
-  groups.value = (await getGroupList()).data
+  const [groupRes, brandRes] = await Promise.all([getGroupList(), getBrandList()])
+  groups.value = groupRes.data
+  brands.value = brandRes.data
   loadList()
 })
 </script>
@@ -157,6 +181,9 @@ onMounted(async () => {
         </template>
         <template #col-group="{ row }">
           {{ groupName(row.groupId) }}
+        </template>
+        <template #col-brand="{ row }">
+          {{ brandName(row.brandId) }}
         </template>
         <template #col-action="{ row }">
           <el-button
@@ -190,6 +217,11 @@ onMounted(async () => {
       <el-form ref="formRef" :model="form" :rules="formRules" label-width="100px">
         <el-form-item :label="$t('equipment.modelName')" prop="name">
           <el-input v-model="form.name" />
+        </el-form-item>
+        <el-form-item :label="$t('equipment.brand')" prop="brandId">
+          <el-select v-model="form.brandId" style="width: 100%">
+            <el-option v-for="b in brands" :key="b.id" :label="b.name" :value="b.id" />
+          </el-select>
         </el-form-item>
         <el-form-item :label="$t('equipment.group')" prop="groupId">
           <el-select v-model="form.groupId" style="width: 100%">
