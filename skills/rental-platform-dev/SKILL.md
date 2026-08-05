@@ -30,7 +30,17 @@ description: 租赁平台管理系统（rental-platform-web 仓库）的开发�
 
 ## 环境事实（Windows + Codex 沙箱）
 
-- 沙箱不继承 Windows 用户级 PATH：`gh` 实际位于 `C:\Program Files\GitHub CLI\gh.exe`，用 `& 'C:\Program Files\GitHub CLI\gh.exe' ...` 或先 `$env:PATH = 'C:\Program Files\GitHub CLI;' + $env:PATH` 再调用。
+- 沙箱不继承 Windows 用户级 PATH：`gh` 由 WinGet 安装，实际路径为 `C:\Users\xingd\AppData\Local\Microsoft\WinGet\Links\gh.exe`，用 `& 'C:\Users\xingd\AppData\Local\Microsoft\WinGet\Links\gh.exe' ...` 调用（旧文档中的 `C:\Program Files\GitHub CLI\gh.exe` 已失效，勿再使用）。
+- **`rg` 不可用**：Codex 自带 rg（`C:\Program Files\WindowsApps\OpenAI.Codex_*\app\resources\rg.exe`）受 WindowsApps ACL 限制，沙箱内外均报「拒绝访问」，提权也无法运行，必须本地安装独立的 ripgrep 后全路径调用：
+  - 方式一（gh 下载官方 release，已验证可用）：
+    ```powershell
+    gh release download --repo BurntSushi/ripgrep --pattern '*x86_64-pc-windows-msvc.zip' --dir C:\tmp\rg
+    Expand-Archive -Path C:\tmp\rg\ripgrep-*.zip -DestinationPath C:\tmp\rg\extracted -Force
+    & 'C:\tmp\rg\extracted\rg-15.2.0-x86_64-pc-windows-msvc\rg.exe' --version
+    ```
+  - 方式二：`winget install BurntSushi.ripgrep.MSVC`（winget 可用时），装好后全路径调用或加入 PATH。
+  - 方式三：`scoop install ripgrep`。
+  - 说明：ripgrep 是独立命令行工具，与项目依赖无关；沙箱内执行检索同样需要提权（`require_escalated`）。当前机器已按方式一安装至 `C:\tmp\rg\extracted\ripgrep-15.2.0-x86_64-pc-windows-msvc\rg.exe`。
 - git 写操作（add/commit/push）、npm/npx、网络下载通常需要提权（`require_escalated`）。
 - 本机 5173 处于 Windows 保留端口段（5118–5217），直接 `npm run dev` 会报 EACCES；开发服务器用 8081 等非保留端口（如 `npm run dev -- --host 127.0.0.1 --port 8081`）。
 - 当前开发地址：http://127.0.0.1:8081/，演示账号 admin/123456。
