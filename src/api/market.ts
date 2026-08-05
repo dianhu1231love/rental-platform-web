@@ -2,11 +2,22 @@
  * 市场管理相关接口（客户等）
  */
 import request from '@/utils/request'
-import type { Customer, CustomerFormModel, CustomerQuery, PageResult } from '@/types'
+import type {
+  Customer,
+  CustomerFormModel,
+  CustomerOption,
+  CustomerQuery,
+  PageResult,
+} from '@/types'
 
 /** 分页查询客户列表 */
 export function getCustomerList(params: CustomerQuery) {
   return request.get<PageResult<Customer>>('/market/customers', { params })
+}
+
+/** 客户下拉选项（拜访记录新增时选择客户自动带出联系人与电话） */
+export function getCustomerOptions() {
+  return request.get<CustomerOption[]>('/market/customers/options')
 }
 
 /** 新增客户（客户编码由后端自动生成） */

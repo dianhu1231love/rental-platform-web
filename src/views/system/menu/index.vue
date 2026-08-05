@@ -38,38 +38,46 @@ const filteredMenus = computed(() => {
 })
 
 /** 表格列配置（computed：语言切换时自动重建文案） */
-const columns = computed<TableColumn[]>(() => [
-  { prop: 'name', label: t('menuManage.name'), minWidth: 220 },
-  {
-    prop: 'type',
-    label: t('menuManage.type'),
-    width: 100,
-    align: 'center',
-    statusMap: {
-      directory: { label: t('menuManage.typeDirectory'), type: 'warning' },
-      menu: { label: t('menuManage.typeMenu'), type: 'primary' },
-      button: { label: t('menuManage.typeButton'), type: 'info' },
+const columns = computed<TableColumn[]>(() => {
+  const cols: TableColumn[] = [
+    { prop: 'name', label: t('menuManage.name'), minWidth: 220 },
+    {
+      prop: 'type',
+      label: t('menuManage.type'),
+      width: 100,
+      align: 'center',
+      statusMap: {
+        directory: { label: t('menuManage.typeDirectory'), type: 'warning' },
+        menu: { label: t('menuManage.typeMenu'), type: 'primary' },
+        button: { label: t('menuManage.typeButton'), type: 'info' },
+      },
     },
-  },
-  { prop: 'path', label: t('menuManage.path'), minWidth: 150, showOverflowTooltip: true },
-  { prop: 'component', label: t('menuManage.component'), minWidth: 180, showOverflowTooltip: true },
-  { prop: 'perms', label: t('menuManage.perms'), minWidth: 160, showOverflowTooltip: true },
-  { prop: 'sort', label: t('menuManage.sort'), width: 70, align: 'center' },
-  { prop: 'autoRefresh', label: t('menuManage.autoRefresh'), width: 130, align: 'center' },
-  {
-    prop: 'visible',
-    label: t('common.status'),
-    width: 90,
-    align: 'center',
-    statusMap: {
-      true: { label: t('common.enabled'), type: 'success' },
-      false: { label: t('common.disabled'), type: 'danger' },
-    } as TableColumn['statusMap'],
-  },
-  { prop: 'action', label: t('common.action'), width: 230, fixed: 'right', hideable: false },
-])
+    { prop: 'path', label: t('menuManage.path'), minWidth: 150, showOverflowTooltip: true },
+    {
+      prop: 'component',
+      label: t('menuManage.component'),
+      minWidth: 180,
+      showOverflowTooltip: true,
+    },
+    { prop: 'perms', label: t('menuManage.perms'), minWidth: 160, showOverflowTooltip: true },
+    { prop: 'sort', label: t('menuManage.sort'), width: 70, align: 'center' },
+    { prop: 'autoRefresh', label: t('menuManage.autoRefresh'), width: 130, align: 'center' },
+    {
+      prop: 'visible',
+      label: t('common.status'),
+      width: 90,
+      align: 'center',
+      statusMap: {
+        true: { label: t('common.enabled'), type: 'success' },
+        false: { label: t('common.disabled'), type: 'danger' },
+      },
+    },
+    { prop: 'action', label: t('common.action'), width: 230, fixed: 'right', hideable: false },
+  ]
+  return cols
+})
 
-/** 筛选面板配置 */
+/** 筛选面板配置（computed：语言切换时自动重建文案） */
 const filters = computed<FilterField[]>(() => [
   { prop: 'keyword', label: t('menuManage.name'), type: 'input' },
 ])

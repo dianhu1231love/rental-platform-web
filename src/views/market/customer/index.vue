@@ -50,7 +50,7 @@ const TYPE_OPTIONS = computed<
   { value: 'individual', label: t('customer.typeIndividual'), type: 'success' },
 ])
 
-/** 客户等级选项 */
+/** 客户等级选项（computed：语言切换时自动重建文案） */
 const LEVEL_OPTIONS = computed<
   Array<{ value: CustomerLevel; label: string; type: 'danger' | 'primary' | 'info' }>
 >(() => [
@@ -59,7 +59,7 @@ const LEVEL_OPTIONS = computed<
   { value: 'potential', label: t('customer.levelPotential'), type: 'info' },
 ])
 
-/** 客户来源选项 */
+/** 客户来源选项（computed：语言切换时自动重建文案） */
 const SOURCE_OPTIONS = computed<Array<{ value: CustomerSource; label: string }>>(() => [
   { value: 'referral', label: t('customer.sourceReferral') },
   { value: 'exhibition', label: t('customer.sourceExhibition') },
