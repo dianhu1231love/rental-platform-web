@@ -12,6 +12,7 @@ import {
   seedGroups,
   seedMenus,
   seedModels,
+  seedOpportunities,
   seedRoles,
   seedBrands,
   seedTenants,
@@ -29,6 +30,7 @@ import type {
   EquipmentItem,
   EquipmentModel,
   Menu,
+  Opportunity,
   Role,
   Tenant,
   TodoItem,
@@ -47,6 +49,7 @@ const KEYS = {
   tenants: 'rp_mock_tenants',
   customers: 'rp_mock_customers',
   visits: 'rp_mock_visits',
+  opportunities: 'rp_mock_opportunities',
   todos: 'rp_mock_todos',
   equipment: 'rp_mock_equipment',
   brands: 'rp_mock_brands',
@@ -183,6 +186,7 @@ interface MockDb {
   tenants: Tenant[]
   customers: Customer[]
   visits: VisitRecord[]
+  opportunities: Opportunity[]
   todos: TodoItem[]
   equipment: EquipmentItem[]
   brands: EquipmentBrand[]
@@ -227,6 +231,12 @@ const db: MockDb = {
   },
   set visits(v) {
     save(KEYS.visits, v)
+  },
+  get opportunities() {
+    return load(KEYS.opportunities, seedOpportunities)
+  },
+  set opportunities(v) {
+    save(KEYS.opportunities, v)
   },
   get todos() {
     return load(KEYS.todos, seedTodos)
@@ -395,6 +405,45 @@ function nextCustomerCode(list: Customer[]): string {
     return Math.max(m, num)
   }, 0)
   return `${prefix}${String(max + 1).padStart(4, '0')}`
+}
+
+/** 生成商机编号：OPP-年份-4 位流水号，全局唯一 */
+function nextOpportunityCode(list: Opportunity[]): string {
+  const year = new Date().getFullYear()
+  const prefix = `OPP-${year}-`
+  const max = list.reduce((m, o) => {
+    if (!o.code.startsWith(prefix)) return m
+    const num = Number(o.code.slice(prefix.length)) || 0
+    return Math.max(m, num)
+  }, 0)
+  return `${prefix}${String(max + 1).padStart(4, '0')}`
+}
+
+/** 生成品牌编码：PP-4 位流水号 */
+function nextBrandCode(list: EquipmentBrand[]): string {
+  const max = list.reduce((m, b) => {
+    const num = Number(b.code?.slice(3)) || 0
+    return Math.max(m, num)
+  }, 0)
+  return `PP-${String(max + 1).padStart(4, '0')}`
+}
+
+/** 生成产品组编码：PZ-4 位流水号 */
+function nextGroupCode(list: EquipmentGroup[]): string {
+  const max = list.reduce((m, g) => {
+    const num = Number(g.code?.slice(3)) || 0
+    return Math.max(m, num)
+  }, 0)
+  return `PZ-${String(max + 1).padStart(4, '0')}`
+}
+
+/** 生成产品型号编码：XH-4 位流水号 */
+function nextModelCode(list: EquipmentModel[]): string {
+  const max = list.reduce((m, model) => {
+    const num = Number(model.code?.slice(3)) || 0
+    return Math.max(m, num)
+  }, 0)
+  return `XH-${String(max + 1).padStart(4, '0')}`
 }
 
 /** 接口路由表：按 method + pattern 匹配请求 */
@@ -1171,6 +1220,123 @@ const routes: MockRoute[] = [
   },
   {
     method: 'get',
+    pattern: /^\/market\/opportunities$/,
+    auth: true,
+    handler: async (_config, _match, config) => {
+      const params = (config.params || {}) as {
+        page?: string | number
+        pageSize?: string | number
+        keyword?: string
+        type?: string
+        status?: string
+      }
+      const page = Number(params.page) || 1
+      const pageSize = Number(params.pageSize) || 10
+      let list = db.opportunities
+      if (params.keyword) {
+        const kw = String(params.keyword).toLowerCase()
+        list = list.filter((o) =>
+          [o.code, o.customerName, o.contact, o.phone].some((field) =>
+            String(field || '')
+              .toLowerCase()
+              .includes(kw),
+          ),
+        )
+      }
+      if (params.type) list = list.filter((o) => o.type === params.type)
+      if (params.status) list = list.filter((o) => o.status === params.status)
+      const total = list.length
+      const start = (page - 1) * pageSize
+      return ok({ list: list.slice(start, start + pageSize), total })
+    },
+  },
+  {
+    method: 'post',
+    pattern: /^\/market\/opportunities$/,
+    auth: true,
+    handler: async (_config, _match, config) => {
+      const opportunities = db.opportunities
+      const input = (config.data || {}) as Partial<Opportunity>
+      if (!input.customerName || !input.type || !input.status) {
+        return fail(500, 'market.opportunityRequired')
+      }
+      const current = currentUser(config)
+      const opportunity: Opportunity = {
+        id: nextId(opportunities),
+        code: nextOpportunityCode(opportunities),
+        customerId: input.customerId || null,
+        customerName: input.customerName,
+        type: input.type,
+        contact: input.contact || '',
+        phone: input.phone || '',
+        region: input.region || [],
+        addressDetail: input.addressDetail || '',
+        address: input.address || '',
+        status: input.status,
+        // 信息阶段：新增固定 20，由前端按状态联动（赢单 100，丢单/流单 0）
+        stage: input.stage || 20,
+        leaseTerm: input.leaseTerm || '',
+        leaseMode: input.leaseMode || 'month',
+        estimatedIncome: input.estimatedIncome || 0,
+        estimatedContract: input.estimatedContract || 0,
+        remark: input.remark || '',
+        details: input.details || [],
+        creator: current?.name || '',
+        createdAt: formatNow(),
+      }
+      opportunities.unshift(opportunity)
+      db.opportunities = opportunities
+      return ok(opportunity)
+    },
+  },
+  {
+    method: 'put',
+    pattern: /^\/market\/opportunities\/(\d+)$/,
+    auth: true,
+    handler: async (_config, match, { data }) => {
+      const id = Number(match[1])
+      const opportunities = db.opportunities
+      const index = opportunities.findIndex((o) => o.id === id)
+      if (index === -1) return fail(500, 'market.opportunityNotFound')
+      const input = (data || {}) as Partial<Opportunity>
+      const target = opportunities[index]
+      Object.assign(target, {
+        customerId: input.customerId ?? target.customerId,
+        customerName: input.customerName ?? target.customerName,
+        type: input.type ?? target.type,
+        contact: input.contact ?? target.contact,
+        phone: input.phone ?? target.phone,
+        region: input.region ?? target.region,
+        addressDetail: input.addressDetail ?? target.addressDetail,
+        address: input.address ?? target.address,
+        status: input.status ?? target.status,
+        stage: input.stage ?? target.stage,
+        leaseTerm: input.leaseTerm ?? target.leaseTerm,
+        leaseMode: input.leaseMode ?? target.leaseMode,
+        estimatedIncome: input.estimatedIncome ?? target.estimatedIncome,
+        estimatedContract: input.estimatedContract ?? target.estimatedContract,
+        remark: input.remark ?? target.remark,
+        details: input.details ?? target.details,
+      })
+      db.opportunities = opportunities
+      return ok(target)
+    },
+  },
+  {
+    method: 'delete',
+    pattern: /^\/market\/opportunities\/(\d+)$/,
+    auth: true,
+    handler: async (_config, match) => {
+      const id = Number(match[1])
+      const opportunities = db.opportunities
+      const next = opportunities.filter((o) => o.id !== id)
+      if (next.length === opportunities.length) return fail(500, 'market.opportunityNotFound')
+      db.opportunities = next
+      return ok(null)
+    },
+  },
+  {
+    method: 'get',
     pattern: /^\/system\/dicts$/,
     auth: true,
     handler: async (_config, _match, config) => {
@@ -1330,6 +1496,7 @@ const routes: MockRoute[] = [
       const item = {
         ...(data as Partial<EquipmentBrand>),
         id: nextId(list),
+        code: nextBrandCode(list),
         createdAt: formatNow(),
       } as EquipmentBrand
       list.push(item)
@@ -1379,6 +1546,7 @@ const routes: MockRoute[] = [
       const item = {
         ...(data as Partial<EquipmentGroup>),
         id: nextId(list),
+        code: nextGroupCode(list),
         createdAt: formatNow(),
       } as EquipmentGroup
       list.push(item)
@@ -1428,6 +1596,7 @@ const routes: MockRoute[] = [
       const item = {
         ...(data as Partial<EquipmentModel>),
         id: nextId(list),
+        code: nextModelCode(list),
         createdAt: formatNow(),
       } as EquipmentModel
       list.push(item)

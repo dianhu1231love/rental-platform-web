@@ -57,12 +57,12 @@ export function getBrandList() {
 }
 
 /** 新增设备品牌 */
-export function createBrand(data: Omit<EquipmentBrand, 'id' | 'createdAt'>) {
+export function createBrand(data: Omit<EquipmentBrand, 'id' | 'createdAt' | 'code'>) {
   return request.post<EquipmentBrand>('/equipment/brands', data)
 }
 
 /** 更新设备品牌 */
-export function updateBrand(id: number, data: Partial<EquipmentBrand>) {
+export function updateBrand(id: number, data: Partial<Omit<EquipmentBrand, 'code'>>) {
   return request.put<EquipmentBrand>(`/equipment/brands/${id}`, data)
 }
 
@@ -77,12 +77,12 @@ export function getGroupList() {
 }
 
 /** 新增产品组 */
-export function createGroup(data: Omit<EquipmentGroup, 'id' | 'createdAt'>) {
+export function createGroup(data: Omit<EquipmentGroup, 'id' | 'createdAt' | 'code'>) {
   return request.post<EquipmentGroup>('/equipment/groups', data)
 }
 
 /** 更新产品组 */
-export function updateGroup(id: number, data: Partial<EquipmentGroup>) {
+export function updateGroup(id: number, data: Partial<Omit<EquipmentGroup, 'code'>>) {
   return request.put<EquipmentGroup>(`/equipment/groups/${id}`, data)
 }
 
@@ -97,12 +97,12 @@ export function getModelList() {
 }
 
 /** 新增产品型号 */
-export function createModel(data: Omit<EquipmentModel, 'id' | 'createdAt'>) {
+export function createModel(data: Omit<EquipmentModel, 'id' | 'createdAt' | 'code'>) {
   return request.post<EquipmentModel>('/equipment/models', data)
 }
 
 /** 更新产品型号 */
-export function updateModel(id: number, data: Partial<EquipmentModel>) {
+export function updateModel(id: number, data: Partial<Omit<EquipmentModel, 'code'>>) {
   return request.put<EquipmentModel>(`/equipment/models/${id}`, data)
 }
 

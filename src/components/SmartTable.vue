@@ -491,7 +491,14 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
         width="50"
         :fixed="selectionFixed ? 'left' : false"
       />
-      <el-table-column v-if="showIndex" type="index" label="#" width="55" align="center" />
+      <el-table-column
+        v-if="showIndex"
+        type="index"
+        label="#"
+        width="55"
+        align="center"
+        fixed="left"
+      />
       <el-table-column
         v-for="col in displayColumns"
         :key="col.prop"

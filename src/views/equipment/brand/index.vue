@@ -21,12 +21,15 @@ const filteredList = computed(() => {
   if (!kw) return list.value
   return list.value.filter(
     (item) =>
-      item.name.toLowerCase().includes(kw) || (item.remark || '').toLowerCase().includes(kw),
+      item.code.toLowerCase().includes(kw) ||
+      item.name.toLowerCase().includes(kw) ||
+      (item.remark || '').toLowerCase().includes(kw),
   )
 })
 
 /** 表格列配置（computed：语言切换时自动重建文案） */
 const columns = computed<TableColumn[]>(() => [
+  { prop: 'code', label: t('equipment.brandCode'), width: 130 },
   { prop: 'name', label: t('equipment.brandName'), minWidth: 180 },
   { prop: 'remark', label: t('common.remark'), minWidth: 220, showOverflowTooltip: true },
   { prop: 'createdAt', label: t('common.createdAt'), width: 170 },
@@ -40,7 +43,7 @@ const filters = computed<FilterField[]>(() => [
 const dialogVisible = ref(false)
 const dialogMode = ref<'create' | 'edit'>('create')
 const formRef = ref<FormInstance>()
-const form = reactive({ id: null as number | null, name: '', remark: '' })
+const form = reactive({ id: null as number | null, code: '', name: '', remark: '' })
 const formRules: FormRules = {
   name: [{ required: true, message: () => t('equipment.brandName'), trigger: 'blur' }],
 }
@@ -64,13 +67,13 @@ function handleReset(): void {
 
 function openCreate(): void {
   dialogMode.value = 'create'
-  Object.assign(form, { id: null, name: '', remark: '' })
+  Object.assign(form, { id: null, code: '', name: '', remark: '' })
   dialogVisible.value = true
 }
 
 function openEdit(row: EquipmentBrand): void {
   dialogMode.value = 'edit'
-  Object.assign(form, { id: row.id, name: row.name, remark: row.remark })
+  Object.assign(form, { id: row.id, code: row.code, name: row.name, remark: row.remark })
   dialogVisible.value = true
 }
 
@@ -161,6 +164,13 @@ onMounted(loadList)
       destroy-on-close
     >
       <el-form ref="formRef" :model="form" :rules="formRules" label-width="90px">
+        <el-form-item :label="$t('equipment.brandCode')">
+          <el-input
+            :model-value="form.code"
+            :placeholder="$t('equipment.codePlaceholder')"
+            disabled
+          />
+        </el-form-item>
         <el-form-item :label="$t('equipment.brandName')" prop="name">
           <el-input v-model="form.name" />
         </el-form-item>
