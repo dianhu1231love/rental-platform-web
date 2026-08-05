@@ -15,11 +15,11 @@ export function createVisit(data: Omit<VisitFormModel, 'id'>) {
 }
 
 /** 更新拜访记录（仅允许修改拜访结果与附件） */
-export function updateVisit(id: number, data: Pick<VisitFormModel, 'visitResult' | 'attachments'>) {
+export function updateVisit(id: string, data: Pick<VisitFormModel, 'visitResult' | 'attachments'>) {
   return request.put<VisitRecord>(`/market/visits/${id}`, data)
 }
 
 /** 删除拜访记录 */
-export function deleteVisit(id: number) {
+export function deleteVisit(id: string) {
   return request.delete<null>(`/market/visits/${id}`)
 }

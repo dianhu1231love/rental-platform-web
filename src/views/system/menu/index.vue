@@ -97,12 +97,12 @@ const defaultButtons = ['add', 'edit', 'delete', 'view']
 const dialogVisible = ref(false)
 const dialogMode = ref('create')
 const saving = ref(false)
-const refreshingId = ref<number | null>(null)
+const refreshingId = ref<string | null>(null)
 const formRef = ref<FormInstance>()
 
 const form = reactive<MenuFormModel>({
   id: null,
-  parentId: 0,
+  parentId: '0',
   type: 'menu',
   name: '',
   path: '',
@@ -161,9 +161,9 @@ async function loadMenus(): Promise<void> {
 }
 
 /** 生成上级菜单下拉选项（含缩进层级） */
-function parentOptions(): Array<{ id: number; title: string; depth: number }> {
-  const options: Array<{ id: number; title: string; depth: number }> = [
-    { id: 0, title: t('menuManage.root'), depth: 0 },
+function parentOptions(): Array<{ id: string; title: string; depth: number }> {
+  const options: Array<{ id: string; title: string; depth: number }> = [
+    { id: '0', title: t('menuManage.root'), depth: 0 },
   ]
   const walk = (nodes: TreeNode<Menu>[], depth = 0): void => {
     nodes.forEach((n) => {
@@ -178,7 +178,7 @@ function parentOptions(): Array<{ id: number; title: string; depth: number }> {
 }
 
 /** 打开新增弹窗 */
-function openCreate(parentId = 0): void {
+function openCreate(parentId = '0'): void {
   dialogMode.value = 'create'
   Object.assign(form, {
     id: null,
@@ -299,7 +299,7 @@ async function handleSave(): Promise<void> {
     if (dialogMode.value === 'create') {
       await createMenu(payload)
     } else {
-      await updateMenu(payload.id as number, { ...payload, id: payload.id as number })
+      await updateMenu(payload.id as string, { ...payload, id: payload.id as string })
     }
     ElMessage.success(t('menuManage.saveSuccess'))
     dialogVisible.value = false

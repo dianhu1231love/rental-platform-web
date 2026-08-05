@@ -23,16 +23,16 @@ import type {
 
 /** 演示用户（phone 可选，用于找回账户演示） */
 export interface SeedUser {
-  id: number
+  id: string
   username: string
   password: string
   name: string
-  roleId: number
+  roleId: string
   avatar: string
   phone?: string
   email?: string
   /** 关联租户 id，null 表示平台级用户 */
-  tenantId?: number | null
+  tenantId?: string | null
   /** 状态：1 启用 / 0 停用 */
   status?: number
   /** 备注 */
@@ -47,8 +47,8 @@ const TINY_PNG =
 // 种子数据：首次运行时写入 localStorage，之后系统内编辑会持久化保存
 export const seedMenus: Menu[] = [
   {
-    id: 1,
-    parentId: 0,
+    id: '1',
+    parentId: '0',
     type: 'menu',
     name: 'Dashboard',
     path: '/dashboard',
@@ -63,8 +63,8 @@ export const seedMenus: Menu[] = [
     buttons: [],
   },
   {
-    id: 2,
-    parentId: 0,
+    id: '2',
+    parentId: '0',
     type: 'directory',
     name: 'System',
     path: '/system',
@@ -78,8 +78,8 @@ export const seedMenus: Menu[] = [
     buttons: [],
   },
   {
-    id: 3,
-    parentId: 2,
+    id: '3',
+    parentId: '2',
     type: 'menu',
     name: 'RoleManage',
     path: '/system/role',
@@ -99,8 +99,8 @@ export const seedMenus: Menu[] = [
     ],
   },
   {
-    id: 4,
-    parentId: 2,
+    id: '4',
+    parentId: '2',
     type: 'menu',
     name: 'MenuManage',
     path: '/system/menu',
@@ -120,8 +120,8 @@ export const seedMenus: Menu[] = [
     ],
   },
   {
-    id: 5,
-    parentId: 2,
+    id: '5',
+    parentId: '2',
     type: 'menu',
     name: 'TenantManage',
     path: '/system/tenant',
@@ -141,8 +141,8 @@ export const seedMenus: Menu[] = [
     ],
   },
   {
-    id: 11,
-    parentId: 2,
+    id: '11',
+    parentId: '2',
     type: 'menu',
     name: 'UserManage',
     path: '/system/user',
@@ -163,8 +163,8 @@ export const seedMenus: Menu[] = [
     ],
   },
   {
-    id: 6,
-    parentId: 0,
+    id: '6',
+    parentId: '0',
     type: 'directory',
     name: 'Equipment',
     path: '/equipment',
@@ -178,8 +178,8 @@ export const seedMenus: Menu[] = [
     buttons: [],
   },
   {
-    id: 7,
-    parentId: 6,
+    id: '7',
+    parentId: '6',
     type: 'menu',
     name: 'EquipmentList',
     path: '/equipment/list',
@@ -199,8 +199,8 @@ export const seedMenus: Menu[] = [
     ],
   },
   {
-    id: 8,
-    parentId: 6,
+    id: '8',
+    parentId: '6',
     type: 'menu',
     name: 'EquipmentBrand',
     path: '/equipment/brand',
@@ -220,8 +220,8 @@ export const seedMenus: Menu[] = [
     ],
   },
   {
-    id: 9,
-    parentId: 6,
+    id: '9',
+    parentId: '6',
     type: 'menu',
     name: 'EquipmentGroup',
     path: '/equipment/group',
@@ -241,8 +241,8 @@ export const seedMenus: Menu[] = [
     ],
   },
   {
-    id: 10,
-    parentId: 6,
+    id: '10',
+    parentId: '6',
     type: 'menu',
     name: 'EquipmentModel',
     path: '/equipment/model',
@@ -262,8 +262,8 @@ export const seedMenus: Menu[] = [
     ],
   },
   {
-    id: 12,
-    parentId: 0,
+    id: '12',
+    parentId: '0',
     type: 'directory',
     name: 'Market',
     path: '/market',
@@ -277,8 +277,8 @@ export const seedMenus: Menu[] = [
     buttons: [],
   },
   {
-    id: 13,
-    parentId: 12,
+    id: '13',
+    parentId: '12',
     type: 'menu',
     name: 'CustomerManage',
     path: '/market/customer',
@@ -298,8 +298,8 @@ export const seedMenus: Menu[] = [
     ],
   },
   {
-    id: 14,
-    parentId: 12,
+    id: '14',
+    parentId: '12',
     type: 'menu',
     name: 'VisitManage',
     path: '/market/visit',
@@ -319,8 +319,8 @@ export const seedMenus: Menu[] = [
     ],
   },
   {
-    id: 15,
-    parentId: 12,
+    id: '15',
+    parentId: '12',
     type: 'menu',
     name: 'OpportunityManage',
     path: '/market/opportunity',
@@ -343,30 +343,30 @@ export const seedMenus: Menu[] = [
 
 export const seedRoles: Role[] = [
   {
-    id: 1,
+    id: '1',
     name: '超级管理员',
     code: 'admin',
-    menuIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+    menuIds: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'],
     perms: ['*:*:*'],
     status: 1,
     remark: '拥有系统全部权限',
     createdAt: '2026-01-01 10:00:00',
   },
   {
-    id: 2,
+    id: '2',
     name: '财务专员',
     code: 'finance',
-    menuIds: [1, 2, 3],
+    menuIds: ['1', '2', '3'],
     perms: ['dashboard:view', 'system:role:list', 'system:role:view'],
     status: 1,
     remark: '负责分款、开票等财务业务',
     createdAt: '2026-01-02 10:00:00',
   },
   {
-    id: 3,
+    id: '3',
     name: '运营专员',
     code: 'operator',
-    menuIds: [1, 2, 5],
+    menuIds: ['1', '2', '5'],
     perms: ['dashboard:view', 'system:tenant:list', 'system:tenant:view'],
     status: 1,
     remark: '负责日常运营与租户维护',
@@ -376,11 +376,11 @@ export const seedRoles: Role[] = [
 
 export const seedUsers: SeedUser[] = [
   {
-    id: 1,
+    id: '1',
     username: 'admin',
     password: '123456',
     name: '系统管理员',
-    roleId: 1,
+    roleId: '1',
     avatar: '',
     phone: '13800000001',
     email: 'admin@example.com',
@@ -390,57 +390,57 @@ export const seedUsers: SeedUser[] = [
     createdAt: '2026-01-01 09:00:00',
   },
   {
-    id: 2,
+    id: '2',
     username: 'finance',
     password: '123456',
     name: '财务专员-小李',
-    roleId: 2,
+    roleId: '2',
     avatar: '',
     phone: '13800000002',
     email: 'finance@example.com',
-    tenantId: 1,
+    tenantId: '1',
     status: 1,
     remark: '',
     createdAt: '2026-01-02 09:00:00',
   },
   {
-    id: 3,
+    id: '3',
     username: 'operator',
     password: '123456',
     name: '运营专员-小王',
-    roleId: 3,
+    roleId: '3',
     avatar: '',
     phone: '13800000003',
     email: 'operator@example.com',
-    tenantId: 2,
+    tenantId: '2',
     status: 1,
     remark: '',
     createdAt: '2026-01-03 09:00:00',
   },
   {
-    id: 4,
+    id: '4',
     username: 'finance2',
     password: '123456',
     name: '财务专员-小陈',
-    roleId: 2,
+    roleId: '2',
     avatar: '',
     phone: '13700000004',
     email: 'xiaochen@example.com',
-    tenantId: 3,
+    tenantId: '3',
     status: 1,
     remark: '苏州租户财务',
     createdAt: '2026-03-12 10:00:00',
   },
   {
-    id: 5,
+    id: '5',
     username: 'operator2',
     password: '123456',
     name: '运营专员-小周',
-    roleId: 3,
+    roleId: '3',
     avatar: '',
     phone: '13600000005',
     email: 'xiaozhou@example.com',
-    tenantId: 1,
+    tenantId: '1',
     status: 0,
     remark: '已停用',
     createdAt: '2026-05-20 14:00:00',
@@ -450,7 +450,7 @@ export const seedUsers: SeedUser[] = [
 /** 客户种子数据 */
 export const seedCustomers: Customer[] = [
   {
-    id: 1,
+    id: '1',
     code: 'KH-2026-0001',
     name: '上海建工机械设备有限公司',
     type: 'enterprise',
@@ -472,7 +472,7 @@ export const seedCustomers: Customer[] = [
     createdAt: '2026-02-10 10:00:00',
   },
   {
-    id: 2,
+    id: '2',
     code: 'KH-2026-0002',
     name: '杭州远大设备租赁有限公司',
     type: 'enterprise',
@@ -494,7 +494,7 @@ export const seedCustomers: Customer[] = [
     createdAt: '2026-02-18 14:30:00',
   },
   {
-    id: 3,
+    id: '3',
     code: 'KH-2026-0003',
     name: '张伟',
     type: 'individual',
@@ -516,7 +516,7 @@ export const seedCustomers: Customer[] = [
     createdAt: '2026-03-05 09:20:00',
   },
   {
-    id: 4,
+    id: '4',
     code: 'KH-2026-0004',
     name: '苏州金穗机械租赁有限公司',
     type: 'enterprise',
@@ -538,7 +538,7 @@ export const seedCustomers: Customer[] = [
     createdAt: '2026-04-12 16:40:00',
   },
   {
-    id: 5,
+    id: '5',
     code: 'KH-2026-0005',
     name: '李慧',
     type: 'individual',
@@ -564,9 +564,9 @@ export const seedCustomers: Customer[] = [
 /** 拜访记录种子数据 */
 export const seedVisits: VisitRecord[] = [
   {
-    id: 1,
+    id: '1',
     opportunityCode: 'SJ-2026-0001',
-    customerId: 1,
+    customerId: '1',
     customerName: '上海建工机械设备有限公司',
     visitType: 'onsite',
     visitTime: '2026-07-18 10:00:00',
@@ -577,14 +577,14 @@ export const seedVisits: VisitRecord[] = [
     visitResult: '客户意向明确，约定下周输出租赁方案与报价。',
     attachments: [
       {
-        id: 1,
+        id: '1',
         name: '现场照片.png',
         size: 102400,
         type: 'image/png',
         url: TINY_PNG,
       },
       {
-        id: 2,
+        id: '2',
         name: '会议纪要.txt',
         size: 2048,
         type: 'text/plain',
@@ -599,9 +599,9 @@ export const seedVisits: VisitRecord[] = [
     createdAt: '2026-07-18 14:20:00',
   },
   {
-    id: 2,
+    id: '2',
     opportunityCode: 'SJ-2026-0002',
-    customerId: 2,
+    customerId: '2',
     customerName: '杭州远大设备租赁有限公司',
     visitType: 'phone',
     visitTime: '2026-07-22 15:30:00',
@@ -615,9 +615,9 @@ export const seedVisits: VisitRecord[] = [
     createdAt: '2026-07-22 16:10:00',
   },
   {
-    id: 3,
+    id: '3',
     opportunityCode: '',
-    customerId: 3,
+    customerId: '3',
     customerName: '张伟',
     visitType: 'onsite',
     visitTime: '2026-07-25 09:00:00',
@@ -628,7 +628,7 @@ export const seedVisits: VisitRecord[] = [
     visitResult: '客户需评估预算后反馈，后续跟进报价单。',
     attachments: [
       {
-        id: 3,
+        id: '3',
         name: '需求清单.pdf',
         size: 307200,
         type: 'application/pdf',
@@ -639,9 +639,9 @@ export const seedVisits: VisitRecord[] = [
     createdAt: '2026-07-25 15:00:00',
   },
   {
-    id: 4,
+    id: '4',
     opportunityCode: 'SJ-2026-0003',
-    customerId: 4,
+    customerId: '4',
     customerName: '苏州金穗机械租赁有限公司',
     visitType: 'phone',
     visitTime: '2026-07-28 11:00:00',
@@ -655,9 +655,9 @@ export const seedVisits: VisitRecord[] = [
     createdAt: '2026-07-28 14:30:00',
   },
   {
-    id: 5,
+    id: '5',
     opportunityCode: '',
-    customerId: 5,
+    customerId: '5',
     customerName: '李慧',
     visitType: 'phone',
     visitTime: '2026-08-01 10:30:00',
@@ -671,9 +671,9 @@ export const seedVisits: VisitRecord[] = [
     createdAt: '2026-08-01 11:20:00',
   },
   {
-    id: 6,
+    id: '6',
     opportunityCode: '',
-    customerId: 1,
+    customerId: '1',
     customerName: '上海建工机械设备有限公司',
     visitType: 'onsite',
     visitTime: '2026-08-03 14:00:00',
@@ -684,7 +684,7 @@ export const seedVisits: VisitRecord[] = [
     visitResult: '客户对报价方案基本认可，计划 8 月中旬签订合同。',
     attachments: [
       {
-        id: 4,
+        id: '4',
         name: '租赁方案.docx',
         size: 51200,
         type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -699,9 +699,9 @@ export const seedVisits: VisitRecord[] = [
 /** 商机种子数据 */
 export const seedOpportunities: Opportunity[] = [
   {
-    id: 1,
+    id: '1',
     code: 'OPP-2026-0001',
-    customerId: 1,
+    customerId: '1',
     customerName: '上海建工机械设备有限公司',
     type: 'lease',
     contact: '张伟',
@@ -718,26 +718,26 @@ export const seedOpportunities: Opportunity[] = [
     remark: '首批洽谈高空作业平台租赁',
     details: [
       {
-        id: 1,
+        id: '1',
         brandCode: 'PP-0001',
-        brandId: 1,
+        brandId: '1',
         groupCode: 'PZ-0001',
-        groupId: 1,
+        groupId: '1',
         modelCode: 'XH-0001',
-        modelId: 1,
+        modelId: '1',
         quantity: 4,
         unitPrice: 25000,
         startAt: '2026-08-10',
         remark: '',
       },
       {
-        id: 2,
+        id: '2',
         brandCode: 'PP-0002',
-        brandId: 2,
+        brandId: '2',
         groupCode: 'PZ-0001',
-        groupId: 1,
+        groupId: '1',
         modelCode: 'XH-0002',
-        modelId: 2,
+        modelId: '2',
         quantity: 2,
         unitPrice: 30000,
         startAt: '2026-08-15',
@@ -748,9 +748,9 @@ export const seedOpportunities: Opportunity[] = [
     createdAt: '2026-08-01 09:30:00',
   },
   {
-    id: 2,
+    id: '2',
     code: 'OPP-2026-0002',
-    customerId: 2,
+    customerId: '2',
     customerName: '杭州远大设备租赁有限公司',
     type: 'trial',
     contact: '李娜',
@@ -767,13 +767,13 @@ export const seedOpportunities: Opportunity[] = [
     remark: '叉车年度框架协议',
     details: [
       {
-        id: 1,
+        id: '1',
         brandCode: 'PP-0003',
-        brandId: 3,
+        brandId: '3',
         groupCode: 'PZ-0002',
-        groupId: 2,
+        groupId: '2',
         modelCode: 'XH-0004',
-        modelId: 4,
+        modelId: '4',
         quantity: 6,
         unitPrice: 55000,
         startAt: '2026-09-01',
@@ -787,7 +787,7 @@ export const seedOpportunities: Opportunity[] = [
 
 export const seedTenants: Tenant[] = [
   {
-    id: 1,
+    id: '1',
     name: '上海华筑租赁有限公司',
     code: 'SH-HZ',
     contact: '王建国',
@@ -799,7 +799,7 @@ export const seedTenants: Tenant[] = [
     createdAt: '2026-01-10 09:30:00',
   },
   {
-    id: 2,
+    id: '2',
     name: '杭州远大设备租赁',
     code: 'HZ-YD',
     contact: '李慧',
@@ -811,7 +811,7 @@ export const seedTenants: Tenant[] = [
     createdAt: '2026-02-05 14:20:00',
   },
   {
-    id: 3,
+    id: '3',
     name: '苏州金穗机械租赁',
     code: 'SZ-JS',
     contact: '赵强',
@@ -823,7 +823,7 @@ export const seedTenants: Tenant[] = [
     createdAt: '2026-02-18 11:00:00',
   },
   {
-    id: 4,
+    id: '4',
     name: '南京鼎力工程设备',
     code: 'NJ-DL',
     contact: '孙丽',
@@ -835,7 +835,7 @@ export const seedTenants: Tenant[] = [
     createdAt: '2026-03-02 16:45:00',
   },
   {
-    id: 5,
+    id: '5',
     name: '宁波甬盛租赁',
     code: 'NB-YS',
     contact: '周涛',
@@ -847,7 +847,7 @@ export const seedTenants: Tenant[] = [
     createdAt: '2026-03-20 10:10:00',
   },
   {
-    id: 6,
+    id: '6',
     name: '无锡星辰设备租赁',
     code: 'WX-XC',
     contact: '吴敏',
@@ -904,7 +904,7 @@ export const seedDashboard: {
 
 export const seedTodos: TodoItem[] = [
   {
-    id: 1,
+    id: '1',
     type: 'contract',
     title: 'B公司高空作业车租赁合同审批（10台/6个月）',
     applicant: '张伟',
@@ -912,7 +912,7 @@ export const seedTodos: TodoItem[] = [
     priority: 'high',
   },
   {
-    id: 2,
+    id: '2',
     type: 'distribute',
     title: '分款审批：2026-07 分款单 #F20260718',
     applicant: '刘敏',
@@ -920,7 +920,7 @@ export const seedTodos: TodoItem[] = [
     priority: 'medium',
   },
   {
-    id: 3,
+    id: '3',
     type: 'invoice',
     title: '开票申请：上海XX建筑工程有限公司 增值税专用发票',
     applicant: '陈晨',
@@ -928,7 +928,7 @@ export const seedTodos: TodoItem[] = [
     priority: 'medium',
   },
   {
-    id: 4,
+    id: '4',
     type: 'contract',
     title: 'C公司叉车租赁补充协议审批',
     applicant: '张伟',
@@ -936,7 +936,7 @@ export const seedTodos: TodoItem[] = [
     priority: 'low',
   },
   {
-    id: 5,
+    id: '5',
     type: 'distribute',
     title: '分款审批：2026-07 分款单 #F20260721',
     applicant: '刘敏',
@@ -948,47 +948,47 @@ export const seedTodos: TodoItem[] = [
 /** 设备品牌种子数据 */
 export const seedBrands: EquipmentBrand[] = [
   {
-    id: 1,
+    id: '1',
     code: 'PP-0001',
     name: '徐工',
     remark: '工程机械龙头品牌',
     createdAt: '2026-01-05 10:00:00',
   },
-  { id: 2, code: 'PP-0002', name: '三一重工', remark: '', createdAt: '2026-01-05 10:05:00' },
-  { id: 3, code: 'PP-0003', name: '中联重科', remark: '', createdAt: '2026-01-05 10:10:00' },
-  { id: 4, code: 'PP-0004', name: '柳工', remark: '', createdAt: '2026-01-05 10:15:00' },
-  { id: 5, code: 'PP-0005', name: '临工', remark: '', createdAt: '2026-01-05 10:20:00' },
+  { id: '2', code: 'PP-0002', name: '三一重工', remark: '', createdAt: '2026-01-05 10:05:00' },
+  { id: '3', code: 'PP-0003', name: '中联重科', remark: '', createdAt: '2026-01-05 10:10:00' },
+  { id: '4', code: 'PP-0004', name: '柳工', remark: '', createdAt: '2026-01-05 10:15:00' },
+  { id: '5', code: 'PP-0005', name: '临工', remark: '', createdAt: '2026-01-05 10:20:00' },
 ]
 
 /** 产品组种子数据 */
 export const seedGroups: EquipmentGroup[] = [
   {
-    id: 1,
+    id: '1',
     code: 'PZ-0001',
     name: '高空作业平台',
     remark: '剪叉式/臂式高空作业车',
     createdAt: '2026-01-06 09:00:00',
   },
   {
-    id: 2,
+    id: '2',
     code: 'PZ-0002',
     name: '叉车',
     remark: '电动叉车与内燃叉车',
     createdAt: '2026-01-06 09:05:00',
   },
-  { id: 3, code: 'PZ-0003', name: '挖掘机', remark: '', createdAt: '2026-01-06 09:10:00' },
-  { id: 4, code: 'PZ-0004', name: '起重机', remark: '', createdAt: '2026-01-06 09:15:00' },
-  { id: 5, code: 'PZ-0005', name: '发电机组', remark: '', createdAt: '2026-01-06 09:20:00' },
+  { id: '3', code: 'PZ-0003', name: '挖掘机', remark: '', createdAt: '2026-01-06 09:10:00' },
+  { id: '4', code: 'PZ-0004', name: '起重机', remark: '', createdAt: '2026-01-06 09:15:00' },
+  { id: '5', code: 'PZ-0005', name: '发电机组', remark: '', createdAt: '2026-01-06 09:20:00' },
 ]
 
 /** 产品型号种子数据 */
 export const seedModels: EquipmentModel[] = [
   {
-    id: 1,
+    id: '1',
     code: 'XH-0001',
     name: 'XS1200 剪叉式',
-    brandId: 1,
-    groupId: 1,
+    brandId: '1',
+    groupId: '1',
     leaseTerm: 12,
     leaseUnit: 'month',
     unitPrice: 25000,
@@ -996,11 +996,11 @@ export const seedModels: EquipmentModel[] = [
     createdAt: '2026-01-07 09:00:00',
   },
   {
-    id: 2,
+    id: '2',
     code: 'XH-0002',
     name: 'ZA14J 臂式',
-    brandId: 2,
-    groupId: 1,
+    brandId: '2',
+    groupId: '1',
     leaseTerm: 12,
     leaseUnit: 'month',
     unitPrice: 30000,
@@ -1008,11 +1008,11 @@ export const seedModels: EquipmentModel[] = [
     createdAt: '2026-01-07 09:05:00',
   },
   {
-    id: 3,
+    id: '3',
     code: 'XH-0003',
     name: 'CPC30 电动叉车',
-    brandId: 2,
-    groupId: 2,
+    brandId: '2',
+    groupId: '2',
     leaseTerm: 24,
     leaseUnit: 'month',
     unitPrice: 50000,
@@ -1020,11 +1020,11 @@ export const seedModels: EquipmentModel[] = [
     createdAt: '2026-01-07 09:10:00',
   },
   {
-    id: 4,
+    id: '4',
     code: 'XH-0004',
     name: 'CPCD50 内燃叉车',
-    brandId: 3,
-    groupId: 2,
+    brandId: '3',
+    groupId: '2',
     leaseTerm: 24,
     leaseUnit: 'month',
     unitPrice: 55000,
@@ -1032,11 +1032,11 @@ export const seedModels: EquipmentModel[] = [
     createdAt: '2026-01-07 09:15:00',
   },
   {
-    id: 5,
+    id: '5',
     code: 'XH-0005',
     name: 'XE215 中型挖掘机',
-    brandId: 3,
-    groupId: 3,
+    brandId: '3',
+    groupId: '3',
     leaseTerm: 3,
     leaseUnit: 'year',
     unitPrice: 80000,
@@ -1044,11 +1044,11 @@ export const seedModels: EquipmentModel[] = [
     createdAt: '2026-01-07 09:20:00',
   },
   {
-    id: 6,
+    id: '6',
     code: 'XH-0006',
     name: 'QY25K 汽车起重机',
-    brandId: 4,
-    groupId: 4,
+    brandId: '4',
+    groupId: '4',
     leaseTerm: 3,
     leaseUnit: 'year',
     unitPrice: 100000,
@@ -1056,11 +1056,11 @@ export const seedModels: EquipmentModel[] = [
     createdAt: '2026-01-07 09:25:00',
   },
   {
-    id: 7,
+    id: '7',
     code: 'XH-0007',
     name: 'D100 柴油发电机',
-    brandId: 5,
-    groupId: 5,
+    brandId: '5',
+    groupId: '5',
     leaseTerm: 12,
     leaseUnit: 'month',
     unitPrice: 15000,
@@ -1071,11 +1071,11 @@ export const seedModels: EquipmentModel[] = [
 
 /** 数据字典种子数据（资产归属等，可自定义添加） */
 export const seedDicts: DictItem[] = [
-  { id: 1, type: 'asset_owner', label: '上海华筑租赁有限公司' },
-  { id: 2, type: 'asset_owner', label: '杭州远大设备租赁' },
-  { id: 3, type: 'asset_owner', label: '苏州金穗机械租赁' },
-  { id: 4, type: 'equipment_intact', label: '完好' },
-  { id: 5, type: 'equipment_intact', label: '不完好' },
+  { id: '1', type: 'asset_owner', label: '上海华筑租赁有限公司' },
+  { id: '2', type: 'asset_owner', label: '杭州远大设备租赁' },
+  { id: '3', type: 'asset_owner', label: '苏州金穗机械租赁' },
+  { id: '4', type: 'equipment_intact', label: '完好' },
+  { id: '5', type: 'equipment_intact', label: '不完好' },
 ]
 
 /**
@@ -1111,10 +1111,10 @@ export const seedTranslationDict: Record<string, string> = {
 /** 设备列表种子数据 */
 export const seedEquipment: EquipmentItem[] = [
   {
-    id: 1,
+    id: '1',
     code: 'XCMG-XS1200-0001',
-    brandId: 1,
-    modelId: 1,
+    brandId: '1',
+    modelId: '1',
     owner: '上海华筑租赁有限公司',
     intact: '完好',
     purchaseAmount: 268000,
@@ -1129,10 +1129,10 @@ export const seedEquipment: EquipmentItem[] = [
     createdAt: '2026-02-10 10:00:00',
   },
   {
-    id: 2,
+    id: '2',
     code: 'SANY-ZA14J-0002',
-    brandId: 2,
-    modelId: 2,
+    brandId: '2',
+    modelId: '2',
     owner: '杭州远大设备租赁',
     intact: '完好',
     purchaseAmount: 356000,
@@ -1147,10 +1147,10 @@ export const seedEquipment: EquipmentItem[] = [
     createdAt: '2026-02-15 10:00:00',
   },
   {
-    id: 3,
+    id: '3',
     code: 'ZOOMLION-CPC30-0003',
-    brandId: 3,
-    modelId: 3,
+    brandId: '3',
+    modelId: '3',
     owner: '上海华筑租赁有限公司',
     intact: '完好',
     purchaseAmount: 118000,
@@ -1165,10 +1165,10 @@ export const seedEquipment: EquipmentItem[] = [
     createdAt: '2026-03-01 10:00:00',
   },
   {
-    id: 4,
+    id: '4',
     code: 'LG-CPCD50-0004',
-    brandId: 4,
-    modelId: 4,
+    brandId: '4',
+    modelId: '4',
     owner: '苏州金穗机械租赁',
     intact: '不完好',
     purchaseAmount: 156000,
@@ -1183,10 +1183,10 @@ export const seedEquipment: EquipmentItem[] = [
     createdAt: '2026-03-10 10:00:00',
   },
   {
-    id: 5,
+    id: '5',
     code: 'XCMG-XE215-0005',
-    brandId: 1,
-    modelId: 5,
+    brandId: '1',
+    modelId: '5',
     owner: '杭州远大设备租赁',
     intact: '完好',
     purchaseAmount: 880000,
@@ -1201,10 +1201,10 @@ export const seedEquipment: EquipmentItem[] = [
     createdAt: '2026-03-20 10:00:00',
   },
   {
-    id: 6,
+    id: '6',
     code: 'SANY-QY25K-0006',
-    brandId: 2,
-    modelId: 6,
+    brandId: '2',
+    modelId: '6',
     owner: '上海华筑租赁有限公司',
     intact: '完好',
     purchaseAmount: 1250000,
@@ -1219,10 +1219,10 @@ export const seedEquipment: EquipmentItem[] = [
     createdAt: '2026-04-02 10:00:00',
   },
   {
-    id: 7,
+    id: '7',
     code: 'ZOOMLION-D100-0007',
-    brandId: 3,
-    modelId: 7,
+    brandId: '3',
+    modelId: '7',
     owner: '苏州金穗机械租赁',
     intact: '完好',
     purchaseAmount: 98000,
@@ -1237,10 +1237,10 @@ export const seedEquipment: EquipmentItem[] = [
     createdAt: '2026-04-15 10:00:00',
   },
   {
-    id: 8,
+    id: '8',
     code: 'LGMG-XS1200-0008',
-    brandId: 5,
-    modelId: 1,
+    brandId: '5',
+    modelId: '1',
     owner: '杭州远大设备租赁',
     intact: '完好',
     purchaseAmount: 245000,

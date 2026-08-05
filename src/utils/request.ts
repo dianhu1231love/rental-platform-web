@@ -31,9 +31,31 @@ interface RequestInstance {
   put: PostPut
 }
 
+/**
+ * JSON 解析 reviver：雪花算法主键等超出 JS 安全整数范围的数字统一转为字符串，
+ * 避免精度丢失（如 2084975640146219009 被解析成 2084975640146219008）
+ */
+function bigIntReviver(_key: string, value: unknown): unknown {
+  if (typeof value === 'number' && Number.isInteger(value) && !Number.isSafeInteger(value)) {
+    return String(value)
+  }
+  return value
+}
+
 const service = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   timeout: 15000,
+  // 解析响应 JSON 时把超长整数转成字符串（替代 axios 默认解析）
+  transformResponse: [
+    (data: unknown) => {
+      if (typeof data !== 'string') return data
+      try {
+        return JSON.parse(data, bigIntReviver)
+      } catch {
+        return data
+      }
+    },
+  ],
 })
 
 if (import.meta.env.VITE_USE_MOCK === 'true') {

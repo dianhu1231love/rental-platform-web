@@ -200,7 +200,7 @@ docs: 更新 README 文档
 ### 接入真实后端
 
 1. 修改 `.env.development`：`VITE_USE_MOCK=false`；
-2. 确认 `VITE_API_BASE_URL=/api`，并在 `vite.config.ts` 中把 `/api` 代理到后端地址；
+2. 确认 `VITE_API_BASE_URL=/api`，并在 `vite.config.ts` 中把 `/api` 代理到后端网关（当前开发环境：网关 `http://localhost:8080`，`SystemApplication` 服务在 `8082`，前端开发服务器建议用 `8081`）；
 3. 后端统一按以下契约返回：
 
 ```json
@@ -213,6 +213,8 @@ docs: 更新 README 文档
 - `GET /auth/userinfo` → `{ name, username, avatar, roles, perms, roleId, menus }`
 - 看板接口：`/dashboard/stats|trend|equipment|hours|todos`
 - 系统接口：`/system/roles|menus|tenants`
+
+> **雪花 ID 约定**：后端主键采用雪花算法（Long），前端统一按字符串处理——`src/types/index.ts` 中主键/外键类型为 `Id`（string）；`src/utils/request.ts` 内置 JSON reviver，会把超出 JS 安全整数范围的数字自动转成字符串，避免精度丢失。
 
 ### 其他
 

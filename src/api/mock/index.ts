@@ -332,11 +332,11 @@ type MenuNode = Menu & { children: MenuNode[] }
 
 /** 将扁平菜单列表构建为树 */
 function buildTree(list: Menu[]): MenuNode[] {
-  const map = new Map<number, MenuNode>()
+  const map = new Map<string, MenuNode>()
   list.forEach((m) => map.set(m.id, { ...m, children: [] }))
   const roots: MenuNode[] = []
   for (const m of map.values()) {
-    if (m.parentId === 0 || !map.has(m.parentId)) roots.push(m)
+    if (m.parentId === '0' || !map.has(m.parentId)) roots.push(m)
     else map.get(m.parentId)!.children.push(m)
   }
   const sortRec = (arr: MenuNode[]): void => {
@@ -348,7 +348,7 @@ function buildTree(list: Menu[]): MenuNode[] {
 }
 
 /** 按角色可见菜单 id 裁剪菜单树（目录下无可见子项时剔除） */
-function pruneTree(nodes: MenuNode[], ids: number[]): MenuNode[] {
+function pruneTree(nodes: MenuNode[], ids: string[]): MenuNode[] {
   const result: MenuNode[] = []
   for (const node of nodes) {
     if (!ids.includes(node.id)) continue
@@ -386,8 +386,8 @@ function delay(): Promise<void> {
 }
 
 /** 生成自增 id */
-function nextId(list: Array<{ id: number }>): number {
-  return list.length ? Math.max(...list.map((i) => i.id)) + 1 : 1
+function nextId(list: Array<{ id: string }>): string {
+  return list.length ? String(Math.max(...list.map((i) => Number(i.id))) + 1) : '1'
 }
 
 /** 当前时间格式化（YYYY-MM-DD HH:mm:ss） */
@@ -623,7 +623,7 @@ const routes: MockRoute[] = [
     pattern: /^\/dashboard\/todos\/(\d+)$/,
     auth: true,
     handler: async (_config, match, { data }) => {
-      const id = Number(match[1])
+      const id = match[1]
       const action = (data as { action?: string } | undefined)?.action
       const todos = db.todos
       const index = todos.findIndex((t) => t.id === id)
@@ -660,7 +660,7 @@ const routes: MockRoute[] = [
     pattern: /^\/system\/roles\/(\d+)$/,
     auth: true,
     handler: async (_config, match, { data }) => {
-      const id = Number(match[1])
+      const id = match[1]
       const roles = db.roles
       const index = roles.findIndex((r) => r.id === id)
       if (index === -1) return fail(500, 'system.roleNotFound')
@@ -674,7 +674,7 @@ const routes: MockRoute[] = [
     pattern: /^\/system\/roles\/(\d+)$/,
     auth: true,
     handler: async (_config, match) => {
-      const id = Number(match[1])
+      const id = match[1]
       const roles = db.roles
       const next = roles.filter((r) => r.id !== id)
       if (next.length === roles.length) return fail(500, 'system.roleNotFound')
@@ -705,7 +705,7 @@ const routes: MockRoute[] = [
     pattern: /^\/system\/menus\/(\d+)$/,
     auth: true,
     handler: async (_config, match, { data }) => {
-      const id = Number(match[1])
+      const id = match[1]
       const menus = db.menus
       const index = menus.findIndex((m) => m.id === id)
       if (index === -1) return fail(500, 'system.menuNotFound')
@@ -719,7 +719,7 @@ const routes: MockRoute[] = [
     pattern: /^\/system\/menus\/(\d+)$/,
     auth: true,
     handler: async (_config, match) => {
-      const id = Number(match[1])
+      const id = match[1]
       const menus = db.menus
       if (menus.some((m) => m.parentId === id)) return fail(500, 'system.deleteChildFirst')
       const next = menus.filter((m) => m.id !== id)
@@ -780,7 +780,7 @@ const routes: MockRoute[] = [
     pattern: /^\/system\/tenants\/(\d+)$/,
     auth: true,
     handler: async (_config, match, { data }) => {
-      const id = Number(match[1])
+      const id = match[1]
       const tenants = db.tenants
       const index = tenants.findIndex((t) => t.id === id)
       if (index === -1) return fail(500, 'system.tenantNotFound')
@@ -794,7 +794,7 @@ const routes: MockRoute[] = [
     pattern: /^\/system\/tenants\/(\d+)\/status$/,
     auth: true,
     handler: async (_config, match, { data }) => {
-      const id = Number(match[1])
+      const id = match[1]
       const tenants = db.tenants
       const index = tenants.findIndex((t) => t.id === id)
       if (index === -1) return fail(500, 'system.tenantNotFound')
@@ -808,7 +808,7 @@ const routes: MockRoute[] = [
     pattern: /^\/system\/tenants\/(\d+)$/,
     auth: true,
     handler: async (_config, match) => {
-      const id = Number(match[1])
+      const id = match[1]
       const tenants = db.tenants
       const next = tenants.filter((t) => t.id !== id)
       if (next.length === tenants.length) return fail(500, 'system.tenantNotFound')
@@ -843,10 +843,10 @@ const routes: MockRoute[] = [
         )
       }
       if (params.roleId !== undefined && params.roleId !== '') {
-        list = list.filter((u) => u.roleId === Number(params.roleId))
+        list = list.filter((u) => u.roleId === String(params.roleId))
       }
       if (params.tenantId !== undefined && params.tenantId !== '') {
-        list = list.filter((u) => u.tenantId === Number(params.tenantId))
+        list = list.filter((u) => u.tenantId === String(params.tenantId))
       }
       if (params.status !== undefined && params.status !== '' && params.status !== null) {
         list = list.filter((u) => u.status === Number(params.status))
@@ -870,7 +870,7 @@ const routes: MockRoute[] = [
         username: input.username,
         password: input.password || '123456',
         name: input.name,
-        roleId: Number(input.roleId) || 1,
+        roleId: input.roleId || '1',
         avatar: input.avatar || '',
         phone: input.phone || '',
         email: input.email || '',
@@ -889,7 +889,7 @@ const routes: MockRoute[] = [
     pattern: /^\/system\/users\/(\d+)\/status$/,
     auth: true,
     handler: async (_config, match, config) => {
-      const id = Number(match[1])
+      const id = match[1]
       const data = (config.data || {}) as { status?: number }
       const status = data.status ? 1 : 0
       const users = db.users
@@ -897,7 +897,7 @@ const routes: MockRoute[] = [
       if (index === -1) return fail(500, 'system.userNotFound')
       // 停用保护：内置管理员与当前登录用户不可停用
       if (status === 0) {
-        if (id === 1) return fail(500, 'system.userBuiltinDisableProtected')
+        if (id === '1') return fail(500, 'system.userBuiltinDisableProtected')
         const current = currentUser(config)
         if (current && current.id === id) return fail(500, 'system.userSelfDisableProtected')
       }
@@ -911,8 +911,8 @@ const routes: MockRoute[] = [
     pattern: /^\/system\/users\/(\d+)\/role$/,
     auth: true,
     handler: async (_config, match, { data }) => {
-      const id = Number(match[1])
-      const roleId = Number((data as { roleId?: number } | undefined)?.roleId)
+      const id = match[1]
+      const roleId = (data as { roleId?: string | null } | undefined)?.roleId ?? ''
       const users = db.users
       const index = users.findIndex((u) => u.id === id)
       if (index === -1) return fail(500, 'system.userNotFound')
@@ -927,12 +927,12 @@ const routes: MockRoute[] = [
     pattern: /^\/system\/users\/(\d+)\/tenant$/,
     auth: true,
     handler: async (_config, match, { data }) => {
-      const id = Number(match[1])
-      const tenantId = (data as { tenantId?: number | null } | undefined)?.tenantId ?? null
+      const id = match[1]
+      const tenantId = (data as { tenantId?: string | null } | undefined)?.tenantId ?? null
       const users = db.users
       const index = users.findIndex((u) => u.id === id)
       if (index === -1) return fail(500, 'system.userNotFound')
-      users[index].tenantId = tenantId === null ? null : Number(tenantId)
+      users[index].tenantId = tenantId === null ? null : tenantId
       db.users = users
       return ok({ id, tenantId: users[index].tenantId })
     },
@@ -942,7 +942,7 @@ const routes: MockRoute[] = [
     pattern: /^\/system\/users\/(\d+)$/,
     auth: true,
     handler: async (_config, match, { data }) => {
-      const id = Number(match[1])
+      const id = match[1]
       const users = db.users
       const index = users.findIndex((u) => u.id === id)
       if (index === -1) return fail(500, 'system.userNotFound')
@@ -967,8 +967,8 @@ const routes: MockRoute[] = [
     pattern: /^\/system\/users\/(\d+)$/,
     auth: true,
     handler: async (_config, match, config) => {
-      const id = Number(match[1])
-      if (id === 1) return fail(500, 'system.userBuiltinProtected')
+      const id = match[1]
+      if (id === '1') return fail(500, 'system.userBuiltinProtected')
       const current = currentUser(config)
       if (current && current.id === id) return fail(500, 'system.userSelfProtected')
       const users = db.users
@@ -1072,7 +1072,7 @@ const routes: MockRoute[] = [
     pattern: /^\/market\/customers\/(\d+)\/status$/,
     auth: true,
     handler: async (_config, match, { data }) => {
-      const id = Number(match[1])
+      const id = match[1]
       const customers = db.customers
       const index = customers.findIndex((c) => c.id === id)
       if (index === -1) return fail(500, 'market.customerNotFound')
@@ -1086,7 +1086,7 @@ const routes: MockRoute[] = [
     pattern: /^\/market\/customers\/(\d+)$/,
     auth: true,
     handler: async (_config, match, { data }) => {
-      const id = Number(match[1])
+      const id = match[1]
       const customers = db.customers
       const index = customers.findIndex((c) => c.id === id)
       if (index === -1) return fail(500, 'market.customerNotFound')
@@ -1100,7 +1100,7 @@ const routes: MockRoute[] = [
     pattern: /^\/market\/customers\/(\d+)$/,
     auth: true,
     handler: async (_config, match) => {
-      const id = Number(match[1])
+      const id = match[1]
       const customers = db.customers
       const next = customers.filter((c) => c.id !== id)
       if (next.length === customers.length) return fail(500, 'market.customerNotFound')
@@ -1170,7 +1170,7 @@ const routes: MockRoute[] = [
       const visit: VisitRecord = {
         id: nextId(visits),
         opportunityCode: input.opportunityCode || '',
-        customerId: input.customerId || 0,
+        customerId: input.customerId ?? '',
         customerName: input.customerName,
         visitType: input.visitType as VisitType,
         visitTime: input.visitTime,
@@ -1193,7 +1193,7 @@ const routes: MockRoute[] = [
     pattern: /^\/market\/visits\/(\d+)$/,
     auth: true,
     handler: async (_config, match, { data }) => {
-      const id = Number(match[1])
+      const id = match[1]
       const visits = db.visits
       const index = visits.findIndex((v) => v.id === id)
       if (index === -1) return fail(500, 'market.visitNotFound')
@@ -1210,7 +1210,7 @@ const routes: MockRoute[] = [
     pattern: /^\/market\/visits\/(\d+)$/,
     auth: true,
     handler: async (_config, match) => {
-      const id = Number(match[1])
+      const id = match[1]
       const visits = db.visits
       const next = visits.filter((v) => v.id !== id)
       if (next.length === visits.length) return fail(500, 'market.visitNotFound')
@@ -1294,7 +1294,7 @@ const routes: MockRoute[] = [
     pattern: /^\/market\/opportunities\/(\d+)$/,
     auth: true,
     handler: async (_config, match, { data }) => {
-      const id = Number(match[1])
+      const id = match[1]
       const opportunities = db.opportunities
       const index = opportunities.findIndex((o) => o.id === id)
       if (index === -1) return fail(500, 'market.opportunityNotFound')
@@ -1327,7 +1327,7 @@ const routes: MockRoute[] = [
     pattern: /^\/market\/opportunities\/(\d+)$/,
     auth: true,
     handler: async (_config, match) => {
-      const id = Number(match[1])
+      const id = match[1]
       const opportunities = db.opportunities
       const next = opportunities.filter((o) => o.id !== id)
       if (next.length === opportunities.length) return fail(500, 'market.opportunityNotFound')
@@ -1403,7 +1403,7 @@ const routes: MockRoute[] = [
         )
       }
       if (params.brandId !== undefined && params.brandId !== '') {
-        list = list.filter((e) => e.brandId === Number(params.brandId))
+        list = list.filter((e) => e.brandId === String(params.brandId))
       }
       if (params.status) {
         list = list.filter((e) => e.status === params.status)
@@ -1434,11 +1434,12 @@ const routes: MockRoute[] = [
     pattern: /^\/equipment\/list\/(\d+)\/location$/,
     auth: true,
     handler: async (_config, match) => {
-      const id = Number(match[1])
+      const id = match[1]
       // 模拟外部设备定位接口；接入真实定位服务时替换该地址
+      const num = Number(id)
       return ok({
-        lng: Number((121.4737 + (id % 7) * 0.03).toFixed(4)),
-        lat: Number((31.2304 + (id % 5) * 0.02).toFixed(4)),
+        lng: Number((121.4737 + (num % 7) * 0.03).toFixed(4)),
+        lat: Number((31.2304 + (num % 5) * 0.02).toFixed(4)),
         address: `上海市浦东新区示例路${id}号`,
       })
     },
@@ -1448,7 +1449,7 @@ const routes: MockRoute[] = [
     pattern: /^\/equipment\/list\/(\d+)$/,
     auth: true,
     handler: async (_config, match) => {
-      const id = Number(match[1])
+      const id = match[1]
       const item = db.equipment.find((e) => e.id === id)
       if (!item) return fail(500, 'equipment.notFound')
       return ok(item)
@@ -1459,7 +1460,7 @@ const routes: MockRoute[] = [
     pattern: /^\/equipment\/list\/(\d+)$/,
     auth: true,
     handler: async (_config, match, { data }) => {
-      const id = Number(match[1])
+      const id = match[1]
       const equipment = db.equipment
       const index = equipment.findIndex((e) => e.id === id)
       if (index === -1) return fail(500, 'equipment.notFound')
@@ -1473,7 +1474,7 @@ const routes: MockRoute[] = [
     pattern: /^\/equipment\/list\/(\d+)$/,
     auth: true,
     handler: async (_config, match) => {
-      const id = Number(match[1])
+      const id = match[1]
       const equipment = db.equipment
       const next = equipment.filter((e) => e.id !== id)
       if (next.length === equipment.length) return fail(500, 'equipment.notFound')
@@ -1509,7 +1510,7 @@ const routes: MockRoute[] = [
     pattern: /^\/equipment\/brands\/(\d+)$/,
     auth: true,
     handler: async (_config, match, { data }) => {
-      const id = Number(match[1])
+      const id = match[1]
       const list = db.brands
       const index = list.findIndex((b) => b.id === id)
       if (index === -1) return fail(500, 'equipment.brandNotFound')
@@ -1523,7 +1524,7 @@ const routes: MockRoute[] = [
     pattern: /^\/equipment\/brands\/(\d+)$/,
     auth: true,
     handler: async (_config, match) => {
-      const id = Number(match[1])
+      const id = match[1]
       const list = db.brands
       const next = list.filter((b) => b.id !== id)
       if (next.length === list.length) return fail(500, 'equipment.brandNotFound')
@@ -1559,7 +1560,7 @@ const routes: MockRoute[] = [
     pattern: /^\/equipment\/groups\/(\d+)$/,
     auth: true,
     handler: async (_config, match, { data }) => {
-      const id = Number(match[1])
+      const id = match[1]
       const list = db.groups
       const index = list.findIndex((g) => g.id === id)
       if (index === -1) return fail(500, 'equipment.groupNotFound')
@@ -1573,7 +1574,7 @@ const routes: MockRoute[] = [
     pattern: /^\/equipment\/groups\/(\d+)$/,
     auth: true,
     handler: async (_config, match) => {
-      const id = Number(match[1])
+      const id = match[1]
       const list = db.groups
       const next = list.filter((g) => g.id !== id)
       if (next.length === list.length) return fail(500, 'equipment.groupNotFound')
@@ -1609,7 +1610,7 @@ const routes: MockRoute[] = [
     pattern: /^\/equipment\/models\/(\d+)$/,
     auth: true,
     handler: async (_config, match, { data }) => {
-      const id = Number(match[1])
+      const id = match[1]
       const list = db.models
       const index = list.findIndex((m) => m.id === id)
       if (index === -1) return fail(500, 'equipment.modelNotFound')
@@ -1623,7 +1624,7 @@ const routes: MockRoute[] = [
     pattern: /^\/equipment\/models\/(\d+)$/,
     auth: true,
     handler: async (_config, match) => {
-      const id = Number(match[1])
+      const id = match[1]
       const list = db.models
       const next = list.filter((m) => m.id !== id)
       if (next.length === list.length) return fail(500, 'equipment.modelNotFound')

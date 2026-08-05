@@ -258,7 +258,7 @@ watch(
 )
 
 /** 选择客户后自动带出客户名称、主要联系人与联系电话 */
-function handleCustomerChange(id: number): void {
+function handleCustomerChange(id: string): void {
   const customer = customerOptions.value.find((c) => c.id === id)
   form.customerName = customer?.name || ''
   form.contact = customer?.contact || ''
@@ -353,7 +353,7 @@ async function handleSave(): Promise<void> {
     if (dialogMode.value === 'create') {
       await createOpportunity(payload)
     } else {
-      await updateOpportunity(form.id as number, payload)
+      await updateOpportunity(form.id as string, payload)
     }
     ElMessage.success(t('common.success'))
     dialogVisible.value = false
@@ -385,7 +385,7 @@ const detailEditIndex = ref(-1)
 const detailFormRef = ref<FormInstance>()
 
 const detailForm = reactive<OpportunityDetail>({
-  id: 0,
+  id: '',
   brandCode: '',
   brandId: null,
   groupCode: '',
@@ -407,20 +407,20 @@ const filteredModels = computed(() =>
   ),
 )
 
-function brandName(id: number | null): string {
+function brandName(id: string | null): string {
   return brands.value.find((b) => b.id === id)?.name || '-'
 }
 
-function groupName(id: number | null): string {
+function groupName(id: string | null): string {
   return groups.value.find((g) => g.id === id)?.name || '-'
 }
 
-function modelName(id: number | null): string {
+function modelName(id: string | null): string {
   return models.value.find((m) => m.id === id)?.name || '-'
 }
 
 /** 选择产品型号后自动带出设备品牌与产品组 */
-function handleModelChange(id: number | null): void {
+function handleModelChange(id: string | null): void {
   const model = models.value.find((m) => m.id === id)
   if (model) {
     detailForm.brandId = model.brandId
@@ -492,7 +492,7 @@ async function saveDetail(): Promise<void> {
   await detailFormRef.value.validate()
   const item: OpportunityDetail = { ...detailForm }
   if (detailEditIndex.value === -1) {
-    form.details.push({ ...item, id: Date.now() })
+    form.details.push({ ...item, id: String(Date.now()) })
   } else {
     form.details[detailEditIndex.value] = { ...item }
   }

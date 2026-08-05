@@ -15,11 +15,11 @@ export function createOpportunity(data: Omit<OpportunityFormModel, 'id' | 'code'
 }
 
 /** 更新商机 */
-export function updateOpportunity(id: number, data: Partial<Omit<OpportunityFormModel, 'code'>>) {
+export function updateOpportunity(id: string, data: Partial<Omit<OpportunityFormModel, 'code'>>) {
   return request.put<Opportunity>(`/market/opportunities/${id}`, data)
 }
 
 /** 删除商机 */
-export function deleteOpportunity(id: number) {
+export function deleteOpportunity(id: string) {
   return request.delete<null>(`/market/opportunities/${id}`)
 }

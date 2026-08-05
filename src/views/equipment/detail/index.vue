@@ -53,11 +53,11 @@ const mapUrl = computed(() => {
   return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lng}`
 })
 
-function brandName(id: number): string {
+function brandName(id: string): string {
   return brands.value.find((b) => b.id === id)?.name || '-'
 }
 
-function modelName(id: number): string {
+function modelName(id: string): string {
   return models.value.find((m) => m.id === id)?.name || '-'
 }
 
@@ -73,7 +73,7 @@ function renderAttachments(files: Attachment[]): string {
 }
 
 onMounted(async () => {
-  const id = Number(route.params.id)
+  const id = route.params.id as string
   try {
     const [detailRes, brandsRes, modelsRes, locationRes] = await Promise.all([
       getEquipmentDetail(id),

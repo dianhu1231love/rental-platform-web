@@ -30,6 +30,6 @@ export function getTodos() {
 }
 
 /** 处理待办（通过/驳回） */
-export function handleTodo(id: number, action: 'approve' | 'reject') {
+export function handleTodo(id: string, action: 'approve' | 'reject') {
   return request.put(`/dashboard/todos/${id}`, { action })
 }

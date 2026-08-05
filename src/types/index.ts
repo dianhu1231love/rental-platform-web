@@ -13,6 +13,12 @@ export interface ApiResponse<T = unknown> {
   message: string
 }
 
+/**
+ * 业务主键：后端采用雪花算法生成，超出 JS 安全整数范围（Number.MAX_SAFE_INTEGER），
+ * 前端统一使用字符串处理，避免精度丢失
+ */
+export type Id = string
+
 /** 分页结果 */
 export interface PageResult<T> {
   list: T[]
@@ -30,8 +36,8 @@ export interface ButtonPerm {
 
 /** 菜单节点（扁平数据；树形结构见 utils/tree 的 TreeNode） */
 export interface Menu {
-  id: number
-  parentId: number
+  id: Id
+  parentId: Id
   type: MenuType
   /** 组件名，同时用于 keep-alive 缓存匹配 */
   name: string
@@ -55,14 +61,14 @@ export interface Menu {
 
 /** 角色 */
 export interface Role {
-  id: number
+  id: Id
   name: string
   code: string
   status: number
   remark: string
   createdAt: string
   /** 可见菜单 id 集合 */
-  menuIds: number[]
+  menuIds: Id[]
   /** 按钮权限标识集合 */
   perms: string[]
 }
@@ -76,7 +82,7 @@ export interface UserInfo {
   email?: string
   roles: string[]
   perms: string[]
-  roleId: number | null
+  roleId: Id | null
   menus: Menu[]
 }
 
@@ -112,18 +118,18 @@ export interface ForgotForm {
 
 /** 角色编辑表单模型（权限分配抽屉） */
 export interface RoleFormModel {
-  id: number | null
+  id: Id | null
   name: string
   code: string
   status: number
   remark: string
-  menuIds: number[]
+  menuIds: Id[]
   perms: string[]
 }
 
 /** 租户新增/编辑表单模型 */
 export interface TenantFormModel {
-  id: number | null
+  id: Id | null
   name: string
   code: string
   contact: string
@@ -136,8 +142,8 @@ export interface TenantFormModel {
 
 /** 菜单新增/编辑表单模型 */
 export interface MenuFormModel {
-  id: number | null
-  parentId: number
+  id: Id | null
+  parentId: Id
   type: MenuType
   name: string
   path: string
@@ -154,7 +160,7 @@ export interface MenuFormModel {
 
 /** 租户 */
 export interface Tenant {
-  id: number
+  id: Id
   name: string
   code: string
   contact: string
@@ -176,7 +182,7 @@ export interface TenantQuery {
 
 /** 系统用户（用户管理） */
 export interface SysUser {
-  id: number
+  id: Id
   /** 登录账号 */
   username: string
   /** 姓名 */
@@ -188,9 +194,9 @@ export interface SysUser {
   /** 头像地址 */
   avatar: string
   /** 角色 id（决定菜单与按钮权限） */
-  roleId: number
+  roleId: Id
   /** 关联租户 id，null 表示平台级用户 */
-  tenantId: number | null
+  tenantId: Id | null
   /** 状态：1 启用 / 0 停用 */
   status: number
   /** 备注 */
@@ -200,15 +206,15 @@ export interface SysUser {
 
 /** 用户新增/编辑表单模型 */
 export interface UserFormModel {
-  id: number | null
+  id: Id | null
   username: string
   /** 登录密码（编辑时留空表示不修改） */
   password: string
   name: string
   phone: string
   email: string
-  roleId: number | null
-  tenantId: number | null
+  roleId: Id | null
+  tenantId: Id | null
   status: number
   remark: string
 }
@@ -218,8 +224,8 @@ export interface UserQuery {
   page?: number
   pageSize?: number
   keyword?: string
-  roleId?: number | ''
-  tenantId?: number | ''
+  roleId?: Id | ''
+  tenantId?: Id | ''
   status?: number | ''
 }
 
@@ -234,7 +240,7 @@ export type CustomerSource = 'referral' | 'exhibition' | 'online' | 'self'
 
 /** 市场管理-客户 */
 export interface Customer {
-  id: number
+  id: Id
   /** 客户编码（系统自动生成，全局唯一流水码） */
   code: string
   /** 客户名称 */
@@ -276,7 +282,7 @@ export interface Customer {
 
 /** 客户新增/编辑表单模型 */
 export interface CustomerFormModel {
-  id: number | null
+  id: Id | null
   name: string
   type: CustomerType
   idNumber: string
@@ -370,7 +376,7 @@ export type TodoPriority = 'high' | 'medium' | 'low'
 
 /** 待办事项 */
 export interface TodoItem {
-  id: number
+  id: Id
   type: TodoType
   title: string
   applicant: string
@@ -387,11 +393,11 @@ export interface Attachment {
 
 /** 拜访记录附件（支持多文件上传与在线预览） */
 export interface VisitAttachment extends Attachment {
-  id: number
+  id: Id
   /** 预览地址（Mock 下为 base64 Data URL，真实后端为文件访问地址） */
   url: string
   /** 本地上传时的临时标识（用于文件列表） */
-  uid?: number
+  uid?: Id
 }
 
 /** 拜访类型：现场拜访 / 电话拜访 */
@@ -399,11 +405,11 @@ export type VisitType = 'onsite' | 'phone'
 
 /** 市场管理-拜访记录 */
 export interface VisitRecord {
-  id: number
+  id: Id
   /** 商机编号（来自商机管理模块系统流水码，全局唯一，非必填；商机管理开发后自动带出） */
   opportunityCode: string
   /** 关联客户 id */
-  customerId: number
+  customerId: Id
   /** 客户名称 */
   customerName: string
   /** 拜访类型 */
@@ -429,9 +435,9 @@ export interface VisitRecord {
 
 /** 拜访记录新增/编辑表单模型 */
 export interface VisitFormModel {
-  id: number | null
+  id: Id | null
   opportunityCode: string
-  customerId: number | null
+  customerId: Id | null
   customerName: string
   visitType: VisitType
   visitTime: string
@@ -457,7 +463,7 @@ export interface VisitQuery {
 
 /** 客户下拉选项（拜访记录新增时自动带出联系人与电话） */
 export interface CustomerOption {
-  id: number
+  id: Id
   name: string
   contact: string
   phone: string
@@ -468,13 +474,13 @@ export type EquipmentStatus = 'renting' | 'idle' | 'preparing' | 'maintenance'
 
 /** 设备（整机） */
 export interface EquipmentItem {
-  id: number
+  id: Id
   /** 整机编码 */
   code: string
   /** 品牌 id */
-  brandId: number
+  brandId: Id
   /** 产品型号 id */
-  modelId: number
+  modelId: Id
   /** 资产归属（来自数据字典，可自定义） */
   owner: string
   /** 设备是否完好（来自数据字典，如完好/不完好） */
@@ -502,7 +508,7 @@ export interface EquipmentItem {
 
 /** 设备品牌 */
 export interface EquipmentBrand {
-  id: number
+  id: Id
   /** 品牌编码（系统生成，全局唯一） */
   code: string
   name: string
@@ -512,7 +518,7 @@ export interface EquipmentBrand {
 
 /** 产品组 */
 export interface EquipmentGroup {
-  id: number
+  id: Id
   /** 产品组编码（系统生成，全局唯一） */
   code: string
   name: string
@@ -522,14 +528,14 @@ export interface EquipmentGroup {
 
 /** 产品型号 */
 export interface EquipmentModel {
-  id: number
+  id: Id
   /** 型号编码（系统生成，全局唯一） */
   code: string
   name: string
   /** 所属品牌 id（需求明细选型号后自动带出品牌） */
-  brandId: number
+  brandId: Id
   /** 所属产品组 id */
-  groupId: number
+  groupId: Id
   /** 租期（数字，人工填写） */
   leaseTerm: number
   /** 租赁单位（年/月/日/台班/平方/立方，下拉选择） */
@@ -551,19 +557,19 @@ export type LeaseMode = 'year' | 'month' | 'day' | 'shift' | 'square' | 'cube'
 
 /** 商机需求明细（可新增/编辑） */
 export interface OpportunityDetail {
-  id: number
+  id: Id
   /** 设备品牌编码（选择产品型号后自动带出并保存） */
   brandCode: string
   /** 设备品牌 id（选择产品型号后自动带出） */
-  brandId: number | null
+  brandId: Id | null
   /** 产品组编码（选择产品型号后自动带出并保存） */
   groupCode: string
   /** 产品组 id（选择产品型号后自动带出） */
-  groupId: number | null
+  groupId: Id | null
   /** 产品型号编码（选择产品型号后自动带出并保存） */
   modelCode: string
   /** 产品型号 id */
-  modelId: number | null
+  modelId: Id | null
   /** 需求台量 */
   quantity: number
   /** 预计单价（元/台），作为预计收入总额/预计合同金额自动计算基数 */
@@ -575,11 +581,11 @@ export interface OpportunityDetail {
 
 /** 市场管理-商机 */
 export interface Opportunity {
-  id: number
+  id: Id
   /** 商机编号（系统流水码生成，全局唯一） */
   code: string
   /** 关联客户 id */
-  customerId: number | null
+  customerId: Id | null
   /** 客户名称 */
   customerName: string
   /** 商机类型 */
@@ -617,10 +623,10 @@ export interface Opportunity {
 
 /** 商机新增/编辑表单模型 */
 export interface OpportunityFormModel {
-  id: number | null
+  id: Id | null
   /** 商机编号（新增时系统生成，编辑时回显） */
   code: string
-  customerId: number | null
+  customerId: Id | null
   customerName: string
   type: OpportunityType
   contact: string
@@ -648,7 +654,7 @@ export interface OpportunityQuery {
 
 /** 数据字典项（如资产归属） */
 export interface DictItem {
-  id: number
+  id: Id
   /** 字典类型 */
   type: string
   /** 字典标签 */

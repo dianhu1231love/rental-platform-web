@@ -292,7 +292,7 @@ async function handleSave(): Promise<void> {
     if (dialogMode.value === 'create') {
       await createCustomer(payload)
     } else {
-      await updateCustomer(form.id as number, payload)
+      await updateCustomer(form.id as string, payload)
     }
     ElMessage.success(t('common.success'))
     dialogVisible.value = false

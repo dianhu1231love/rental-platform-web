@@ -59,11 +59,11 @@ const dialogVisible = ref(false)
 const dialogMode = ref<'create' | 'edit'>('create')
 const formRef = ref<FormInstance>()
 const form = reactive({
-  id: null as number | null,
+  id: null as string | null,
   code: '',
   name: '',
-  brandId: null as number | null,
-  groupId: null as number | null,
+  brandId: null as string | null,
+  groupId: null as string | null,
   leaseTerm: 0,
   leaseUnit: 'month' as LeaseMode,
   unitPrice: 0,
@@ -75,11 +75,11 @@ const formRules: FormRules = {
   groupId: [{ required: true, message: () => t('equipment.group'), trigger: 'change' }],
 }
 
-function groupName(id: number): string {
+function groupName(id: string): string {
   return groups.value.find((g) => g.id === id)?.name || '-'
 }
 
-function brandName(id: number): string {
+function brandName(id: string): string {
   return brands.value.find((b) => b.id === id)?.name || '-'
 }
 
@@ -154,18 +154,18 @@ async function handleSave(): Promise<void> {
     if (dialogMode.value === 'create') {
       await createModel({
         name: form.name,
-        brandId: form.brandId as number,
-        groupId: form.groupId as number,
+        brandId: form.brandId as string,
+        groupId: form.groupId as string,
         leaseTerm: form.leaseTerm,
         leaseUnit: form.leaseUnit,
         unitPrice: form.unitPrice,
         remark: form.remark,
       })
     } else {
-      await updateModel(form.id as number, {
+      await updateModel(form.id as string, {
         name: form.name,
-        brandId: form.brandId as number,
-        groupId: form.groupId as number,
+        brandId: form.brandId as string,
+        groupId: form.groupId as string,
         leaseTerm: form.leaseTerm,
         leaseUnit: form.leaseUnit,
         unitPrice: form.unitPrice,

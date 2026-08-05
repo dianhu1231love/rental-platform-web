@@ -10,9 +10,9 @@ import type { TodoItem } from '@/types'
 
 defineProps<{ todos: TodoItem[] }>()
 
-const emit = defineEmits<{ handled: [id: number] }>()
+const emit = defineEmits<{ handled: [id: string] }>()
 const { t } = useI18n()
-const loadingId = ref<number | null>(null)
+const loadingId = ref<string | null>(null)
 
 /** 处理待办（通过/驳回），成功后通知父组件移除 */
 async function handle(todo: TodoItem, action: 'approve' | 'reject'): Promise<void> {
