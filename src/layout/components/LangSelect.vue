@@ -32,16 +32,30 @@ function changeLang(lang: string): void {
 </template>
 
 <style scoped>
+/** 语言切换按钮：按钮化样式，保证在顶栏中清晰可见、易于点击 */
 .lang-trigger {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  padding: 5px 12px;
   cursor: pointer;
   color: #fff;
   outline: none;
+  border: 1px solid rgb(255 255 255 / 45%);
+  border-radius: 16px;
+  background: rgb(255 255 255 / 14%);
+  transition:
+    background-color 0.2s,
+    border-color 0.2s;
+}
+
+.lang-trigger:hover {
+  border-color: rgb(255 255 255 / 75%);
+  background: rgb(255 255 255 / 26%);
 }
 
 .lang-text {
   font-size: 14px;
+  line-height: 1;
 }
 </style>
