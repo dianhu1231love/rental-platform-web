@@ -1,0 +1,6 @@
+interface:
+  display_name: "Rental Platform 开发规范"
+  short_description: "租赁平台管理系统项目开发规范，所有开发任务开始前必读"
+  default_prompt: "Use $rental-platform-dev to read the project development standards before starting this task."
+policy:
+  allow_implicit_invocation: true
