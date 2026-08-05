@@ -67,7 +67,7 @@ async function loadAll(): Promise<void> {
 }
 
 /** 待办处理完成后从列表移除 */
-function handleTodoHandled(id: number): void {
+function handleTodoHandled(id: string): void {
   todos.value = todos.value.filter((t) => t.id !== id)
 }
 

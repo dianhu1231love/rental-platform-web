@@ -48,7 +48,7 @@ const intactOptions = ref<DictItem[]>([])
 const query = reactive({ page: 1, pageSize: 10 })
 const searchParams = reactive({
   keyword: '',
-  brandId: '' as number | '',
+  brandId: '' as string | '',
   status: '' as EquipmentStatus | '',
 })
 
@@ -152,11 +152,11 @@ const filters = computed<FilterField[]>(() => [
   },
 ])
 
-function brandName(id: number): string {
+function brandName(id: string): string {
   return brands.value.find((b) => b.id === id)?.name || '-'
 }
 
-function modelName(id: number): string {
+function modelName(id: string): string {
   return models.value.find((m) => m.id === id)?.name || '-'
 }
 
@@ -186,7 +186,7 @@ async function loadList(): Promise<void> {
 
 function handleSearch(condition: Record<string, unknown>): void {
   searchParams.keyword = (condition.keyword as string) || ''
-  searchParams.brandId = condition.brandId !== undefined ? (condition.brandId as number) : ''
+  searchParams.brandId = condition.brandId !== undefined ? (condition.brandId as string) : ''
   searchParams.status = condition.status !== undefined ? (condition.status as EquipmentStatus) : ''
   query.page = 1
   loadList()
@@ -214,10 +214,10 @@ const insuranceFiles = ref<Attachment[]>([])
 const sparePartFiles = ref<Attachment[]>([])
 
 const form = reactive({
-  id: null as number | null,
+  id: null as string | null,
   code: '',
-  brandId: null as number | null,
-  modelId: null as number | null,
+  brandId: null as string | null,
+  modelId: null as string | null,
   owner: '',
   intact: '',
   purchaseAmount: 0,
@@ -307,8 +307,8 @@ async function handleSave(): Promise<void> {
   try {
     const payload = {
       code: form.code,
-      brandId: form.brandId as number,
-      modelId: form.modelId as number,
+      brandId: form.brandId as string,
+      modelId: form.modelId as string,
       owner: form.owner,
       intact: form.intact,
       purchaseAmount: form.purchaseAmount,
@@ -328,7 +328,7 @@ async function handleSave(): Promise<void> {
     if (dialogMode.value === 'create') {
       await createEquipment(payload)
     } else {
-      await updateEquipment(form.id as number, payload)
+      await updateEquipment(form.id as string, payload)
     }
     ElMessage.success(t('common.success'))
     dialogVisible.value = false

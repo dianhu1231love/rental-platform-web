@@ -15,7 +15,7 @@ export interface EquipmentQuery {
   page?: number
   pageSize?: number
   keyword?: string
-  brandId?: number | ''
+  brandId?: string | ''
   status?: string
 }
 
@@ -30,22 +30,22 @@ export function createEquipment(data: Omit<EquipmentItem, 'id' | 'createdAt'>) {
 }
 
 /** 更新设备 */
-export function updateEquipment(id: number, data: Partial<EquipmentItem>) {
+export function updateEquipment(id: string, data: Partial<EquipmentItem>) {
   return request.put<EquipmentItem>(`/equipment/list/${id}`, data)
 }
 
 /** 删除设备 */
-export function deleteEquipment(id: number) {
+export function deleteEquipment(id: string) {
   return request.delete<null>(`/equipment/list/${id}`)
 }
 
 /** 获取设备详情 */
-export function getEquipmentDetail(id: number) {
+export function getEquipmentDetail(id: string) {
   return request.get<EquipmentItem>(`/equipment/list/${id}`)
 }
 
 /** 获取设备位置（外部定位接口模拟） */
-export function getEquipmentLocation(id: number) {
+export function getEquipmentLocation(id: string) {
   return request.get<{ lng: number; lat: number; address: string }>(
     `/equipment/list/${id}/location`,
   )
@@ -62,12 +62,12 @@ export function createBrand(data: Omit<EquipmentBrand, 'id' | 'createdAt' | 'cod
 }
 
 /** 更新设备品牌 */
-export function updateBrand(id: number, data: Partial<Omit<EquipmentBrand, 'code'>>) {
+export function updateBrand(id: string, data: Partial<Omit<EquipmentBrand, 'code'>>) {
   return request.put<EquipmentBrand>(`/equipment/brands/${id}`, data)
 }
 
 /** 删除设备品牌 */
-export function deleteBrand(id: number) {
+export function deleteBrand(id: string) {
   return request.delete<null>(`/equipment/brands/${id}`)
 }
 
@@ -82,12 +82,12 @@ export function createGroup(data: Omit<EquipmentGroup, 'id' | 'createdAt' | 'cod
 }
 
 /** 更新产品组 */
-export function updateGroup(id: number, data: Partial<Omit<EquipmentGroup, 'code'>>) {
+export function updateGroup(id: string, data: Partial<Omit<EquipmentGroup, 'code'>>) {
   return request.put<EquipmentGroup>(`/equipment/groups/${id}`, data)
 }
 
 /** 删除产品组 */
-export function deleteGroup(id: number) {
+export function deleteGroup(id: string) {
   return request.delete<null>(`/equipment/groups/${id}`)
 }
 
@@ -102,12 +102,12 @@ export function createModel(data: Omit<EquipmentModel, 'id' | 'createdAt' | 'cod
 }
 
 /** 更新产品型号 */
-export function updateModel(id: number, data: Partial<Omit<EquipmentModel, 'code'>>) {
+export function updateModel(id: string, data: Partial<Omit<EquipmentModel, 'code'>>) {
   return request.put<EquipmentModel>(`/equipment/models/${id}`, data)
 }
 
 /** 删除产品型号 */
-export function deleteModel(id: number) {
+export function deleteModel(id: string) {
   return request.delete<null>(`/equipment/models/${id}`)
 }
 

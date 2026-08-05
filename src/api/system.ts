@@ -24,12 +24,12 @@ export function createRole(data: Partial<Role>) {
 }
 
 /** 更新角色 */
-export function updateRole(id: number, data: Partial<Role>) {
+export function updateRole(id: string, data: Partial<Role>) {
   return request.put<Role>(`/system/roles/${id}`, data)
 }
 
 /** 删除角色 */
-export function deleteRole(id: number) {
+export function deleteRole(id: string) {
   return request.delete<null>(`/system/roles/${id}`)
 }
 
@@ -44,12 +44,12 @@ export function createMenu(data: Partial<Menu>) {
 }
 
 /** 更新菜单 */
-export function updateMenu(id: number, data: Partial<Menu>) {
+export function updateMenu(id: string, data: Partial<Menu>) {
   return request.put<Menu>(`/system/menus/${id}`, data)
 }
 
 /** 删除菜单 */
-export function deleteMenu(id: number) {
+export function deleteMenu(id: string) {
   return request.delete<null>(`/system/menus/${id}`)
 }
 
@@ -64,18 +64,18 @@ export function createTenant(data: Omit<Tenant, 'id'>) {
 }
 
 /** 更新租户 */
-export function updateTenant(id: number, data: Partial<Tenant>) {
+export function updateTenant(id: string, data: Partial<Tenant>) {
   return request.put<Tenant>(`/system/tenants/${id}`, data)
 }
 
 /** 删除租户 */
-export function deleteTenant(id: number) {
+export function deleteTenant(id: string) {
   return request.delete<null>(`/system/tenants/${id}`)
 }
 
 /** 启停租户 */
-export function updateTenantStatus(id: number, status: number) {
-  return request.put<{ id: number; status: number }>(`/system/tenants/${id}/status`, {
+export function updateTenantStatus(id: string, status: number) {
+  return request.put<{ id: string; status: number }>(`/system/tenants/${id}/status`, {
     status,
   })
 }
@@ -91,28 +91,28 @@ export function createUser(data: Omit<UserFormModel, 'id'>) {
 }
 
 /** 更新用户（密码留空表示不修改） */
-export function updateUser(id: number, data: Partial<SysUser> & { password?: string }) {
+export function updateUser(id: string, data: Partial<SysUser> & { password?: string }) {
   return request.put<SysUser>(`/system/users/${id}`, data)
 }
 
 /** 删除用户 */
-export function deleteUser(id: number) {
+export function deleteUser(id: string) {
   return request.delete<null>(`/system/users/${id}`)
 }
 
 /** 启停用户 */
-export function updateUserStatus(id: number, status: number) {
-  return request.put<{ id: number; status: number }>(`/system/users/${id}/status`, { status })
+export function updateUserStatus(id: string, status: number) {
+  return request.put<{ id: string; status: number }>(`/system/users/${id}/status`, { status })
 }
 
 /** 为用户分配角色（角色决定菜单与按钮权限） */
-export function assignUserRole(id: number, roleId: number) {
-  return request.put<{ id: number; roleId: number }>(`/system/users/${id}/role`, { roleId })
+export function assignUserRole(id: string, roleId: string) {
+  return request.put<{ id: string; roleId: string }>(`/system/users/${id}/role`, { roleId })
 }
 
 /** 为用户分配租户（null 表示平台级用户） */
-export function assignUserTenant(id: number, tenantId: number | null) {
-  return request.put<{ id: number; tenantId: number | null }>(`/system/users/${id}/tenant`, {
+export function assignUserTenant(id: string, tenantId: string | null) {
+  return request.put<{ id: string; tenantId: string | null }>(`/system/users/${id}/tenant`, {
     tenantId,
   })
 }

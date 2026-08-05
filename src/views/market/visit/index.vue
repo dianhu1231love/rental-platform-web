@@ -181,7 +181,7 @@ const form = reactive<VisitFormModel>({
 })
 
 /** 选择客户后自动带出客户名称、联系人与电话 */
-function handleCustomerChange(id: number): void {
+function handleCustomerChange(id: string): void {
   const customer = customerOptions.value.find((c) => c.id === id)
   form.customerName = customer?.name || ''
   form.contact = customer?.contact || ''
@@ -255,7 +255,7 @@ async function handleSave(): Promise<void> {
         attachments: form.attachments,
       })
     } else {
-      await updateVisit(form.id as number, {
+      await updateVisit(form.id as string, {
         visitResult: form.visitResult,
         attachments: form.attachments,
       })
@@ -301,8 +301,8 @@ async function handleAttachmentChange(uploadFile: UploadFile, _files: UploadFile
   try {
     const url = await fileToDataUrl(raw)
     form.attachments.push({
-      id: Date.now() + Math.floor(Math.random() * 1000),
-      uid: uploadFile.uid,
+      id: `${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      uid: String(uploadFile.uid),
       name: raw.name,
       size: raw.size,
       type: raw.type || '',

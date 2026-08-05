@@ -24,7 +24,7 @@ export const useUserStore = defineStore('user', {
     email: '',
     roles: [] as string[],
     perms: [] as string[],
-    roleId: null as number | null,
+    roleId: null as string | null,
     menus: [] as Menu[],
   }),
   actions: {

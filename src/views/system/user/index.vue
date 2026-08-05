@@ -41,28 +41,28 @@ const query = reactive({
 /** 搜索条件（由 SmartTable 筛选面板驱动） */
 const searchParams = reactive({
   keyword: '',
-  roleId: '' as number | '',
-  tenantId: '' as number | '',
+  roleId: '' as string | '',
+  tenantId: '' as string | '',
   // 默认只查询未停用用户，管理员可通过状态筛选查看全部/已停用
   status: 1 as number | '',
 })
 
 /** 角色名称（id → 名称） */
-function roleName(id: number): string {
+function roleName(id: string): string {
   return roles.value.find((r) => r.id === id)?.name || '-'
 }
 
 /** 租户名称（id → 名称，null 表示平台级用户） */
-function tenantName(id: number | null): string {
+function tenantName(id: string | null): string {
   if (id === null || id === undefined) return t('user.tenantNone')
   return tenants.value.find((tn) => tn.id === id)?.name || '-'
 }
 
 /** 角色标签颜色（内置角色区分色，其他角色用 info） */
-const ROLE_TAG_TYPE: Record<number, 'danger' | 'warning' | 'primary'> = {
-  1: 'danger',
-  2: 'warning',
-  3: 'primary',
+const ROLE_TAG_TYPE: Record<string, 'danger' | 'warning' | 'primary'> = {
+  '1': 'danger',
+  '2': 'warning',
+  '3': 'primary',
 }
 
 /** 表格列配置（computed：语言切换时自动重建文案） */
@@ -74,14 +74,14 @@ const columns = computed<TableColumn[]>(() => [
     label: t('user.role'),
     width: 120,
     align: 'center',
-    formatter: (_row, value) => roleName(value as number),
+    formatter: (_row, value) => roleName(value as string),
   },
   {
     prop: 'tenantId',
     label: t('user.tenant'),
     minWidth: 150,
     showOverflowTooltip: true,
-    formatter: (_row, value) => tenantName(value as number | null),
+    formatter: (_row, value) => tenantName(value as string | null),
   },
   { prop: 'phone', label: t('user.phone'), width: 125 },
   { prop: 'email', label: t('user.email'), minWidth: 150, showOverflowTooltip: true },
@@ -148,8 +148,8 @@ async function loadList(): Promise<void> {
 /** 搜索：同步筛选条件、回到第一页并刷新 */
 function handleSearch(condition: Record<string, unknown>): void {
   searchParams.keyword = (condition.keyword as string) || ''
-  searchParams.roleId = condition.roleId !== undefined ? (condition.roleId as number) : ''
-  searchParams.tenantId = condition.tenantId !== undefined ? (condition.tenantId as number) : ''
+  searchParams.roleId = condition.roleId !== undefined ? (condition.roleId as string) : ''
+  searchParams.tenantId = condition.tenantId !== undefined ? (condition.tenantId as string) : ''
   searchParams.status = condition.status !== undefined ? (condition.status as number) : ''
   query.page = 1
   loadList()
@@ -255,7 +255,7 @@ async function handleSave(): Promise<void> {
       name: form.name,
       phone: form.phone,
       email: form.email,
-      roleId: form.roleId as number,
+      roleId: form.roleId as string,
       tenantId: form.tenantId,
       status: form.status,
       remark: form.remark,
@@ -263,7 +263,7 @@ async function handleSave(): Promise<void> {
     if (dialogMode.value === 'create') {
       await createUser(payload)
     } else {
-      await updateUser(form.id as number, payload)
+      await updateUser(form.id as string, payload)
     }
     ElMessage.success(t('common.success'))
     dialogVisible.value = false
@@ -314,7 +314,7 @@ async function handleDelete(row: SysUser): Promise<void> {
 const assignVisible = ref(false)
 const assignSaving = ref(false)
 const assignTarget = ref<SysUser | null>(null)
-const assignRoleId = ref<number | null>(null)
+const assignRoleId = ref<string | null>(null)
 
 /** 打开分配权限弹窗（回显当前角色） */
 function openAssignPermission(row: SysUser): void {
@@ -362,7 +362,7 @@ async function handleAssignRole(): Promise<void> {
 const tenantAssignVisible = ref(false)
 const tenantAssignSaving = ref(false)
 const tenantAssignTarget = ref<SysUser | null>(null)
-const tenantAssignId = ref<number | null>(null)
+const tenantAssignId = ref<string | null>(null)
 
 /** 打开分配租户弹窗（回显当前租户） */
 function openAssignTenant(row: SysUser): void {

@@ -43,7 +43,7 @@ const filters = computed<FilterField[]>(() => [
 const dialogVisible = ref(false)
 const dialogMode = ref<'create' | 'edit'>('create')
 const formRef = ref<FormInstance>()
-const form = reactive({ id: null as number | null, code: '', name: '', remark: '' })
+const form = reactive({ id: null as string | null, code: '', name: '', remark: '' })
 const formRules: FormRules = {
   name: [{ required: true, message: () => t('equipment.groupName'), trigger: 'blur' }],
 }
@@ -85,7 +85,7 @@ async function handleSave(): Promise<void> {
     if (dialogMode.value === 'create') {
       await createGroup({ name: form.name, remark: form.remark })
     } else {
-      await updateGroup(form.id as number, { name: form.name, remark: form.remark })
+      await updateGroup(form.id as string, { name: form.name, remark: form.remark })
     }
     ElMessage.success(t('common.success'))
     dialogVisible.value = false

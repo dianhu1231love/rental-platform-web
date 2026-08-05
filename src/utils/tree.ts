@@ -11,11 +11,10 @@ export type TreeNode<T> = T & { children: TreeNode<T>[] }
  * @param parentId 根节点所属的父级 id
  * @returns 按 sort 排序后的树形结构
  */
-export function buildTree<T extends { id: number; parentId: number; sort?: number }>(
-  list: T[],
-  parentId = 0,
-): TreeNode<T>[] {
-  const map = new Map<number, TreeNode<T>>()
+export function buildTree<
+  T extends { id: string | number; parentId: string | number; sort?: number },
+>(list: T[], parentId = 0): TreeNode<T>[] {
+  const map = new Map<string | number, TreeNode<T>>()
   list.forEach((item) => map.set(item.id, { ...item, children: [] }))
   const roots: TreeNode<T>[] = []
   for (const item of map.values()) {

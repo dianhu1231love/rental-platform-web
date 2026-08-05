@@ -158,10 +158,10 @@ function openEdit(role: Role): void {
 }
 
 /** 收集权限树勾选的菜单 id（含半选父级） */
-function collectTreeIds(): number[] {
+function collectTreeIds(): string[] {
   if (!treeRef.value) return []
-  const checked = treeRef.value.getCheckedKeys().map(Number)
-  const half = treeRef.value.getHalfCheckedKeys().map(Number)
+  const checked = treeRef.value.getCheckedKeys().map(String)
+  const half = treeRef.value.getHalfCheckedKeys().map(String)
   return [...new Set([...checked, ...half])]
 }
 
@@ -198,7 +198,7 @@ async function handleSave(): Promise<void> {
     if (drawerMode.value === 'create') {
       await createRole({ ...roleForm, id: undefined })
     } else {
-      await updateRole(roleForm.id as number, { ...roleForm, id: roleForm.id as number })
+      await updateRole(roleForm.id as string, { ...roleForm, id: roleForm.id as string })
     }
     ElMessage.success(t('common.success'))
     drawerVisible.value = false
@@ -220,7 +220,7 @@ async function handleToggleStatus(role: Role): Promise<void> {
 
 /** 删除角色（内置管理员不可删除） */
 async function handleDelete(role: Role): Promise<void> {
-  if (role.id === 1) {
+  if (role.id === '1') {
     ElMessage.warning('内置管理员角色不可删除')
     return
   }

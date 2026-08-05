@@ -26,18 +26,18 @@ export function createCustomer(data: Omit<CustomerFormModel, 'id'>) {
 }
 
 /** 更新客户 */
-export function updateCustomer(id: number, data: Partial<Customer>) {
+export function updateCustomer(id: string, data: Partial<Customer>) {
   return request.put<Customer>(`/market/customers/${id}`, data)
 }
 
 /** 删除客户 */
-export function deleteCustomer(id: number) {
+export function deleteCustomer(id: string) {
   return request.delete<null>(`/market/customers/${id}`)
 }
 
 /** 启停客户 */
-export function updateCustomerStatus(id: number, status: number) {
-  return request.put<{ id: number; status: number }>(`/market/customers/${id}/status`, {
+export function updateCustomerStatus(id: string, status: number) {
+  return request.put<{ id: string; status: number }>(`/market/customers/${id}/status`, {
     status,
   })
 }

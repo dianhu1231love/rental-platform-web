@@ -192,7 +192,7 @@ async function handleSave(): Promise<void> {
         status: form.status,
       })
     } else {
-      await updateTenant(form.id as number, { ...form, id: form.id as number })
+      await updateTenant(form.id as string, { ...form, id: form.id as string })
     }
     ElMessage.success(t('common.success'))
     dialogVisible.value = false
