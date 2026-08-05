@@ -4,12 +4,16 @@ import { ref } from 'vue'
 import PasswordLogin from './components/PasswordLogin.vue'
 import SsoLogin from './components/SsoLogin.vue'
 import ForgotAccount from './components/ForgotAccount.vue'
+import LangSelect from '@/layout/components/LangSelect.vue'
 
 const activeTab = ref('password')
 </script>
 
 <template>
   <div class="login-page">
+    <div class="login-lang">
+      <LangSelect light />
+    </div>
     <div class="login-brand">
       <div class="brand-content">
         <div class="brand-logo">
@@ -73,9 +77,17 @@ const activeTab = ref('password')
 
 <style lang="scss" scoped>
 .login-page {
+  position: relative;
   height: 100vh;
   display: flex;
   background: #f6f9fd;
+}
+
+.login-lang {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  z-index: 10;
 }
 
 .login-brand {
